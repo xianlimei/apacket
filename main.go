@@ -39,8 +39,10 @@ func (this *MainWorker) worker() {
 
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	d := &decoder.Decoder{}
-	pkt := d.Process(data, ci)
-	this.pktQueue <- pkt
+	go func() {
+		pkt := d.Process(data, ci)
+		this.pktQueue <- pkt
+	}()
 }
 
 func createWorker(dl layers.LinkType) (sniffer.Worker, error) {
