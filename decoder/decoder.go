@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
+	"time"
 )
 
 const (
@@ -12,16 +13,21 @@ const (
 	PktTypeICMPv4 int8 = 3
 )
 
-type Decoder struct {
-	Ip4     *IPv4   `json:"ip4,omitempty"`
-	Tcp     *TCP    `json:"tcp,omitempty"`
-	Udp     *UDP    `json:"udp,omitempty"`
-	Icmp4   *ICMPv4 `json:"icmp4,omitempty"`
-	PktType int8    `json:"ptype,omitempty"`
+type Packet struct {
+	Ts      time.Time `json:"ts"`
+	Ip4     *IPv4     `json:"ip4,omitempty"`
+	Tcp     *TCP      `json:"tcp,omitempty"`
+	Udp     *UDP      `json:"udp,omitempty"`
+	Icmp4   *ICMPv4   `json:"icmp4,omitempty"`
+	PktType int8      `json:"ptype,omitempty"`
 }
 
-func (d *Decoder) Process(data []byte) {
+type Decoder struct {
+}
 
+func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
+
+	pkt := Packet{Ts: ci.Timestamp}
 	packet := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.NoCopy)
 	for _, layer := range packet.Layers() {
 		switch layer.LayerType() {
@@ -33,7 +39,7 @@ func (d *Decoder) Process(data []byte) {
 				break
 			}
 			i := NewIP4(ip4)
-			d.Ip4 = i
+			pkt.Ip4 = i
 		case layers.LayerTypeIPv6:
 			//TODO
 		case layers.LayerTypeICMPv4:
@@ -44,8 +50,8 @@ func (d *Decoder) Process(data []byte) {
 				break
 			}
 			ic4 := NewICMPv4(icmp4)
-			d.Icmp4 = ic4
-			d.PktType = PktTypeICMPv4
+			pkt.Icmp4 = ic4
+			pkt.PktType = PktTypeICMPv4
 		case layers.LayerTypeICMPv6:
 			//TODO
 		case layers.LayerTypeUDP:
@@ -56,8 +62,8 @@ func (d *Decoder) Process(data []byte) {
 				break
 			}
 			u := NewUDP(udp)
-			d.Udp = u
-			d.PktType = PktTypeUDP
+			pkt.Udp = u
+			pkt.PktType = PktTypeUDP
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)
 			tcp, ok := tcpl.(*layers.TCP)
@@ -69,8 +75,9 @@ func (d *Decoder) Process(data []byte) {
 				break
 			}
 			t := NewTCP(tcp)
-			d.Tcp = t
-			d.PktType = PktTypeTCP
+			pkt.Tcp = t
+			pkt.PktType = PktTypeTCP
 		}
 	}
+	return &pkt
 }

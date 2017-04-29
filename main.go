@@ -15,12 +15,11 @@ import (
 var ifaceConfig config.InterfacesConfig
 
 type MainWorker struct {
+	pktQueue chan *decoder.Packet
 }
 
-func (mw *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
-	d := &decoder.Decoder{}
-	d.Process(data)
-	b, err := json.Marshal(d)
+func (this *MainWorker) output(pkt *decoder.Packet) {
+	b, err := json.Marshal(pkt)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
@@ -28,9 +27,27 @@ func (mw *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	os.Stdout.Write([]byte("\n"))
 }
 
+func (this *MainWorker) worker() {
+	for {
+		select {
+		case pkt := <-this.pktQueue:
+			this.output(pkt)
+			break
+		}
+	}
+}
+
+func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
+	d := &decoder.Decoder{}
+	pkt := d.Process(data, ci)
+	this.pktQueue <- pkt
+}
+
 func createWorker(dl layers.LinkType) (sniffer.Worker, error) {
-	var w MainWorker
-	return &w, nil
+	w := &MainWorker{
+		make(chan *decoder.Packet)}
+	go w.worker()
+	return w, nil
 }
 
 func optParse() {
