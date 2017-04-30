@@ -7,12 +7,18 @@ import (
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/sniffer"
+	"github.com/elastic/beats/libbeat/logp"
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
 	"os"
+	"runtime"
 )
 
-var ifaceConfig config.InterfacesConfig
+const (
+	NAME = "apacket"
+)
+
+var cfg config.Config
 
 type MainWorker struct {
 	pktQueue chan *decoder.Packet
@@ -40,8 +46,10 @@ func (this *MainWorker) worker() {
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	d := &decoder.Decoder{}
 	go func() {
-		pkt := d.Process(data, ci)
-		this.pktQueue <- pkt
+		pkt, _ := d.Process(data, ci)
+		if pkt != nil {
+			this.pktQueue <- pkt
+		}
 	}()
 }
 
@@ -59,6 +67,10 @@ func optParse() {
 		flag.PrintDefaults()
 	}
 
+	var ifaceConfig config.InterfacesConfig
+	var logging logp.Logging
+	var fileRotator logp.FileRotator
+
 	flag.StringVar(&ifaceConfig.Device, "i", "", "interface")
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
 	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BpfFilter")
@@ -68,7 +80,21 @@ func optParse() {
 	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "snap length")
 	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "buffer size mb")
 
+	flag.StringVar(&logging.Level, "l", "info", "logging level")
+	flag.StringVar(&fileRotator.Path, "p", "", "log path")
+	flag.StringVar(&fileRotator.Name, "n", NAME, "log name")
+
 	flag.Parse()
+
+	cfg.Iface = &ifaceConfig
+
+	logging.Files = &fileRotator
+	if logging.Files.Path != "" {
+		tofiles := true
+		logging.ToFiles = &tofiles
+		fmt.Println(*logging.ToFiles)
+	}
+	cfg.Logging = &logging
 
 	if ifaceConfig.Device == "" {
 		flag.Usage()
@@ -78,11 +104,13 @@ func optParse() {
 
 func init() {
 	optParse()
+	logp.Init("apacket", cfg.Logging)
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	sniff := &sniffer.SnifferSetup{}
-	sniff.Init(false, "not arp", createWorker, &ifaceConfig)
+	sniff.Init(false, cfg.Iface.BpfFilter, createWorker, cfg.Iface)
 	defer sniff.Close()
 	sniff.Run()
 }

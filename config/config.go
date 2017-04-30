@@ -1,5 +1,14 @@
 package config
 
+import (
+	"github.com/elastic/beats/libbeat/logp"
+)
+
+type Config struct {
+	Iface   *InterfacesConfig
+	Logging *logp.Logging
+}
+
 type InterfacesConfig struct {
 	Device       string
 	Type         string

@@ -25,9 +25,9 @@ type Packet struct {
 type Decoder struct {
 }
 
-func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
+func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error) {
 
-	pkt := Packet{Ts: ci.Timestamp}
+	pkt := &Packet{Ts: ci.Timestamp}
 	packet := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.NoCopy)
 	for _, layer := range packet.Layers() {
 		switch layer.LayerType() {
@@ -36,12 +36,13 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
 			ip4, ok := ip4l.(*layers.IPv4)
 			if !ok {
 				fmt.Println("ip4 not ok")
-				break
+				return nil, nil
 			}
 			i := NewIP4(ip4)
 			pkt.Ip4 = i
 		case layers.LayerTypeIPv6:
 			//TODO
+			return nil, nil
 		case layers.LayerTypeICMPv4:
 			icmp4l := packet.Layer(layers.LayerTypeICMPv4)
 			icmp4, ok := icmp4l.(*layers.ICMPv4)
@@ -52,8 +53,10 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
 			ic4 := NewICMPv4(icmp4)
 			pkt.Icmp4 = ic4
 			pkt.PktType = PktTypeICMPv4
+			return pkt, nil
 		case layers.LayerTypeICMPv6:
 			//TODO
+			return nil, nil
 		case layers.LayerTypeUDP:
 			udpl := packet.Layer(layers.LayerTypeUDP)
 			udp, ok := udpl.(*layers.UDP)
@@ -64,6 +67,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
 			u := NewUDP(udp)
 			pkt.Udp = u
 			pkt.PktType = PktTypeUDP
+			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)
 			tcp, ok := tcpl.(*layers.TCP)
@@ -77,7 +81,8 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) *Packet {
 			t := NewTCP(tcp)
 			pkt.Tcp = t
 			pkt.PktType = PktTypeTCP
+			return pkt, nil
 		}
 	}
-	return &pkt
+	return nil, nil
 }
