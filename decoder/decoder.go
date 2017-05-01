@@ -75,7 +75,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				fmt.Println("tcp not ok")
 				break
 			}
-			if !tcp.SYN && !tcp.ACK {
+			if !tcp.SYN && !(tcp.SYN && tcp.ACK) {
 				break
 			}
 			t := NewTCP(tcp)

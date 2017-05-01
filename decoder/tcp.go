@@ -22,7 +22,7 @@ type TCP struct {
 	Window     uint16             `json:"window"`
 	Checksum   uint16             `json:"checksum"`
 	Urgent     uint16             `json:"urgent"`
-	Options    []layers.TCPOption `json:"opt,omitempty"`
+	Options    []layers.TCPOption `json:"-"`
 	Padding    []byte             `json:"padding,omitempty"`
 	Payload    []byte             `json:"payload,omitempty"`
 }

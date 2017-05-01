@@ -14,10 +14,6 @@ import (
 	"runtime"
 )
 
-const (
-	NAME = "apacket"
-)
-
 var cfg config.Config
 
 type MainWorker struct {
@@ -82,7 +78,7 @@ func optParse() {
 
 	flag.StringVar(&logging.Level, "l", "info", "logging level")
 	flag.StringVar(&fileRotator.Path, "p", "", "log path")
-	flag.StringVar(&fileRotator.Name, "n", NAME, "log name")
+	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "log name")
 
 	flag.Parse()
 

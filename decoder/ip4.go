@@ -18,7 +18,7 @@ type IPv4 struct {
 	Checksum   uint16              `json:"checksum"`
 	SrcIP      net.IP              `json:"sip"`
 	DstIP      net.IP              `json:"dip"`
-	Options    []layers.IPv4Option `json:"opt,omitempty"`
+	Options    []layers.IPv4Option `json:"-"`
 	Padding    []byte              `json:"padding,omitempty"`
 }
 
