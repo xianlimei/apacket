@@ -67,9 +67,11 @@ func NewDNS(dns *layers.DNS) *DNS {
 	d.ARCount = dns.ARCount
 
 	for _, q := range dns.Questions {
-		qr := DNSQuestion{}
-		qr.Name = string(q.Name)
-		d.Questions = append(d.Questions, qr)
+		qs := DNSQuestion{}
+		qs.Name = string(q.Name)
+		qs.Type = q.Type
+		qs.Class = q.Class
+		d.Questions = append(d.Questions, qs)
 	}
 
 	for _, r := range dns.Answers {
