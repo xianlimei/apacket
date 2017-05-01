@@ -1,7 +1,6 @@
 package decoder
 
 import (
-	"fmt"
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
 	"time"
@@ -35,7 +34,6 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			ip4l := packet.Layer(layers.LayerTypeIPv4)
 			ip4, ok := ip4l.(*layers.IPv4)
 			if !ok {
-				fmt.Println("ip4 not ok")
 				return nil, nil
 			}
 			i := NewIP4(ip4)
@@ -47,7 +45,6 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			icmp4l := packet.Layer(layers.LayerTypeICMPv4)
 			icmp4, ok := icmp4l.(*layers.ICMPv4)
 			if !ok {
-				fmt.Println("icmp4 not ok")
 				break
 			}
 			ic4 := NewICMPv4(icmp4)
@@ -61,7 +58,6 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			udpl := packet.Layer(layers.LayerTypeUDP)
 			udp, ok := udpl.(*layers.UDP)
 			if !ok {
-				fmt.Println("udp not ok")
 				break
 			}
 			u := NewUDP(udp)
@@ -72,12 +68,11 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			tcpl := packet.Layer(layers.LayerTypeTCP)
 			tcp, ok := tcpl.(*layers.TCP)
 			if !ok {
-				fmt.Println("tcp not ok")
 				break
 			}
-			if !tcp.SYN && !(tcp.SYN && tcp.ACK) {
-				break
-			}
+			//if !tcp.SYN && !(tcp.SYN && tcp.ACK) {
+			//	break
+			//}
 			t := NewTCP(tcp)
 			pkt.Tcp = t
 			pkt.PktType = PktTypeTCP

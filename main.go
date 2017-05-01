@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/sniffer"
+	"github.com/Acey9/apacket/utils"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
@@ -16,43 +16,23 @@ import (
 
 var cfg config.Config
 
+var outputer *Outputer = NewOutputer()
+
 type MainWorker struct {
-	pktQueue chan *decoder.Packet
-}
-
-func (this *MainWorker) output(pkt *decoder.Packet) {
-	b, err := json.Marshal(pkt)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	os.Stdout.Write(b)
-	os.Stdout.Write([]byte("\n"))
-}
-
-func (this *MainWorker) worker() {
-	for {
-		select {
-		case pkt := <-this.pktQueue:
-			this.output(pkt)
-			break
-		}
-	}
 }
 
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	d := &decoder.Decoder{}
-	go func() {
-		pkt, _ := d.Process(data, ci)
-		if pkt != nil {
-			this.pktQueue <- pkt
-		}
-	}()
+	//go func() {
+	pkt, _ := d.Process(data, ci)
+	if pkt != nil {
+		outputer.PublishEvent(pkt)
+	}
+	//}()
 }
 
 func createWorker(dl layers.LinkType) (sniffer.Worker, error) {
-	w := &MainWorker{
-		make(chan *decoder.Packet)}
-	go w.worker()
+	w := &MainWorker{}
 	return w, nil
 }
 
@@ -71,7 +51,7 @@ func optParse() {
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
 	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BpfFilter")
 
-	flag.BoolVar(&ifaceConfig.WithVlans, "wl", true, "with vlans")
+	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "with vlans")
 
 	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "snap length")
 	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "buffer size mb")
@@ -79,6 +59,8 @@ func optParse() {
 	flag.StringVar(&logging.Level, "l", "info", "logging level")
 	flag.StringVar(&fileRotator.Path, "p", "", "log path")
 	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "log name")
+
+	flag.BoolVar(&cfg.Backscatter, "bs", false, "catch backscatter only")
 
 	flag.Parse()
 
@@ -88,13 +70,24 @@ func optParse() {
 	if logging.Files.Path != "" {
 		tofiles := true
 		logging.ToFiles = &tofiles
-		fmt.Println(*logging.ToFiles)
 	}
 	cfg.Logging = &logging
 
 	if ifaceConfig.Device == "" {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	ifaceAddrs, err := utils.InterfaceAddrsByName(cfg.Iface.Device)
+	if err != nil {
+		flag.Usage()
+		fmt.Println("get interface addrs error.")
+		os.Exit(1)
+	}
+
+	cfg.IfaceAddrs = make(map[string]bool)
+	for _, addr := range ifaceAddrs {
+		cfg.IfaceAddrs[addr] = true
 	}
 }
 
@@ -105,6 +98,8 @@ func init() {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	go outputer.Start()
+
 	sniff := &sniffer.SnifferSetup{}
 	sniff.Init(false, cfg.Iface.BpfFilter, createWorker, cfg.Iface)
 	defer sniff.Close()

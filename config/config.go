@@ -5,8 +5,10 @@ import (
 )
 
 type Config struct {
-	Iface   *InterfacesConfig
-	Logging *logp.Logging
+	Iface       *InterfacesConfig
+	IfaceAddrs  map[string]bool
+	Logging     *logp.Logging
+	Backscatter bool
 }
 
 type InterfacesConfig struct {
