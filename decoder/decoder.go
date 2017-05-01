@@ -7,19 +7,22 @@ import (
 )
 
 const (
-	PktTypeTCP    int8 = 6
-	PktTypeUDP    int8 = 17
-	PktTypeICMPv4 int8 = 1
-	PktTypeICMPv6 int8 = 58
+	PktTypeTCP    int8 = 1
+	PktTypeUDP    int8 = 2
+	PktTypeDNS    int8 = 3
+	PktTypeICMPv4 int8 = 4
+	PktTypeICMPv6 int8 = 5
 )
 
 type Packet struct {
 	Ts      time.Time `json:"ts"`
 	Ip4     *IPv4     `json:"ip4,omitempty"`
+	Ip6     *IPv6     `json:"ip6,omitempty"`
 	Tcp     *TCP      `json:"tcp,omitempty"`
 	Udp     *UDP      `json:"udp,omitempty"`
 	Dns     *DNS      `json:"dns,omitempty"`
 	Icmp4   *ICMPv4   `json:"icmp4,omitempty"`
+	Icmp6   *ICMPv6   `json:"icmp6,omitempty"`
 	PktType int8      `json:"ptype,omitempty"`
 }
 
@@ -38,32 +41,39 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				return nil, nil
 			}
-			i := NewIP4(ip4)
-			pkt.Ip4 = i
+			pkt.Ip4 = NewIP4(ip4)
 		case layers.LayerTypeIPv6:
-			//TODO
-			return nil, nil
+			ip6l := packet.Layer(layers.LayerTypeIPv6)
+			ip6, ok := ip6l.(*layers.IPv6)
+			if !ok {
+				return nil, nil
+			}
+			pkt.Ip6 = NewIP6(ip6)
 		case layers.LayerTypeICMPv4:
 			icmp4l := packet.Layer(layers.LayerTypeICMPv4)
 			icmp4, ok := icmp4l.(*layers.ICMPv4)
 			if !ok {
 				break
 			}
-			ic4 := NewICMPv4(icmp4)
-			pkt.Icmp4 = ic4
+			pkt.Icmp4 = NewICMPv4(icmp4)
 			pkt.PktType = PktTypeICMPv4
 			return pkt, nil
 		case layers.LayerTypeICMPv6:
-			//TODO
-			return nil, nil
+			icmp6l := packet.Layer(layers.LayerTypeICMPv6)
+			icmp6, ok := icmp6l.(*layers.ICMPv6)
+			if !ok {
+				break
+			}
+			pkt.Icmp6 = NewICMPv6(icmp6)
+			pkt.PktType = PktTypeICMPv6
+			return pkt, nil
 		case layers.LayerTypeUDP:
 			udpl := packet.Layer(layers.LayerTypeUDP)
 			udp, ok := udpl.(*layers.UDP)
 			if !ok {
 				break
 			}
-			u := NewUDP(udp)
-			pkt.Udp = u
+			pkt.Udp = NewUDP(udp)
 			pkt.PktType = PktTypeUDP
 			//return pkt, nil
 		case layers.LayerTypeDNS:
@@ -72,8 +82,8 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			d := NewDNS(dns)
-			pkt.Dns = d
+			pkt.Dns = NewDNS(dns)
+			pkt.PktType = PktTypeDNS
 			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)
@@ -84,8 +94,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			//if !tcp.SYN && !(tcp.SYN && tcp.ACK) {
 			//	break
 			//}
-			t := NewTCP(tcp)
-			pkt.Tcp = t
+			pkt.Tcp = NewTCP(tcp)
 			pkt.PktType = PktTypeTCP
 			return pkt, nil
 		}
