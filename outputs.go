@@ -37,6 +37,12 @@ func (out *Outputer) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 	if !pkt.Tcp.SYN && !(pkt.Tcp.SYN && pkt.Tcp.ACK) {
 		return nil
 	}
+	if pkt.Tcp.SYN && pkt.Tcp.ACK {
+		_, ok := cfg.IfaceAddrs[pkt.Ip4.SrcIP.String()]
+		if ok {
+			return nil
+		}
+	}
 	//TODO filter our syn and syn_ack
 	return pkt
 }

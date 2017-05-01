@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	PktTypeTCP    int8 = 1
-	PktTypeUDP    int8 = 2
-	PktTypeICMPv4 int8 = 3
+	PktTypeTCP    int8 = 6
+	PktTypeUDP    int8 = 17
+	PktTypeICMPv4 int8 = 1
+	PktTypeICMPv6 int8 = 58
 )
 
 type Packet struct {
@@ -17,6 +18,7 @@ type Packet struct {
 	Ip4     *IPv4     `json:"ip4,omitempty"`
 	Tcp     *TCP      `json:"tcp,omitempty"`
 	Udp     *UDP      `json:"udp,omitempty"`
+	Dns     *DNS      `json:"dns,omitempty"`
 	Icmp4   *ICMPv4   `json:"icmp4,omitempty"`
 	PktType int8      `json:"ptype,omitempty"`
 }
@@ -63,6 +65,15 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			u := NewUDP(udp)
 			pkt.Udp = u
 			pkt.PktType = PktTypeUDP
+			//return pkt, nil
+		case layers.LayerTypeDNS:
+			dnsl := packet.Layer(layers.LayerTypeDNS)
+			dns, ok := dnsl.(*layers.DNS)
+			if !ok {
+				break
+			}
+			d := NewDNS(dns)
+			pkt.Dns = d
 			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)
@@ -78,6 +89,9 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			pkt.PktType = PktTypeTCP
 			return pkt, nil
 		}
+	}
+	if pkt.PktType != 0 {
+		return pkt, nil
 	}
 	return nil, nil
 }
