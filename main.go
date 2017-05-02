@@ -46,6 +46,8 @@ func optParse() {
 	var ifaceConfig config.InterfacesConfig
 	var logging logp.Logging
 	var fileRotator logp.FileRotator
+	var rotateEveryMB uint64
+	var keepFiles int
 
 	flag.StringVar(&ifaceConfig.Device, "i", "", "interface")
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
@@ -54,11 +56,13 @@ func optParse() {
 	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "with vlans")
 
 	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "snap length")
-	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "buffer size mb")
+	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "interface buffer size mb")
 
 	flag.StringVar(&logging.Level, "l", "info", "logging level")
 	flag.StringVar(&fileRotator.Path, "p", "", "log path")
 	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "log name")
+	flag.Uint64Var(&rotateEveryMB, "r", 10, "rotate every mb")
+	flag.IntVar(&keepFiles, "k", 7, "keep files")
 
 	flag.BoolVar(&cfg.Backscatter, "bs", false, "catch backscatter only")
 
@@ -70,6 +74,10 @@ func optParse() {
 	if logging.Files.Path != "" {
 		tofiles := true
 		logging.ToFiles = &tofiles
+
+		rotateMB := rotateEveryMB * 1024 * 1024
+		logging.Files.RotateEveryBytes = &rotateMB
+		logging.Files.KeepFiles = &keepFiles
 	}
 	cfg.Logging = &logging
 
