@@ -16,7 +16,6 @@ const (
 
 type Packet struct {
 	Ts      time.Time `json:"ts"`
-	IPV     int8      `json:"ipv"`
 	Ip4     *IPv4     `json:"ip4,omitempty"`
 	Ip6     *IPv6     `json:"ip6,omitempty"`
 	Tcp     *TCP      `json:"tcp,omitempty"`
@@ -47,7 +46,6 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip4 = NewIP4(ip4)
-			pkt.IPV = 4
 
 			flow.Sip = ip4.SrcIP
 			flow.Dip = ip4.DstIP
@@ -60,7 +58,6 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip6 = NewIP6(ip6)
-			pkt.IPV = 6
 
 			flow.Sip = ip6.SrcIP
 			flow.Dip = ip6.DstIP

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/logp"
-	"github.com/tsg/gopacket/layers"
-	"net"
 )
 
 type Outputer struct {
@@ -36,24 +34,6 @@ func (out *Outputer) output(pkt *decoder.Packet) {
 		logp.Err("%s", err)
 	}
 	logp.Info("pkt %s", b)
-}
-
-func (out *Outputer) getSipDipProtocol(pkt *decoder.Packet) (s, d, proto string) {
-	var sip, dip net.IP
-	var p layers.IPProtocol
-
-	if pkt.IPV == 4 {
-		sip = pkt.Ip4.SrcIP
-		dip = pkt.Ip4.DstIP
-		p = pkt.Ip4.Protocol
-	} else if pkt.IPV == 6 {
-		sip = pkt.Ip6.SrcIP
-		dip = pkt.Ip6.DstIP
-		p = pkt.Ip6.NextHeader
-	} else {
-		return "", "", proto
-	}
-	return sip.String(), dip.String(), p.String()
 }
 
 func (out *Outputer) filterTCP(pkt *decoder.Packet) *decoder.Packet {

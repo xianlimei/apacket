@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const SessionExpired = 5
+
 type Session struct {
 	tab map[string]time.Time
 }
@@ -36,7 +38,7 @@ func (s *Session) clean() {
 	for {
 		logp.Debug("session", "session map len:%d", len(s.tab))
 		for k, v := range s.tab {
-			if time.Since(v) > time.Second*5 {
+			if time.Since(v) > time.Second*SessionExpired {
 				logp.Debug("session", "delete session id:%s", k)
 				s.DeleteSession(k)
 			}
