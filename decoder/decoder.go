@@ -16,6 +16,7 @@ const (
 
 type Packet struct {
 	Ts      time.Time `json:"ts"`
+	IPV     int8      `json:"ipv"`
 	Ip4     *IPv4     `json:"ip4,omitempty"`
 	Ip6     *IPv6     `json:"ip6,omitempty"`
 	Tcp     *TCP      `json:"tcp,omitempty"`
@@ -24,6 +25,7 @@ type Packet struct {
 	Icmp4   *ICMPv4   `json:"icmp4,omitempty"`
 	Icmp6   *ICMPv6   `json:"icmp6,omitempty"`
 	PktType int8      `json:"ptype,omitempty"`
+	Flow    *Flow     `json:"-"`
 }
 
 type Decoder struct {
@@ -31,7 +33,10 @@ type Decoder struct {
 
 func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error) {
 
-	pkt := &Packet{Ts: ci.Timestamp}
+	flow := &Flow{}
+	pkt := &Packet{Ts: ci.Timestamp,
+		Flow: flow}
+
 	packet := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.NoCopy)
 	for _, layer := range packet.Layers() {
 		switch layer.LayerType() {
@@ -42,6 +47,12 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip4 = NewIP4(ip4)
+			pkt.IPV = 4
+
+			flow.Sip = ip4.SrcIP
+			flow.Dip = ip4.DstIP
+			flow.Protocol = ip4.Protocol
+
 		case layers.LayerTypeIPv6:
 			ip6l := packet.Layer(layers.LayerTypeIPv6)
 			ip6, ok := ip6l.(*layers.IPv6)
@@ -49,6 +60,12 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip6 = NewIP6(ip6)
+			pkt.IPV = 6
+
+			flow.Sip = ip6.SrcIP
+			flow.Dip = ip6.DstIP
+			flow.Protocol = ip6.NextHeader
+
 		case layers.LayerTypeICMPv4:
 			icmp4l := packet.Layer(layers.LayerTypeICMPv4)
 			icmp4, ok := icmp4l.(*layers.ICMPv4)
@@ -75,6 +92,8 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			}
 			pkt.Udp = NewUDP(udp)
 			pkt.PktType = PktTypeUDP
+			flow.Sport = uint16(udp.SrcPort)
+			flow.Dport = uint16(udp.DstPort)
 			//return pkt, nil
 		case layers.LayerTypeDNS:
 			dnsl := packet.Layer(layers.LayerTypeDNS)
@@ -96,6 +115,8 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			//}
 			pkt.Tcp = NewTCP(tcp)
 			pkt.PktType = PktTypeTCP
+			flow.Sport = uint16(tcp.SrcPort)
+			flow.Dport = uint16(tcp.DstPort)
 			return pkt, nil
 		}
 	}

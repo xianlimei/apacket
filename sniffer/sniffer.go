@@ -323,7 +323,7 @@ func (sniffer *SnifferSetup) Run() error {
 			continue
 		}
 
-		logp.Debug("sniffer", "End of file")
+		//logp.Debug("sniffer", "End of file")
 		if err == io.EOF {
 			logp.Debug("sniffer", "End of file")
 			loopCount++
