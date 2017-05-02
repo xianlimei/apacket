@@ -36,7 +36,7 @@ func (s *Session) clean() {
 	for {
 		logp.Debug("session", "session map len:%d", len(s.tab))
 		for k, v := range s.tab {
-			if time.Since(v) > time.Second*3 {
+			if time.Since(v) > time.Second*5 {
 				logp.Debug("session", "delete session id:%s", k)
 				s.DeleteSession(k)
 			}

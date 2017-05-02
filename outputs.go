@@ -90,6 +90,25 @@ func (out *Outputer) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 	return pkt
 }
 
+func (out *Outputer) filterUDP(pkt *decoder.Packet) *decoder.Packet {
+	//ignore device sended udp
+	_, ok := cfg.IfaceAddrs[pkt.Flow.Sip.String()]
+	if ok {
+		logp.Debug("filter", "device udp, flow id:%s", pkt.Flow.FlowID())
+		out.session.AddSession(pkt.Flow.FlowID())
+		return nil
+	} else {
+		//ignore device sended udp response
+		flowid := pkt.Flow.ToOutFlowID()
+		if out.session.QuerySession(flowid) {
+			out.session.DeleteSession(flowid)
+			logp.Debug("filter", "device udp response, flow id:%s", pkt.Flow.ToOutFlowID())
+			return nil
+		}
+	}
+	return pkt
+}
+
 func (out *Outputer) filter(pkt *decoder.Packet) *decoder.Packet {
 	switch pkt.PktType {
 	case decoder.PktTypeTCP:
@@ -99,11 +118,19 @@ func (out *Outputer) filter(pkt *decoder.Packet) *decoder.Packet {
 		}
 		return pkt
 	case decoder.PktTypeUDP:
-		//TODO
+		p := out.filterUDP(pkt)
+		if p == nil {
+			return nil
+		}
+		return pkt
 	case decoder.PktTypeICMPv4:
 		//TODO
 	case decoder.PktTypeDNS:
-		//TODO
+		p := out.filterUDP(pkt)
+		if p == nil {
+			return nil
+		}
+		return pkt
 	}
 	return pkt
 }
