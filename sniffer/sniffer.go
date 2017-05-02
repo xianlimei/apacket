@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/elastic/beats/libbeat/logp"
+	"github.com/Acey9/apacket/logp"
 
 	"github.com/Acey9/apacket/config"
 

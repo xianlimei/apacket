@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/elastic/beats/libbeat/logp"
+	"github.com/Acey9/apacket/logp"
 )
 
 type Config struct {

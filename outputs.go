@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/Acey9/apacket/decoder"
-	"github.com/elastic/beats/libbeat/logp"
+	"github.com/Acey9/apacket/logp"
 )
 
 type Outputer struct {
@@ -58,6 +58,8 @@ func (out *Outputer) filter(pkt *decoder.Packet) *decoder.Packet {
 	case decoder.PktTypeUDP:
 		//TODO
 	case decoder.PktTypeICMPv4:
+		//TODO
+	case decoder.PktTypeDNS:
 		//TODO
 	}
 	return pkt
