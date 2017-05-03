@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/logp"
+	"github.com/tsg/gopacket/layers"
 )
 
 type Outputer struct {
@@ -78,7 +79,7 @@ func (out *Outputer) filterUDP(pkt *decoder.Packet) *decoder.Packet {
 		out.session.AddSession(pkt.Flow.FlowID())
 		return nil
 	} else {
-		//ignore device sended udp response
+		//ignore device udp response
 		flowid := pkt.Flow.ToOutFlowID()
 		if out.session.QuerySession(flowid) {
 			out.session.DeleteSession(flowid)
@@ -106,6 +107,10 @@ func (out *Outputer) filter(pkt *decoder.Packet) *decoder.Packet {
 	case decoder.PktTypeICMPv4:
 		//TODO
 	case decoder.PktTypeDNS:
+		//ignore ptr query
+		if len(pkt.Dns.Questions) > 0 && pkt.Dns.Questions[0].Type == layers.DNSTypePTR {
+			return nil
+		}
 		p := out.filterUDP(pkt)
 		if p == nil {
 			return nil
