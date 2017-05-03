@@ -17,12 +17,12 @@ import (
 
 type MainWorker struct {
 	outputer *outputs.Outputer
+	decoder  *decoder.Decoder
 }
 
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
-	d := &decoder.Decoder{}
 	//go func() {
-	pkt, _ := d.Process(data, ci)
+	pkt, _ := this.decoder.Process(data, ci)
 	if pkt != nil {
 		this.outputer.PublishEvent(pkt)
 	}
@@ -31,7 +31,11 @@ func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 
 func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 	o := outputs.NewOutputer()
-	w := &MainWorker{outputer: o}
+
+	d := decoder.NewDecoder()
+
+	w := &MainWorker{outputer: o,
+		decoder: d}
 
 	go w.outputer.Start()
 

@@ -30,6 +30,10 @@ type Packet struct {
 type Decoder struct {
 }
 
+func NewDecoder() *Decoder {
+	return &Decoder{}
+}
+
 func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error) {
 
 	flow := &Flow{}
