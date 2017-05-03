@@ -6,6 +6,7 @@ import (
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/logp"
+	"github.com/Acey9/apacket/outputs"
 	"github.com/Acey9/apacket/sniffer"
 	"github.com/Acey9/apacket/utils"
 	"github.com/tsg/gopacket"
@@ -14,11 +15,8 @@ import (
 	"runtime"
 )
 
-var cfg config.Config
-
-var outputer *Outputer = NewOutputer()
-
 type MainWorker struct {
+	outputer *outputs.Outputer
 }
 
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
@@ -26,13 +24,17 @@ func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	//go func() {
 	pkt, _ := d.Process(data, ci)
 	if pkt != nil {
-		outputer.PublishEvent(pkt)
+		this.outputer.PublishEvent(pkt)
 	}
 	//}()
 }
 
-func createWorker(dl layers.LinkType) (sniffer.Worker, error) {
-	w := &MainWorker{}
+func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
+	o := outputs.NewOutputer()
+	w := &MainWorker{outputer: o}
+
+	go w.outputer.Start()
+
 	return w, nil
 }
 
@@ -67,11 +69,11 @@ func optParse() {
 	flag.Uint64Var(&rotateEveryMB, "r", 10, "rotate every mb")
 	flag.IntVar(&keepFiles, "k", 7, "keep files")
 
-	flag.BoolVar(&cfg.Backscatter, "bs", false, "catch backscatter only")
+	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "catch backscatter only")
 
 	flag.Parse()
 
-	cfg.Iface = &ifaceConfig
+	config.Cfg.Iface = &ifaceConfig
 
 	logging.Files = &fileRotator
 	if logging.Files.Path != "" {
@@ -82,7 +84,7 @@ func optParse() {
 		logging.Files.RotateEveryBytes = &rotateMB
 		logging.Files.KeepFiles = &keepFiles
 	}
-	cfg.Logging = &logging
+	config.Cfg.Logging = &logging
 
 	if ifaceConfig.Device == "" && ifaceConfig.File == "" {
 		flag.Usage()
@@ -90,31 +92,30 @@ func optParse() {
 	}
 
 	if ifaceConfig.Device != "" {
-		ifaceAddrs, err := utils.InterfaceAddrsByName(cfg.Iface.Device)
+		ifaceAddrs, err := utils.InterfaceAddrsByName(config.Cfg.Iface.Device)
 		if err != nil {
 			flag.Usage()
 			fmt.Println("get interface addrs error.")
 			os.Exit(1)
 		}
 
-		cfg.IfaceAddrs = make(map[string]bool)
+		config.Cfg.IfaceAddrs = make(map[string]bool)
 		for _, addr := range ifaceAddrs {
-			cfg.IfaceAddrs[addr] = true
+			config.Cfg.IfaceAddrs[addr] = true
 		}
 	}
 }
 
 func init() {
 	optParse()
-	logp.Init("apacket", cfg.Logging)
+	logp.Init("apacket", config.Cfg.Logging)
 }
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	go outputer.Start()
 
 	sniff := &sniffer.SnifferSetup{}
-	sniff.Init(false, cfg.Iface.BpfFilter, createWorker, cfg.Iface)
+	sniff.Init(false, config.Cfg.Iface.BpfFilter, NewWorker, config.Cfg.Iface)
 	defer sniff.Close()
 	sniff.Run()
 }

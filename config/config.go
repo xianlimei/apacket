@@ -4,6 +4,8 @@ import (
 	"github.com/Acey9/apacket/logp"
 )
 
+var Cfg Config
+
 type Config struct {
 	Iface       *InterfacesConfig
 	IfaceAddrs  map[string]bool
