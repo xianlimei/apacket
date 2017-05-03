@@ -189,6 +189,7 @@ func (sniffer *SnifferSetup) setFromConfig(config *config.InterfacesConfig) erro
 			sniffer.config.Snaplen,
 			os.Getpagesize())
 		if err != nil {
+			logp.Err("sniffer %s", err)
 			return err
 		}
 
@@ -199,6 +200,7 @@ func (sniffer *SnifferSetup) setFromConfig(config *config.InterfacesConfig) erro
 			numBlocks,
 			500*time.Millisecond)
 		if err != nil {
+			logp.Err("sniffer %s", err)
 			return err
 		}
 
@@ -215,16 +217,19 @@ func (sniffer *SnifferSetup) setFromConfig(config *config.InterfacesConfig) erro
 			true)
 
 		if err != nil {
+			logp.Err("sniffer %s", err)
 			return err
 		}
 
 		err = sniffer.pfringHandle.SetBPFFilter(sniffer.filter)
 		if err != nil {
+			logp.Err("sniffer %s", err)
 			return fmt.Errorf("SetBPFFilter failed: %s", err)
 		}
 
 		err = sniffer.pfringHandle.Enable()
 		if err != nil {
+			logp.Err("sniffer %s", err)
 			return fmt.Errorf("Enable failed: %s", err)
 		}
 

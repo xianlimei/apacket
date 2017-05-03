@@ -52,6 +52,9 @@ func optParse() {
 	flag.StringVar(&ifaceConfig.Device, "i", "", "interface")
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
 	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BpfFilter")
+	flag.StringVar(&ifaceConfig.File, "rf", "", "Read packets from file")
+	flag.StringVar(&ifaceConfig.Dumpfile, "df", "", "Dump to file")
+	flag.IntVar(&ifaceConfig.Loop, "lp", 0, "loop")
 
 	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "with vlans")
 
@@ -81,21 +84,23 @@ func optParse() {
 	}
 	cfg.Logging = &logging
 
-	if ifaceConfig.Device == "" {
+	if ifaceConfig.Device == "" && ifaceConfig.File == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	ifaceAddrs, err := utils.InterfaceAddrsByName(cfg.Iface.Device)
-	if err != nil {
-		flag.Usage()
-		fmt.Println("get interface addrs error.")
-		os.Exit(1)
-	}
+	if ifaceConfig.Device != "" {
+		ifaceAddrs, err := utils.InterfaceAddrsByName(cfg.Iface.Device)
+		if err != nil {
+			flag.Usage()
+			fmt.Println("get interface addrs error.")
+			os.Exit(1)
+		}
 
-	cfg.IfaceAddrs = make(map[string]bool)
-	for _, addr := range ifaceAddrs {
-		cfg.IfaceAddrs[addr] = true
+		cfg.IfaceAddrs = make(map[string]bool)
+		for _, addr := range ifaceAddrs {
+			cfg.IfaceAddrs[addr] = true
+		}
 	}
 }
 
