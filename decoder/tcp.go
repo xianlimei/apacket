@@ -27,8 +27,9 @@ type TCP struct {
 	Payload    []byte             `json:"payload,omitempty"`
 }
 
-func NewTCP(tcp *layers.TCP) *TCP {
-	t := &TCP{}
+func NewTCP(tcp *layers.TCP) (t *TCP, pktType int8) {
+	pktType = PktTypeTCP
+	t = &TCP{}
 	t.SrcPort = tcp.SrcPort
 	t.DstPort = tcp.DstPort
 	t.Seq = tcp.Seq
@@ -49,5 +50,11 @@ func NewTCP(tcp *layers.TCP) *TCP {
 	t.Options = tcp.Options
 	t.Padding = tcp.Padding
 	t.Payload = tcp.Payload
-	return t
+
+	if t.SYN && t.ACK {
+		pktType = PktTypeTCPSYNACK
+	} else if t.SYN {
+		pktType = PktTypeTCPSYN
+	}
+	return t, pktType
 }

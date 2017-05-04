@@ -12,12 +12,13 @@ type ICMPv4 struct {
 	Payload  []byte                `json:"payload,omitempty"`
 }
 
-func NewICMPv4(icmp4 *layers.ICMPv4) *ICMPv4 {
-	i := &ICMPv4{}
+func NewICMPv4(icmp4 *layers.ICMPv4) (i *ICMPv4, pktType int8) {
+	pktType = PktTypeICMPv4
+	i = &ICMPv4{}
 	i.TypeCode = icmp4.TypeCode
 	i.Checksum = icmp4.Checksum
 	i.Id = icmp4.Id
 	i.Seq = icmp4.Seq
 	i.Payload = icmp4.Payload
-	return i
+	return i, pktType
 }

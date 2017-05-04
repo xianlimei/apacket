@@ -47,8 +47,8 @@ type DNSResourceRecord struct {
 	CNAME string `json:"cname,omitempty"`
 }
 
-func NewDNS(dns *layers.DNS) *DNS {
-	d := &DNS{}
+func NewDNS(dns *layers.DNS) (d *DNS, pktType int8) {
+	d = &DNS{}
 
 	d.ID = dns.ID
 	d.QR = dns.QR
@@ -87,5 +87,6 @@ func NewDNS(dns *layers.DNS) *DNS {
 
 		d.Answers = append(d.Answers, res)
 	}
-	return d
+	pktType = PktTypeDNS
+	return d, pktType
 }

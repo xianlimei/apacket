@@ -7,11 +7,13 @@ import (
 )
 
 const (
-	PktTypeTCP    int8 = 1
-	PktTypeUDP    int8 = 2
-	PktTypeDNS    int8 = 3
-	PktTypeICMPv4 int8 = 4
-	PktTypeICMPv6 int8 = 5
+	PktTypeTCP       int8 = 1
+	PktTypeUDP       int8 = 2
+	PktTypeDNS       int8 = 3
+	PktTypeICMPv4    int8 = 4
+	PktTypeICMPv6    int8 = 5
+	PktTypeTCPSYN    int8 = 6
+	PktTypeTCPSYNACK int8 = 7
 )
 
 type Packet struct {
@@ -73,8 +75,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			pkt.Icmp4 = NewICMPv4(icmp4)
-			pkt.PktType = PktTypeICMPv4
+			pkt.Icmp4, pkt.PktType = NewICMPv4(icmp4)
 			return pkt, nil
 		case layers.LayerTypeICMPv6:
 			icmp6l := packet.Layer(layers.LayerTypeICMPv6)
@@ -82,8 +83,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			pkt.Icmp6 = NewICMPv6(icmp6)
-			pkt.PktType = PktTypeICMPv6
+			pkt.Icmp6, pkt.PktType = NewICMPv6(icmp6)
 			return pkt, nil
 		case layers.LayerTypeUDP:
 			udpl := packet.Layer(layers.LayerTypeUDP)
@@ -91,8 +91,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			pkt.Udp = NewUDP(udp)
-			pkt.PktType = PktTypeUDP
+			pkt.Udp, pkt.PktType = NewUDP(udp)
 			flow.Sport = uint16(udp.SrcPort)
 			flow.Dport = uint16(udp.DstPort)
 			//return pkt, nil
@@ -102,8 +101,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			pkt.Dns = NewDNS(dns)
-			pkt.PktType = PktTypeDNS
+			pkt.Dns, pkt.PktType = NewDNS(dns)
 			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)
@@ -111,11 +109,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			if !ok {
 				break
 			}
-			//if !tcp.SYN && !(tcp.SYN && tcp.ACK) {
-			//	break
-			//}
-			pkt.Tcp = NewTCP(tcp)
-			pkt.PktType = PktTypeTCP
+			pkt.Tcp, pkt.PktType = NewTCP(tcp)
 			flow.Sport = uint16(tcp.SrcPort)
 			flow.Dport = uint16(tcp.DstPort)
 			return pkt, nil
