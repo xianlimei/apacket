@@ -53,15 +53,15 @@ func (pt PktType) String() string {
 	case PktTypeTCPSYNACK:
 		typeStr = "synack"
 	case PktTypeICMP4DNS:
-		typeStr = "icmp_dns"
+		typeStr = "icmp4_dns"
 	case PktTypeICMP4TCP:
-		typeStr = "icmp_tcp"
+		typeStr = "icmp4_tcp"
 	case PktTypeICMP4TCPSYN:
-		typeStr = "icmp_syn"
+		typeStr = "icmp4_syn"
 	case PktTypeICMP4TCPSYNACK:
-		typeStr = "icmp_synack"
+		typeStr = "icmp4_synack"
 	case PktTypeICMP4UDP:
-		typeStr = "icmp_udp"
+		typeStr = "icmp4_udp"
 	}
 	return typeStr
 }
