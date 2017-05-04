@@ -7,13 +7,18 @@ import (
 )
 
 const (
-	PktTypeTCP       int8 = 1
-	PktTypeUDP       int8 = 2
-	PktTypeDNS       int8 = 3
-	PktTypeICMPv4    int8 = 4
-	PktTypeICMPv6    int8 = 5
-	PktTypeTCPSYN    int8 = 6
-	PktTypeTCPSYNACK int8 = 7
+	PktTypeTCP            int8 = 1
+	PktTypeUDP            int8 = 2
+	PktTypeDNS            int8 = 3
+	PktTypeICMPv4         int8 = 4
+	PktTypeICMPv6         int8 = 5
+	PktTypeTCPSYN         int8 = 6
+	PktTypeTCPSYNACK      int8 = 7
+	PktTypeICMP4DNS       int8 = 8
+	PktTypeICMP4TCP       int8 = 9
+	PktTypeICMP4TCPSYN    int8 = 10
+	PktTypeICMP4TCPSYNACK int8 = 11
+	PktTypeICMP4UDP       int8 = 12
 )
 
 type Packet struct {
