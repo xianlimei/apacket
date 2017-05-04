@@ -36,9 +36,6 @@ func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 
 	w := &MainWorker{outputer: o,
 		decoder: d}
-
-	go w.outputer.Start()
-
 	return w, nil
 }
 

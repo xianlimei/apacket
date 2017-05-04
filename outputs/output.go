@@ -19,6 +19,7 @@ func NewOutputer() *Outputer {
 	o := &Outputer{pktQueue: make(chan *decoder.Packet),
 		filterQueue: make(chan *decoder.Packet),
 		session:     s}
+	go o.Start()
 	return o
 }
 
