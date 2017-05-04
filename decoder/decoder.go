@@ -3,36 +3,7 @@ package decoder
 import (
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
-	"time"
 )
-
-const (
-	PktTypeTCP            int8 = 1
-	PktTypeUDP            int8 = 2
-	PktTypeDNS            int8 = 3
-	PktTypeICMPv4         int8 = 4
-	PktTypeICMPv6         int8 = 5
-	PktTypeTCPSYN         int8 = 6
-	PktTypeTCPSYNACK      int8 = 7
-	PktTypeICMP4DNS       int8 = 8
-	PktTypeICMP4TCP       int8 = 9
-	PktTypeICMP4TCPSYN    int8 = 10
-	PktTypeICMP4TCPSYNACK int8 = 11
-	PktTypeICMP4UDP       int8 = 12
-)
-
-type Packet struct {
-	Ts      time.Time `json:"ts"`
-	Ip4     *IPv4     `json:"ip4,omitempty"`
-	Ip6     *IPv6     `json:"ip6,omitempty"`
-	Tcp     *TCP      `json:"tcp,omitempty"`
-	Udp     *UDP      `json:"udp,omitempty"`
-	Dns     *DNS      `json:"dns,omitempty"`
-	Icmp4   *ICMPv4   `json:"icmp4,omitempty"`
-	Icmp6   *ICMPv6   `json:"icmp6,omitempty"`
-	PktType int8      `json:"ptype,omitempty"`
-	Flow    *Flow     `json:"-"`
-}
 
 type Decoder struct {
 }
@@ -46,6 +17,10 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 	flow := &Flow{}
 	pkt := &Packet{Ts: ci.Timestamp,
 		Flow: flow}
+
+	defer func() {
+		pkt.Ptype = pkt.PktType.String()
+	}()
 
 	packet := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.NoCopy)
 	for _, layer := range packet.Layers() {
@@ -113,6 +88,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				break
 			}
 			pkt.Dns, pkt.PktType = NewDNS(dns)
+			pkt.Udp.Payload = nil
 			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)

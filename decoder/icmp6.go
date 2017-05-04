@@ -12,7 +12,7 @@ type ICMPv6 struct {
 	Payload   []byte `json:"payload,omitempty"`
 }
 
-func NewICMPv6(icmp6 *layers.ICMPv6) (i *ICMPv6, pktType int8) {
+func NewICMPv6(icmp6 *layers.ICMPv6) (i *ICMPv6, pktType PktType) {
 	pktType = PktTypeICMPv6
 	i = &ICMPv6{}
 

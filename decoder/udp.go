@@ -12,7 +12,7 @@ type UDP struct {
 	Payload  []byte         `json:"payload,omitempty"`
 }
 
-func NewUDP(udp *layers.UDP) (u *UDP, pktType int8) {
+func NewUDP(udp *layers.UDP) (u *UDP, pktType PktType) {
 	pktType = PktTypeUDP
 	u = &UDP{}
 	u.SrcPort = udp.SrcPort

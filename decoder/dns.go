@@ -47,7 +47,7 @@ type DNSResourceRecord struct {
 	CNAME string `json:"cname,omitempty"`
 }
 
-func NewDNS(dns *layers.DNS) (d *DNS, pktType int8) {
+func NewDNS(dns *layers.DNS) (d *DNS, pktType PktType) {
 	d = &DNS{}
 
 	d.ID = dns.ID

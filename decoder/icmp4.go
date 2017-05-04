@@ -21,7 +21,7 @@ type ICMPv4 struct {
 	ICMPContent
 }
 
-func NewICMPv4(icmp4 *layers.ICMPv4) (i *ICMPv4, pktType int8) {
+func NewICMPv4(icmp4 *layers.ICMPv4) (i *ICMPv4, pktType PktType) {
 	pktType = PktTypeICMPv4
 	i = &ICMPv4{}
 	i.Type = uint8(icmp4.TypeCode >> 8)
@@ -43,8 +43,8 @@ func NewICMPv4(icmp4 *layers.ICMPv4) (i *ICMPv4, pktType int8) {
 	return i, pktType
 }
 
-func DecoderDestinationUnreachable(data []byte, icmp4 *ICMPv4) (*ICMPv4, int8) {
-	var pktType int8
+func DecoderDestinationUnreachable(data []byte, icmp4 *ICMPv4) (*ICMPv4, PktType) {
+	var pktType PktType
 	pktType = 0
 	packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.NoCopy)
 	for _, layer := range packet.Layers() {
