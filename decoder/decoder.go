@@ -76,6 +76,9 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				break
 			}
 			pkt.Icmp4, pkt.PktType = NewICMPv4(icmp4)
+			if pkt.Icmp4 == nil {
+				return nil, nil
+			}
 			return pkt, nil
 		case layers.LayerTypeICMPv6:
 			icmp6l := packet.Layer(layers.LayerTypeICMPv6)
@@ -84,6 +87,9 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				break
 			}
 			pkt.Icmp6, pkt.PktType = NewICMPv6(icmp6)
+			if pkt.Icmp6 == nil {
+				return nil, nil
+			}
 			return pkt, nil
 		case layers.LayerTypeUDP:
 			udpl := packet.Layer(layers.LayerTypeUDP)
