@@ -74,6 +74,9 @@ func (out *Outputer) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 }
 
 func (out *Outputer) filterUDP(pkt *decoder.Packet) *decoder.Packet {
+	if pkt.PktType == decoder.PktTypeDNS && len(pkt.Dns.Questions) > 0 && pkt.Dns.Questions[0].Type == layers.DNSTypePTR {
+		return nil
+	}
 	//ignore device sended udp
 	_, ok := config.Cfg.IfaceAddrs[pkt.Flow.Sip.String()]
 	if ok {
@@ -93,26 +96,14 @@ func (out *Outputer) filterUDP(pkt *decoder.Packet) *decoder.Packet {
 }
 
 func (out *Outputer) filter(pkt *decoder.Packet) *decoder.Packet {
-	switch pkt.PktType {
-	case decoder.PktTypeTCP:
+	switch pkt.Flow.Protocol {
+	case layers.IPProtocolTCP:
 		p := out.filterTCP(pkt)
 		if p == nil {
 			return nil
 		}
 		return pkt
-	case decoder.PktTypeUDP:
-		p := out.filterUDP(pkt)
-		if p == nil {
-			return nil
-		}
-		return pkt
-	case decoder.PktTypeICMPv4:
-		//TODO
-	case decoder.PktTypeDNS:
-		//ignore ptr query
-		if len(pkt.Dns.Questions) > 0 && pkt.Dns.Questions[0].Type == layers.DNSTypePTR {
-			return nil
-		}
+	case layers.IPProtocolUDP:
 		p := out.filterUDP(pkt)
 		if p == nil {
 			return nil
