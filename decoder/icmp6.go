@@ -10,6 +10,7 @@ type ICMPv6 struct {
 	Checksum  uint16 `json:"checksum"`
 	TypeBytes []byte `json:"type,omitempty"`
 	Payload   []byte `json:"payload,omitempty"`
+	ICMPContent
 }
 
 func NewICMPv6(icmp6 *layers.ICMPv6) (i *ICMPv6, pktType PktType) {
@@ -25,5 +26,15 @@ func NewICMPv6(icmp6 *layers.ICMPv6) (i *ICMPv6, pktType PktType) {
 	i.Checksum = icmp6.Checksum
 	i.TypeBytes = icmp6.TypeBytes
 	i.Payload = icmp6.Payload
+	icmpContent, pt := DecoderICMP(i.Payload, ipv4)
+	if icmpContent != nil {
+		pktType = pt
+		i.Payload = nil
+		i.Ip4 = icmpContent.Ip4
+		i.Ip6 = icmpContent.Ip6
+		i.Tcp = icmpContent.Tcp
+		i.Udp = icmpContent.Udp
+		i.Dns = icmpContent.Dns
+	}
 	return i, pktType
 }
