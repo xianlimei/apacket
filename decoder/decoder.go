@@ -88,7 +88,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				break
 			}
 			pkt.Dns, pkt.PktType = NewDNS(dns)
-			pkt.Udp.Payload = nil
+			//pkt.Udp.Payload = nil
 			return pkt, nil
 		case layers.LayerTypeTCP:
 			tcpl := packet.Layer(layers.LayerTypeTCP)

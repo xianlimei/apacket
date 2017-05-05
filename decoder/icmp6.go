@@ -29,7 +29,7 @@ func NewICMPv6(icmp6 *layers.ICMPv6) (i *ICMPv6, pktType PktType) {
 	icmpContent, pt := DecoderICMP(i.Payload, ipv4)
 	if icmpContent != nil {
 		pktType = pt
-		i.Payload = nil
+		//i.Payload = nil
 		i.Ip4 = icmpContent.Ip4
 		i.Ip6 = icmpContent.Ip6
 		i.Tcp = icmpContent.Tcp
