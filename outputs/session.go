@@ -2,26 +2,33 @@ package outputs
 
 import (
 	"github.com/Acey9/apacket/logp"
+	"sync"
 	"time"
 )
 
 const SessionExpired = 5
 
 type Session struct {
-	tab map[string]time.Time
+	tab      map[string]time.Time
+	cntMutex *sync.Mutex
 }
 
 func NewSesson() *Session {
-	s := &Session{tab: make(map[string]time.Time)}
+	s := &Session{tab: make(map[string]time.Time),
+		cntMutex: &sync.Mutex{}}
 	go s.clean()
 	return s
 }
 
 func (s *Session) AddSession(flowid string) {
+	s.cntMutex.Lock()
+	defer s.cntMutex.Unlock()
 	s.tab[flowid] = time.Now()
 }
 
 func (s *Session) QuerySession(flowid string) bool {
+	s.cntMutex.Lock()
+	defer s.cntMutex.Unlock()
 	_, ok := s.tab[flowid]
 	if ok {
 		return true
@@ -30,6 +37,8 @@ func (s *Session) QuerySession(flowid string) bool {
 }
 
 func (s *Session) DeleteSession(flowid string) {
+	s.cntMutex.Lock()
+	defer s.cntMutex.Unlock()
 	delete(s.tab, flowid)
 }
 
