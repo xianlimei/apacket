@@ -52,11 +52,11 @@ func optParse() {
 	var rotateEveryMB uint64
 	var keepFiles int
 
-	flag.StringVar(&ifaceConfig.Device, "i", "", "interface")
+	flag.StringVar(&ifaceConfig.Device, "i", "", "listen on interface")
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
 	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BpfFilter")
-	flag.StringVar(&ifaceConfig.File, "rf", "", "Read packets from file")
-	flag.StringVar(&ifaceConfig.Dumpfile, "df", "", "Dump to file")
+	flag.StringVar(&ifaceConfig.File, "rf", "", "read packets from file")
+	flag.StringVar(&ifaceConfig.Dumpfile, "df", "", "dump to file")
 	flag.IntVar(&ifaceConfig.Loop, "lp", 0, "loop")
 
 	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "with vlans")
@@ -70,7 +70,7 @@ func optParse() {
 	flag.Uint64Var(&rotateEveryMB, "r", 10, "rotate every mb")
 	flag.IntVar(&keepFiles, "k", 7, "keep files")
 
-	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "catch backscatter only")
+	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "capture syn scan/backscatter packets only")
 
 	flag.Parse()
 
