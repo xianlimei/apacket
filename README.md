@@ -4,6 +4,7 @@ Capture syn scan and backscatter packets
 # Usage
 ```
 Usage of apacket [option]
+  -V    version
   -b int
     	interface buffer size mb (default 30)
   -bs
@@ -18,7 +19,7 @@ Usage of apacket [option]
   -i string
     	listen on interface
   -k int
-    	keep files (default 7)
+    	number of keep files (default 7)
   -l string
     	logging level (default "info")
   -lp int
@@ -28,7 +29,7 @@ Usage of apacket [option]
   -p string
     	log path
   -r uint
-    	rotate every mb (default 10)
+        rotate every KB (default 10240)
   -rf string
     	read packets from file
   -s int
