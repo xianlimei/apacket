@@ -15,6 +15,8 @@ import (
 	"runtime"
 )
 
+const version = "1.0"
+
 type MainWorker struct {
 	outputer *outputs.Outputer
 	decoder  *decoder.Decoder
@@ -49,7 +51,7 @@ func optParse() {
 	var ifaceConfig config.InterfacesConfig
 	var logging logp.Logging
 	var fileRotator logp.FileRotator
-	var rotateEveryMB uint64
+	var rotateEveryKB uint64
 	var keepFiles int
 
 	flag.StringVar(&ifaceConfig.Device, "i", "", "listen on interface")
@@ -67,12 +69,19 @@ func optParse() {
 	flag.StringVar(&logging.Level, "l", "info", "logging level")
 	flag.StringVar(&fileRotator.Path, "p", "", "log path")
 	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "log name")
-	flag.Uint64Var(&rotateEveryMB, "r", 10, "rotate every mb")
-	flag.IntVar(&keepFiles, "k", 7, "keep files")
+	flag.Uint64Var(&rotateEveryKB, "r", 10240, "rotate every KB")
+	flag.IntVar(&keepFiles, "k", 7, "number of keep files")
 
 	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "capture syn scan/backscatter packets only")
 
+	printVersion := flag.Bool("V", false, "version")
+
 	flag.Parse()
+
+	if *printVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	config.Cfg.Iface = &ifaceConfig
 
@@ -81,8 +90,8 @@ func optParse() {
 		tofiles := true
 		logging.ToFiles = &tofiles
 
-		rotateMB := rotateEveryMB * 1024 * 1024
-		logging.Files.RotateEveryBytes = &rotateMB
+		rotateKB := rotateEveryKB * 1024
+		logging.Files.RotateEveryBytes = &rotateKB
 		logging.Files.KeepFiles = &keepFiles
 	}
 	config.Cfg.Logging = &logging
