@@ -42,16 +42,26 @@ func (s *Session) DeleteSession(flowid string) {
 	delete(s.tab, flowid)
 }
 
+func (s *Session) del() {
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("del session error:%v", err)
+		}
+	}()
+
+	logp.Debug("session", "session map len:%d", len(s.tab))
+	for k, v := range s.tab {
+		if time.Since(v) > time.Second*SessionExpired {
+			logp.Debug("session", "delete session id:%s", k)
+			s.DeleteSession(k)
+		}
+	}
+}
+
 func (s *Session) clean() {
 	sleep := time.Millisecond * time.Duration(1000)
 	for {
-		logp.Debug("session", "session map len:%d", len(s.tab))
-		for k, v := range s.tab {
-			if time.Since(v) > time.Second*SessionExpired {
-				logp.Debug("session", "delete session id:%s", k)
-				s.DeleteSession(k)
-			}
-		}
+		s.del()
 		time.Sleep(sleep)
 	}
 }
