@@ -1,11 +1,13 @@
 package outputs
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/logp"
 	"github.com/tsg/gopacket/layers"
+	"strconv"
 )
 
 type Outputer struct {
@@ -80,15 +82,28 @@ func (out *Outputer) filterUDP(pkt *decoder.Packet) *decoder.Packet {
 	//ignore device sended udp
 	_, ok := config.Cfg.IfaceAddrs[pkt.Flow.Sip.String()]
 	if ok {
-		logp.Debug("filter", "device udp, flow id:%s", pkt.Flow.FlowID())
-		out.session.AddSession(pkt.Flow.FlowID())
+		flowid := pkt.Flow.FlowID()
+		if pkt.PktType == decoder.PktTypeDNS {
+			id := bytes.Buffer{}
+			id.WriteString(flowid)
+			id.WriteString(strconv.Itoa(int(pkt.Dns.ID)))
+			flowid = id.String()
+		}
+		logp.Debug("filter", "device udp, flow id:%s", flowid)
+		out.session.AddSession(flowid)
 		return nil
 	} else {
 		//ignore device udp response
 		flowid := pkt.Flow.ToOutFlowID()
+		if pkt.PktType == decoder.PktTypeDNS {
+			id := bytes.Buffer{}
+			id.WriteString(flowid)
+			id.WriteString(strconv.Itoa(int(pkt.Dns.ID)))
+			flowid = id.String()
+		}
 		if out.session.QuerySession(flowid) {
 			out.session.DeleteSession(flowid)
-			logp.Debug("filter", "device udp response, flow id:%s", pkt.Flow.ToOutFlowID())
+			logp.Debug("filter", "device udp response, flow id:%s", flowid)
 			return nil
 		}
 	}
