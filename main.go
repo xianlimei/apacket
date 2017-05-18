@@ -15,7 +15,7 @@ import (
 	"runtime"
 )
 
-const version = "1.0.2"
+const version = "2.0"
 
 type MainWorker struct {
 	outputer *outputs.Outputer

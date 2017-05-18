@@ -27,8 +27,8 @@ func (s *Session) AddSession(flowid string) {
 }
 
 func (s *Session) QuerySession(flowid string) bool {
-	s.cntMutex.Lock()
-	defer s.cntMutex.Unlock()
+	s.cntMutex.RLock()
+	defer s.cntMutex.RUnlock()
 	_, ok := s.tab[flowid]
 	if ok {
 		return true
@@ -43,17 +43,14 @@ func (s *Session) DeleteSession(flowid string) {
 }
 
 func (s *Session) del() {
-	defer func() {
-		if err := recover(); err != nil {
-			logp.Err("del session error:%v", err)
-		}
-	}()
+	s.cntMutex.Lock()
+	defer s.cntMutex.Unlock()
 
 	logp.Debug("session", "session map len:%d", len(s.tab))
-	for k, v := range s.tab {
+	for k, v := range s.tab { //TODO fatal error: concurrent map iteration and map write
 		if time.Since(v) > time.Second*SessionExpired {
-			logp.Debug("session", "delete session id:%s", k)
-			s.DeleteSession(k)
+			logp.Debug("session", "clean session id:%s", k)
+			delete(s.tab, k)
 		}
 	}
 }
