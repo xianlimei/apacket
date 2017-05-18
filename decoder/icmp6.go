@@ -6,7 +6,7 @@ import (
 
 type ICMPv6 struct {
 	Type      uint8  `json:"type"`
-	Code      uint8  `json:code"`
+	Code      uint8  `json:"code"`
 	Checksum  uint16 `json:"checksum"`
 	TypeBytes []byte `json:"type,omitempty"`
 	Payload   []byte `json:"payload,omitempty"`
