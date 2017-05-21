@@ -1,6 +1,8 @@
 package outputs
 
 import (
+	"bytes"
+	"compress/zlib"
 	"crypto/tls"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/sapacket/packet"
@@ -65,7 +67,12 @@ func (this *SapacketOutputer) ConnectServer(addr string) (conn net.Conn, err err
 
 func (this *SapacketOutputer) Output(msg []byte) {
 	logp.Info("pkt %s", msg)
-	pkt := packet.Pack(packet.PACKET, string(msg))
+
+	var buf bytes.Buffer
+	w := zlib.NewWriter(&buf)
+	w.Write(msg)
+	w.Close()
+	pkt := packet.Pack(packet.PACKET, buf.String())
 	this.msgQueue <- pkt
 }
 
@@ -79,6 +86,7 @@ func (this *SapacketOutputer) Send(msg []byte) {
 			logp.Err("send to server error: %v", err)
 			return
 		}
+		logp.Debug("reconnect", "succ")
 		err = packet.WritePacket(this.Conn, msg)
 		if err != nil {
 			logp.Err("resend to server error: %v", err)
