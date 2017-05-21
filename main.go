@@ -121,9 +121,14 @@ func init() {
 	logp.Init("apacket", config.Cfg.Logging)
 }
 
+func sayHi() {
+	fmt.Println("apacket version: ", version)
+}
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	sayHi()
 	sniff := &sniffer.SnifferSetup{}
 	sniff.Init(false, config.Cfg.Iface.BpfFilter, NewWorker, config.Cfg.Iface)
 	defer sniff.Close()
