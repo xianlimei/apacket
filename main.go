@@ -15,28 +15,40 @@ import (
 	"runtime"
 )
 
-const version = "2.0.1"
+const version = "3.0"
 
 type MainWorker struct {
-	outputer *outputs.Outputer
-	decoder  *decoder.Decoder
+	publisher *outputs.Publisher
+	decoder   *decoder.Decoder
 }
 
 func (this *MainWorker) OnPacket(data []byte, ci *gopacket.CaptureInfo) {
 	//go func() {
 	pkt, _ := this.decoder.Process(data, ci)
 	if pkt != nil {
-		this.outputer.PublishEvent(pkt)
+		this.publisher.PublishEvent(pkt)
 	}
 	//}()
 }
 
 func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
-	o := outputs.NewOutputer()
+	var o outputs.Outputer
+	var err error
+
+	if config.Cfg.LogServer != "" {
+		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer)
+	} else {
+		o, err = outputs.NewFileOutputer()
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	p := outputs.NewPublisher(o)
 
 	d := decoder.NewDecoder()
 
-	w := &MainWorker{outputer: o,
+	w := &MainWorker{publisher: p,
 		decoder: d}
 	return w, nil
 }
@@ -73,6 +85,7 @@ func optParse() {
 	flag.IntVar(&keepFiles, "k", 7, "number of keep files")
 
 	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "capture syn scan/backscatter packets only")
+	flag.StringVar(&config.Cfg.LogServer, "ls", "", "log server address")
 
 	printVersion := flag.Bool("V", false, "version")
 

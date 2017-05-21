@@ -11,6 +11,7 @@ type Config struct {
 	IfaceAddrs  map[string]bool
 	Logging     *logp.Logging
 	Backscatter bool
+	LogServer   string
 }
 
 type InterfacesConfig struct {
