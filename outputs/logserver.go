@@ -66,7 +66,7 @@ func (this *SapacketOutputer) ConnectServer(addr string) (conn net.Conn, err err
 	}
 
 	conn.SetDeadline(time.Now().Add(30 * time.Second))
-	login := packet.Pack(packet.LOGIN, this.Token)
+	login := packet.Pack(packet.LOGIN, []byte(this.Token))
 	err = packet.WritePacket(conn, login)
 	if err != nil {
 		//logp.Err("login faield. %v", err)
@@ -95,7 +95,7 @@ func (this *SapacketOutputer) Output(msg []byte) {
 	w := zlib.NewWriter(&buf)
 	w.Write(msg)
 	w.Close()
-	pkt := packet.Pack(packet.PACKET, buf.String())
+	pkt := packet.Pack(packet.PACKET, buf.Bytes())
 	this.msgQueue <- pkt
 }
 
