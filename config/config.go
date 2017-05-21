@@ -12,6 +12,7 @@ type Config struct {
 	Logging     *logp.Logging
 	Backscatter bool
 	LogServer   string
+	Token       string
 }
 
 type InterfacesConfig struct {

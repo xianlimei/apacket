@@ -12,13 +12,15 @@ import (
 
 type SapacketOutputer struct {
 	Addr     string
+	Token    string
 	Conn     net.Conn
 	msgQueue chan []byte
 }
 
-func NewSapacketOutputer(serverAddr string) (*SapacketOutputer, error) {
+func NewSapacketOutputer(serverAddr, token string) (*SapacketOutputer, error) {
 	so := &SapacketOutputer{
 		Addr:     serverAddr,
+		Token:    token,
 		msgQueue: make(chan []byte, 1024),
 	}
 	err := so.Init()
@@ -62,6 +64,27 @@ func (this *SapacketOutputer) ConnectServer(addr string) (conn net.Conn, err err
 	if err != nil {
 		return nil, err
 	}
+
+	conn.SetDeadline(time.Now().Add(30 * time.Second))
+	login := packet.Pack(packet.LOGIN, this.Token)
+	err = packet.WritePacket(conn, login)
+	if err != nil {
+		//logp.Err("login faield. %v", err)
+		return nil, err
+	}
+
+	conn.SetDeadline(time.Now().Add(30 * time.Second))
+	pkt, err := packet.ReadPacket(conn)
+	if err != nil {
+		//logp.Err("login faield. %v", err)
+		return nil, err
+	}
+
+	if pkt.Type != packet.LOGINSUCC {
+		//logp.Err("login faield. %v", err)
+		return nil, err
+	}
+
 	return conn, nil
 }
 

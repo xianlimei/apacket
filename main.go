@@ -36,7 +36,7 @@ func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 	var err error
 
 	if config.Cfg.LogServer != "" {
-		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer)
+		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer, config.Cfg.Token)
 	} else {
 		o, err = outputs.NewFileOutputer()
 	}
@@ -86,6 +86,7 @@ func optParse() {
 
 	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "capture syn scan/backscatter packets only")
 	flag.StringVar(&config.Cfg.LogServer, "ls", "", "log server address")
+	flag.StringVar(&config.Cfg.Token, "a", "", "auth token")
 
 	printVersion := flag.Bool("V", false, "version")
 
