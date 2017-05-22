@@ -3,20 +3,29 @@ package decoder
 import (
 	"github.com/tsg/gopacket"
 	"github.com/tsg/gopacket/layers"
+	"os"
 )
 
 type Decoder struct {
+	Host string
 }
 
 func NewDecoder() *Decoder {
-	return &Decoder{}
+	host, err := os.Hostname()
+	if err != nil {
+		host = ""
+	}
+	return &Decoder{Host: host}
 }
 
 func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error) {
 
 	flow := &Flow{}
-	pkt := &Packet{Ts: ci.Timestamp,
-		Flow: flow}
+	pkt := &Packet{
+		Host: d.Host,
+		Ts:   ci.Timestamp,
+		Flow: flow,
+	}
 
 	defer func() {
 		pkt.Ptype = pkt.PktType.String()

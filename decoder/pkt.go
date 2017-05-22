@@ -23,6 +23,7 @@ type Packet struct {
 	Ts      time.Time `json:"ts"`
 	PktType PktType   `json:"-"`
 	Ptype   string    `json:"ptype,omitempty"`
+	Host    string    `json:"host,omitempty"`
 	Ip4     *IPv4     `json:"ip4,omitempty"`
 	Ip6     *IPv6     `json:"ip6,omitempty"`
 	Tcp     *TCP      `json:"tcp,omitempty"`
