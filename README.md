@@ -7,7 +7,7 @@ Sniffer syn and backscatter packets
 Usage of ./apacket [option]
   -V  Version
   -a string
-      Auth token
+      Log server auth token
   -b int
       Interface buffer size mb (default 30)
   -bs

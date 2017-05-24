@@ -86,7 +86,7 @@ func optParse() {
 
 	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "Sniffer syn scan/backscatter packets only")
 	flag.StringVar(&config.Cfg.LogServer, "ls", "", "Log server address.The log will send to this server")
-	flag.StringVar(&config.Cfg.Token, "a", "", "Auth token")
+	flag.StringVar(&config.Cfg.Token, "a", "", "Log server auth token")
 
 	printVersion := flag.Bool("V", false, "Version")
 
