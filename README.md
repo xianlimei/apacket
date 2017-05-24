@@ -1,42 +1,47 @@
-# apacket
-Capture syn scan and backscatter packets
+# APacket
+
+Sniffer syn and backscatter packets
 
 # Usage
 ```
-Usage of apacket [option]
-  -V    version
+Usage of ./apacket [option]
+  -V  Version
+  -a string
+      Auth token
   -b int
-    	interface buffer size mb (default 30)
+      Interface buffer size mb (default 30)
   -bs
-    	capture syn scan/backscatter packets only
+      Sniffer syn scan/backscatter packets only
   -d string
-    	Enable certain debug selectors
+      Enable certain debug selectors
   -df string
-    	dump to file
-  -e	Log to stderr and disable syslog/file output
+      Dump to file
+  -e  Log to stderr and disable syslog/file output
   -f string
-    	BpfFilter
+      BPF filter
   -i string
-    	listen on interface
+      Listen on interface
   -k int
-    	number of keep files (default 7)
+      Number of keep files (default 7)
   -l string
-    	logging level (default "info")
+      Logging level (default "info")
   -lp int
-    	loop
+      Loop
+  -ls string
+      Log server address.The log will send to this server
   -n string
-    	log name (default "apacket.log")
+      Log filename (default "apacket.log")
   -p string
-    	log path
+      Log path
   -r uint
-        rotate every KB (default 10240)
+      Rotate every KB (default 10240)
   -rf string
-    	read packets from file
+      Read packets from file
   -s int
-    	snap length (default 65535)
+      Snap length (default 65535)
   -t string
-    	type (default "pcap")
-  -v	Log at INFO level
+      Sniffer type.Possible case like pcap,af_packet,pfring,pf_ring (default "pcap")
+  -v  Log at INFO level
   -wl
-    	with vlans
+      With vlans
 ```

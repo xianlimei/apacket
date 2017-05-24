@@ -66,29 +66,29 @@ func optParse() {
 	var rotateEveryKB uint64
 	var keepFiles int
 
-	flag.StringVar(&ifaceConfig.Device, "i", "", "listen on interface")
-	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "type")
-	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BpfFilter")
-	flag.StringVar(&ifaceConfig.File, "rf", "", "read packets from file")
-	flag.StringVar(&ifaceConfig.Dumpfile, "df", "", "dump to file")
-	flag.IntVar(&ifaceConfig.Loop, "lp", 0, "loop")
+	flag.StringVar(&ifaceConfig.Device, "i", "", "Listen on interface")
+	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "Sniffer type.Possible case like pcap,af_packet,pfring,pf_ring")
+	flag.StringVar(&ifaceConfig.BpfFilter, "f", "", "BPF filter")
+	flag.StringVar(&ifaceConfig.File, "rf", "", "Read packets from file")
+	flag.StringVar(&ifaceConfig.Dumpfile, "df", "", "Dump to file")
+	flag.IntVar(&ifaceConfig.Loop, "lp", 0, "Loop")
 
-	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "with vlans")
+	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "With vlans")
 
-	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "snap length")
-	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "interface buffer size mb")
+	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "Snap length")
+	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "Interface buffer size mb")
 
-	flag.StringVar(&logging.Level, "l", "info", "logging level")
-	flag.StringVar(&fileRotator.Path, "p", "", "log path")
-	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "log name")
-	flag.Uint64Var(&rotateEveryKB, "r", 10240, "rotate every KB")
-	flag.IntVar(&keepFiles, "k", 7, "number of keep files")
+	flag.StringVar(&logging.Level, "l", "info", "Logging level")
+	flag.StringVar(&fileRotator.Path, "p", "", "Log path")
+	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "Log filename")
+	flag.Uint64Var(&rotateEveryKB, "r", 10240, "Rotate every KB")
+	flag.IntVar(&keepFiles, "k", 7, "Number of keep files")
 
-	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "capture syn scan/backscatter packets only")
-	flag.StringVar(&config.Cfg.LogServer, "ls", "", "log server address")
-	flag.StringVar(&config.Cfg.Token, "a", "", "auth token")
+	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "Sniffer syn scan/backscatter packets only")
+	flag.StringVar(&config.Cfg.LogServer, "ls", "", "Log server address.The log will send to this server")
+	flag.StringVar(&config.Cfg.Token, "a", "", "Auth token")
 
-	printVersion := flag.Bool("V", false, "version")
+	printVersion := flag.Bool("V", false, "Version")
 
 	flag.Parse()
 
