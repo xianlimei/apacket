@@ -2,6 +2,8 @@
 
 Sniffer syn and backscatter packets
 
+It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
+
 # Usage
 ```
 Usage of ./apacket [option]
