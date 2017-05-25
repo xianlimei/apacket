@@ -76,15 +76,15 @@ func optParse() {
 	flag.BoolVar(&ifaceConfig.WithVlans, "wl", false, "With vlans")
 
 	flag.IntVar(&ifaceConfig.Snaplen, "s", 65535, "Snap length")
-	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "Interface buffer size mb")
+	flag.IntVar(&ifaceConfig.BufferSizeMb, "b", 30, "Interface buffer size.(MB)")
 
 	flag.StringVar(&logging.Level, "l", "info", "Logging level")
 	flag.StringVar(&fileRotator.Path, "p", "", "Log path")
 	flag.StringVar(&fileRotator.Name, "n", "apacket.log", "Log filename")
-	flag.Uint64Var(&rotateEveryKB, "r", 10240, "Rotate every KB")
-	flag.IntVar(&keepFiles, "k", 7, "Number of keep files")
+	flag.Uint64Var(&rotateEveryKB, "r", 10240, "The size of each log file.(KB)")
+	flag.IntVar(&keepFiles, "k", 7, "Keep the number of log files")
 
-	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "Sniffer syn scan/backscatter packets only")
+	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "Sniffer syn/backscatter packets only")
 	flag.StringVar(&config.Cfg.LogServer, "ls", "", "Log server address.The log will send to this server")
 	flag.StringVar(&config.Cfg.Token, "a", "", "Log server auth token")
 

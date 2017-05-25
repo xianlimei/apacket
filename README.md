@@ -11,9 +11,9 @@ Usage of ./apacket [option]
   -a string
       Log server auth token
   -b int
-      Interface buffer size mb (default 30)
+      Interface buffer size.(MB) (default 30)
   -bs
-      Sniffer syn scan/backscatter packets only
+      Sniffer syn/backscatter packets only
   -d string
       Enable certain debug selectors
   -df string
@@ -24,7 +24,7 @@ Usage of ./apacket [option]
   -i string
       Listen on interface
   -k int
-      Number of keep files (default 7)
+      Keep the number of log files (default 7)
   -l string
       Logging level (default "info")
   -lp int
@@ -36,7 +36,7 @@ Usage of ./apacket [option]
   -p string
       Log path
   -r uint
-      Rotate every KB (default 10240)
+      The size of each log file.(KB) (default 10240)
   -rf string
       Read packets from file
   -s int
