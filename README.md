@@ -4,6 +4,23 @@ Sniffer syn and backscatter packets
 
 It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
 
+# Installation from source
+
+```
+go get github.com/Acey9/apacket
+cd $GOPATH/src/github.com/Acey9/apacket
+make
+cp ./apacket $GOPATH/bin/
+apacket -h
+
+#install log server
+go get github.com/Acey9/sapacket
+cd $GOPATH/src/github.com/Acey9/sapacket
+make
+cp ./sapacket $GOPATH/bin/
+sapacket -h
+```
+
 # Usage
 ```
 Usage of ./apacket [option]
