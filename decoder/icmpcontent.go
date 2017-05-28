@@ -54,7 +54,7 @@ func DecoderICMP(data []byte, ipVersion uint8) (*ICMPContent, PktType) {
 				break
 			}
 			icmpc.Dns, _ = NewDNS(dns)
-			pktType = PktTypeICMP4DNS
+			pktType = PktTypeICMPDNS
 			icmpc.Udp.Payload = nil
 			return icmpc, pktType
 		case layers.LayerTypeTCP:
@@ -66,11 +66,11 @@ func DecoderICMP(data []byte, ipVersion uint8) (*ICMPContent, PktType) {
 
 			icmpc.Tcp, pktType = NewTCP(tcp)
 			if pktType == PktTypeTCPSYN {
-				pktType = PktTypeICMP4TCPSYN
+				pktType = PktTypeICMPTCPSYN
 			} else if pktType == PktTypeTCPSYNACK {
-				pktType = PktTypeICMP4TCPSYNACK
+				pktType = PktTypeICMPTCPSYNACK
 			} else {
-				pktType = PktTypeICMP4TCP
+				pktType = PktTypeICMPTCP
 			}
 			return icmpc, pktType
 		case layers.LayerTypeUDP:
@@ -80,7 +80,7 @@ func DecoderICMP(data []byte, ipVersion uint8) (*ICMPContent, PktType) {
 				break
 			}
 			icmpc.Udp, _ = NewUDP(udp)
-			pktType = PktTypeICMP4UDP
+			pktType = PktTypeICMPUDP
 		}
 	}
 	if pktType != 0 {

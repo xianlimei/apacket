@@ -5,18 +5,18 @@ import (
 )
 
 const (
-	PktTypeTCP            PktType = 1
-	PktTypeUDP            PktType = 2
-	PktTypeDNS            PktType = 3
-	PktTypeICMPv4         PktType = 4
-	PktTypeICMPv6         PktType = 5
-	PktTypeTCPSYN         PktType = 6
-	PktTypeTCPSYNACK      PktType = 7
-	PktTypeICMP4DNS       PktType = 8
-	PktTypeICMP4TCP       PktType = 9
-	PktTypeICMP4TCPSYN    PktType = 10
-	PktTypeICMP4TCPSYNACK PktType = 11
-	PktTypeICMP4UDP       PktType = 12
+	PktTypeTCP           PktType = 1
+	PktTypeUDP           PktType = 2
+	PktTypeDNS           PktType = 3
+	PktTypeICMPv4        PktType = 4
+	PktTypeICMPv6        PktType = 5
+	PktTypeTCPSYN        PktType = 6
+	PktTypeTCPSYNACK     PktType = 7
+	PktTypeICMPDNS       PktType = 8
+	PktTypeICMPTCP       PktType = 9
+	PktTypeICMPTCPSYN    PktType = 10
+	PktTypeICMPTCPSYNACK PktType = 11
+	PktTypeICMPUDP       PktType = 12
 )
 
 type Packet struct {
@@ -53,15 +53,15 @@ func (pt PktType) String() string {
 		typeStr = "syn"
 	case PktTypeTCPSYNACK:
 		typeStr = "synack"
-	case PktTypeICMP4DNS:
-		typeStr = "icmp4_dns"
-	case PktTypeICMP4TCP:
-		typeStr = "icmp4_tcp"
-	case PktTypeICMP4TCPSYN:
-		typeStr = "icmp4_syn"
-	case PktTypeICMP4TCPSYNACK:
-		typeStr = "icmp4_synack"
-	case PktTypeICMP4UDP:
+	case PktTypeICMPDNS:
+		typeStr = "icmpdns"
+	case PktTypeICMPTCP:
+		typeStr = "icmptcp"
+	case PktTypeICMPTCPSYN:
+		typeStr = "icmpsyn"
+	case PktTypeICMPTCPSYNACK:
+		typeStr = "icmpsynack"
+	case PktTypeICMPUDP:
 		typeStr = "icmp4_udp"
 	}
 	return typeStr
