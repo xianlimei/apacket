@@ -28,17 +28,7 @@ type Logging struct {
 	ToSyslog  *bool `config:"to_syslog"`
 	ToFiles   *bool `config:"to_files"`
 	Level     string
-	Metrics   LoggingMetricsConfig `config:"metrics"`
 }
-
-type LoggingMetricsConfig struct {
-	Enabled *bool          `config:"enabled"`
-	Period  *time.Duration `config:"period" validate:"nonzero,min=0s"`
-}
-
-var (
-	defaultMetricsPeriod = 30 * time.Second
-)
 
 func init() {
 	startTime = time.Now()
@@ -157,8 +147,6 @@ func Init(name string, config *Logging) error {
 		// used by libraries and we don't want their logs to spam ours)
 		log.SetOutput(ioutil.Discard)
 	}
-
-	go logMetrics(&config.Metrics)
 
 	return nil
 }
