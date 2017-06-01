@@ -62,7 +62,7 @@ func (pt PktType) String() string {
 	case PktTypeICMPTCPSYNACK:
 		typeStr = "icmpsynack"
 	case PktTypeICMPUDP:
-		typeStr = "icmp4_udp"
+		typeStr = "icmpudp"
 	}
 	return typeStr
 }
