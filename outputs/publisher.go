@@ -46,12 +46,19 @@ func (pub *Publisher) output(pkt *decoder.Packet) {
 	pub.outputer.Output(b)
 }
 
+func (pub *Publisher) getSynID(flowID string, seq uint32) string {
+	synID := bytes.Buffer{}
+	synID.WriteString(flowID)
+	synID.WriteString(strconv.Itoa(int(seq)))
+	return synID.String()
+}
+
 func (pub *Publisher) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 
 	//ignore not syn and not syn_ack
-	if !pkt.Tcp.SYN && !(pkt.Tcp.SYN && pkt.Tcp.ACK) {
-		return nil
-	}
+	//if !pkt.Tcp.SYN && !(pkt.Tcp.SYN && pkt.Tcp.ACK) {
+	//	return nil
+	//}
 
 	if pkt.Tcp.SYN && pkt.Tcp.ACK { //syn_ack
 		//ignore device sended syn_ack
@@ -67,6 +74,7 @@ func (pub *Publisher) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 			logp.Debug("filter", "device syn_ack, flow id:%s", pkt.Flow.ToOutFlowID())
 			return nil
 		}
+		return pkt
 	} else if pkt.Tcp.SYN { //syn
 
 		//ignore device syn
@@ -75,9 +83,23 @@ func (pub *Publisher) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 			logp.Debug("filter", "device syn, flow id:%s", pkt.Flow.FlowID())
 			pub.session.AddSession(pkt.Flow.FlowID())
 			return nil
+		} else if !config.Cfg.FirstBloodDisable {
+			logp.Debug("filter", "add syn, flow id:%s%v", pkt.Flow.FlowID(), pkt.Tcp.Seq)
+			synID := pub.getSynID(pkt.Flow.FlowID(), pkt.Tcp.Seq)
+			pub.session.AddSession(synID)
+		}
+		return pkt
+	} else if !config.Cfg.FirstBloodDisable && pkt.Tcp.ACK {
+		_, ok := config.Cfg.IfaceAddrs[pkt.Flow.Sip.String()]
+		if ok {
+			return nil
+		}
+		synID := pub.getSynID(pkt.Flow.FlowID(), pkt.Tcp.Seq-1)
+		if pub.session.QuerySession(synID) && len(pkt.Tcp.Payload) != 0 { //First payload
+			return pkt
 		}
 	}
-	return pkt
+	return nil
 }
 
 func (pub *Publisher) filterUDP(pkt *decoder.Packet) *decoder.Packet {

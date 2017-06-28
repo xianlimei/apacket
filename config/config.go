@@ -7,12 +7,14 @@ import (
 var Cfg Config
 
 type Config struct {
-	Iface       *InterfacesConfig
-	IfaceAddrs  map[string]bool
-	Logging     *logp.Logging
-	Backscatter bool
-	LogServer   string
-	Token       string
+	Iface             *InterfacesConfig
+	IfaceAddrs        map[string]bool
+	Logging           *logp.Logging
+	Backscatter       bool
+	FirstBloodDisable bool
+	LogServer         string
+	Token             string
+	ListenAddr        string
 }
 
 type InterfacesConfig struct {

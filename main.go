@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
+	"github.com/Acey9/apacket/firstblood"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
 	"github.com/Acey9/apacket/sniffer"
@@ -15,7 +16,7 @@ import (
 	"runtime"
 )
 
-const version = "apacket 3.0.1"
+const version = "apacket 3.0.2"
 
 type MainWorker struct {
 	publisher *outputs.Publisher
@@ -88,6 +89,9 @@ func optParse() {
 	flag.StringVar(&config.Cfg.LogServer, "ls", "", "Log server address.The log will send to this server")
 	flag.StringVar(&config.Cfg.Token, "a", "", "Log server auth token")
 
+	flag.BoolVar(&config.Cfg.FirstBloodDisable, "dfb", false, "Disable firstblood")
+	flag.StringVar(&config.Cfg.ListenAddr, "listen", "", "Listen address")
+
 	printVersion := flag.Bool("V", false, "Version")
 
 	flag.Parse()
@@ -143,6 +147,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	sayHi()
+	if !config.Cfg.FirstBloodDisable && config.Cfg.ListenAddr != "" {
+		fb := firstblood.NewFirstBlood()
+		go fb.Start()
+	}
 	sniff := &sniffer.SnifferSetup{}
 	sniff.Init(false, config.Cfg.Iface.BpfFilter, NewWorker, config.Cfg.Iface)
 	defer sniff.Close()

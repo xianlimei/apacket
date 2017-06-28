@@ -55,6 +55,8 @@ func NewTCP(tcp *layers.TCP) (t *TCP, pktType PktType) {
 		pktType = PktTypeTCPSYNACK
 	} else if t.SYN {
 		pktType = PktTypeTCPSYN
+	} else if t.ACK {
+		pktType = PktTypeTCPACK
 	}
 	return t, pktType
 }

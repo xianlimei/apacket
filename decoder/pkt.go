@@ -17,6 +17,7 @@ const (
 	PktTypeICMPTCPSYN    PktType = 10
 	PktTypeICMPTCPSYNACK PktType = 11
 	PktTypeICMPUDP       PktType = 12
+	PktTypeTCPACK        PktType = 13
 )
 
 type Packet struct {
@@ -53,6 +54,8 @@ func (pt PktType) String() string {
 		typeStr = "syn"
 	case PktTypeTCPSYNACK:
 		typeStr = "synack"
+	case PktTypeTCPACK:
+		typeStr = "ack"
 	case PktTypeICMPDNS:
 		typeStr = "icmpdns"
 	case PktTypeICMPTCP:
