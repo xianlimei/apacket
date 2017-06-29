@@ -69,8 +69,8 @@ func (pkt *Packet) CalPayloadSha1() string {
 		pl = pkt.Udp.Payload
 	}
 	if len(pl) != 0 {
-		cPayload := pkt.CompressPayload(pl)
-		return pkt.PayloadSha1Hex(cPayload.String())
+		//cPayload := pkt.CompressPayload(pl)
+		return pkt.PayloadSha1Hex(string(pl))
 	}
 	return ""
 }
