@@ -16,7 +16,7 @@ import (
 	"runtime"
 )
 
-const version = "apacket 3.0.2"
+const version = "apacket 3.0.3"
 
 type MainWorker struct {
 	publisher *outputs.Publisher
