@@ -41,38 +41,44 @@ type Packet struct {
 	PayloadSha1 string    `json:"psha1,omitempty"`
 }
 
-func (pkt *Packet) CompressPayload(payload []byte) bytes.Buffer {
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(payload)
+func (pkt *Packet) Compress(source []byte) bytes.Buffer {
+	var buf bytes.Buffer
+	w := zlib.NewWriter(&buf)
+	w.Write(source)
 	w.Close()
-	return b
+	return buf
 }
 
-func (pkt *Packet) PayloadSha1Hex(payload string) string {
+func (pkt *Packet) Sha1HexDigest(str string) string {
 	h := sha1.New()
-	io.WriteString(h, payload)
+	io.WriteString(h, str)
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (pkt *Packet) CalPayloadSha1() string {
-	var pl []byte
-
+func (pkt *Packet) CompressPayload() (psha1 string) {
 	switch pkt.PktType {
 	case PktTypeTCPACK:
-		pl = pkt.Tcp.Payload
+		if len(pkt.Tcp.Payload) != 0 {
+			cPayload := pkt.Compress(pkt.Tcp.Payload)
+			pkt.Tcp.Payload = cPayload.Bytes()
+			psha1 = pkt.Sha1HexDigest(cPayload.String())
+		}
 	//case PktTypeTCPSYNACK:
 	//	pl = pkt.Tcp.Payload
 	case PktTypeTCP:
-		pl = pkt.Tcp.Payload
+		if len(pkt.Tcp.Payload) != 0 {
+			cPayload := pkt.Compress(pkt.Tcp.Payload)
+			pkt.Tcp.Payload = cPayload.Bytes()
+			psha1 = pkt.Sha1HexDigest(cPayload.String())
+		}
 	case PktTypeUDP:
-		pl = pkt.Udp.Payload
+		if len(pkt.Udp.Payload) != 0 {
+			cPayload := pkt.Compress(pkt.Udp.Payload)
+			pkt.Udp.Payload = cPayload.Bytes()
+			psha1 = pkt.Sha1HexDigest(cPayload.String())
+		}
 	}
-	if len(pl) != 0 {
-		//cPayload := pkt.CompressPayload(pl)
-		return pkt.PayloadSha1Hex(string(pl))
-	}
-	return ""
+	return psha1
 }
 
 type PktType uint8

@@ -39,7 +39,7 @@ func (pub *Publisher) PublishEvent(pkt *decoder.Packet) {
 
 func (pub *Publisher) output(pkt *decoder.Packet) {
 	if config.Cfg.Backscatter {
-		pkt.PayloadSha1 = pkt.CalPayloadSha1()
+		pkt.PayloadSha1 = pkt.CompressPayload()
 	}
 	b, err := json.Marshal(pkt)
 	if err != nil {
