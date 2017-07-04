@@ -59,23 +59,23 @@ func (pkt *Packet) CompressPayload() (psha1 string) {
 	switch pkt.PktType {
 	case PktTypeTCPACK:
 		if len(pkt.Tcp.Payload) != 0 {
+			psha1 = pkt.Sha1HexDigest(string(pkt.Tcp.Payload))
 			cPayload := pkt.Compress(pkt.Tcp.Payload)
 			pkt.Tcp.Payload = cPayload.Bytes()
-			psha1 = pkt.Sha1HexDigest(cPayload.String())
 		}
 	//case PktTypeTCPSYNACK:
 	//	pl = pkt.Tcp.Payload
 	case PktTypeTCP:
 		if len(pkt.Tcp.Payload) != 0 {
+			psha1 = pkt.Sha1HexDigest(string(pkt.Tcp.Payload))
 			cPayload := pkt.Compress(pkt.Tcp.Payload)
 			pkt.Tcp.Payload = cPayload.Bytes()
-			psha1 = pkt.Sha1HexDigest(cPayload.String())
 		}
 	case PktTypeUDP:
 		if len(pkt.Udp.Payload) != 0 {
+			psha1 = pkt.Sha1HexDigest(string(pkt.Udp.Payload))
 			cPayload := pkt.Compress(pkt.Udp.Payload)
 			pkt.Udp.Payload = cPayload.Bytes()
-			psha1 = pkt.Sha1HexDigest(cPayload.String())
 		}
 	}
 	return psha1
