@@ -142,7 +142,7 @@ func (this *SapacketOutputer) Start() {
 			counter++
 			this.Send(msg)
 			if counter%1024 == 0 {
-				logp.Debug("logserver", "Packet number: %d", counter)
+				logp.Debug("logserver", "logserver packet number: %d", counter)
 			}
 		}
 	}

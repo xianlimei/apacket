@@ -174,7 +174,7 @@ func (pub *Publisher) Start() {
 		}
 
 		if counter%1024 == 0 {
-			logp.Debug("publisher", "Packet number: %d", counter)
+			logp.Debug("publisher", "publisher packet number: %d", counter)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package outputs
 
 import (
-	"github.com/Acey9/apacket/logp"
+	//"github.com/Acey9/apacket/logp"
 	"sync"
 	"time"
 )
@@ -46,12 +46,10 @@ func (s *Session) del() {
 	s.cntMutex.Lock()
 	defer s.cntMutex.Unlock()
 
-	if len(s.tab) != 0 {
-		logp.Debug("session", "session map len:%d", len(s.tab))
-	}
+	//logp.Debug("session", "session map len:%d", len(s.tab))
 	for k, v := range s.tab { //TODO fatal error: concurrent map iteration and map write
 		if time.Since(v) > time.Second*SessionExpired {
-			logp.Debug("session", "clean session id:%s", k)
+			//logp.Debug("session", "clean session id:%s", k)
 			delete(s.tab, k)
 		}
 	}
