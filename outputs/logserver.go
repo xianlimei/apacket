@@ -42,6 +42,7 @@ func (this *SapacketOutputer) Init() error {
 }
 
 func (this *SapacketOutputer) Close() {
+	logp.Info("sapacket connect close.")
 	this.Conn.Close()
 }
 
@@ -126,11 +127,23 @@ func (this *SapacketOutputer) Send(msg []byte) {
 }
 
 func (this *SapacketOutputer) Start() {
-	defer this.Close()
+	counter := 0
+
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("sapacket error:: %v", err)
+		}
+		this.Close()
+	}()
+
 	for {
 		select {
 		case msg := <-this.msgQueue:
+			counter++
 			this.Send(msg)
+			if counter%1024 == 0 {
+				logp.Debug("logserver", "Packet number: %d", counter)
+			}
 		}
 	}
 }

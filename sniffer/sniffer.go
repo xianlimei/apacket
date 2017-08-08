@@ -382,7 +382,9 @@ func (sniffer *SnifferSetup) Run() error {
 		if sniffer.dumper != nil {
 			sniffer.dumper.WritePacketData(data, ci)
 		}
-		logp.Debug("sniffer", "Packet number: %d", counter)
+		if counter%1024 == 0 {
+			logp.Debug("sniffer", "Packet number: %d", counter)
+		}
 
 		sniffer.worker.OnPacket(data, &ci)
 	}

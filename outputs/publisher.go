@@ -159,15 +159,22 @@ func (pub *Publisher) filter(pkt *decoder.Packet) *decoder.Packet {
 }
 
 func (pub *Publisher) Start() {
+	counter := 0
 	for {
 		select {
 		case pkt := <-pub.pktQueue:
 			pub.output(pkt)
+			counter++
 		case pkt := <-pub.filterQueue:
 			p := pub.filter(pkt)
 			if p != nil {
 				pub.output(pkt)
 			}
+			counter++
+		}
+
+		if counter%1024 == 0 {
+			logp.Debug("publisher", "Packet number: %d", counter)
 		}
 	}
 }

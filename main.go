@@ -154,5 +154,8 @@ func main() {
 	sniff := &sniffer.SnifferSetup{}
 	sniff.Init(false, config.Cfg.Iface.BpfFilter, NewWorker, config.Cfg.Iface)
 	defer sniff.Close()
-	sniff.Run()
+	err := sniff.Run()
+	if err != nil {
+		logp.Err("main %v", err)
+	}
 }
