@@ -108,6 +108,12 @@ func (this *SapacketOutputer) Output(msg []byte) {
 }
 
 func (this *SapacketOutputer) Send(msg []byte) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("send msg error: %v", err)
+		}
+	}()
 	this.Conn.SetDeadline(time.Now().Add(10 * time.Second))
 	err := packet.WritePacket(this.Conn, msg)
 	if err != nil {
@@ -131,7 +137,7 @@ func (this *SapacketOutputer) Start() {
 
 	defer func() {
 		if err := recover(); err != nil {
-			logp.Err("sapacket error:: %v", err)
+			logp.Err("sapacket error: %v", err)
 		}
 		this.Close()
 	}()

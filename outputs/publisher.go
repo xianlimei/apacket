@@ -38,6 +38,12 @@ func (pub *Publisher) PublishEvent(pkt *decoder.Packet) {
 }
 
 func (pub *Publisher) output(pkt *decoder.Packet) {
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("publisher.output error: %v", err)
+		}
+	}()
+
 	if config.Cfg.Backscatter {
 		pkt.PayloadSha1 = pkt.CompressPayload()
 	}
@@ -141,6 +147,12 @@ func (pub *Publisher) filterUDP(pkt *decoder.Packet) *decoder.Packet {
 }
 
 func (pub *Publisher) filter(pkt *decoder.Packet) *decoder.Packet {
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("publisher.filter error: %v", err)
+		}
+	}()
+
 	switch pkt.Flow.Protocol {
 	case layers.IPProtocolTCP:
 		p := pub.filterTCP(pkt)
