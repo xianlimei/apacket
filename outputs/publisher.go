@@ -124,10 +124,15 @@ func (pub *Publisher) filterUDP(pkt *decoder.Packet) *decoder.Packet {
 			id.WriteString(flowid)
 			id.WriteString(strconv.Itoa(int(pkt.Dns.ID)))
 			flowid = id.String()
+			logp.Debug("filter", "device udp, flow id:%s", flowid)
+			pub.session.AddSession(flowid)
+			pkt.Ptype = "dnsqry"
+			return pkt
+		} else {
+			logp.Debug("filter", "device udp, flow id:%s", flowid)
+			pub.session.AddSession(flowid)
+			return nil
 		}
-		logp.Debug("filter", "device udp, flow id:%s", flowid)
-		pub.session.AddSession(flowid)
-		return nil
 	} else {
 		//ignore device udp response
 		flowid := pkt.Flow.ToOutFlowID()
