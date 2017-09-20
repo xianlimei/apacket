@@ -41,6 +41,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip4 = NewIP4(ip4)
+			pkt.IPv = ip4.Version
 
 			flow.Sip = ip4.SrcIP
 			flow.Dip = ip4.DstIP
@@ -53,6 +54,7 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 				return nil, nil
 			}
 			pkt.Ip6 = NewIP6(ip6)
+			pkt.IPv = ip6.Version
 
 			flow.Sip = ip6.SrcIP
 			flow.Dip = ip6.DstIP

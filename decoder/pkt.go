@@ -27,6 +27,7 @@ const (
 
 type Packet struct {
 	Ts          time.Time `json:"ts"`
+	IPv         uint8     `json:"ipv"`
 	PktType     PktType   `json:"-"`
 	Ptype       string    `json:"ptype,omitempty"`
 	Host        string    `json:"host,omitempty"`
