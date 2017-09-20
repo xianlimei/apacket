@@ -38,6 +38,8 @@ func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 
 	if config.Cfg.LogServer != "" {
 		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer, config.Cfg.Token)
+	} else if len(config.Cfg.NsqdTCPAddress) != 0 {
+		o, err = outputs.NewNSQOutputer(config.Cfg.NsqdTCPAddress, config.Cfg.NsqdTopic)
 	} else {
 		o, err = outputs.NewFileOutputer()
 	}
@@ -66,6 +68,7 @@ func optParse() {
 	var fileRotator logp.FileRotator
 	var rotateEveryKB uint64
 	var keepFiles int
+	destNsqdTCPAddrs := utils.StringArray{}
 
 	flag.StringVar(&ifaceConfig.Device, "i", "", "Listen on interface")
 	flag.StringVar(&ifaceConfig.Type, "t", "pcap", "Sniffer type.Possible case like pcap,af_packet,pfring,pf_ring")
@@ -86,7 +89,12 @@ func optParse() {
 	flag.IntVar(&keepFiles, "k", 7, "Keep the number of log files")
 
 	flag.BoolVar(&config.Cfg.Backscatter, "bs", false, "Sniffer syn/backscatter packets only")
+
 	flag.StringVar(&config.Cfg.LogServer, "ls", "", "Log server address.The log will send to this server")
+
+	flag.Var(&destNsqdTCPAddrs, "nsqd-tcp-address", "destination nsqd TCP address (may be given multiple times)")
+	flag.StringVar(&config.Cfg.NsqdTopic, "nsqd-topic", "t.apacket", "NSQ topic to publish to")
+
 	flag.StringVar(&config.Cfg.Token, "a", "", "Log server auth token")
 
 	flag.BoolVar(&config.Cfg.FirstBloodDisable, "dfb", false, "Disable firstblood")
@@ -102,6 +110,7 @@ func optParse() {
 	}
 
 	config.Cfg.Iface = &ifaceConfig
+	config.Cfg.NsqdTCPAddress = destNsqdTCPAddrs
 
 	logging.Files = &fileRotator
 	if logging.Files.Path != "" {

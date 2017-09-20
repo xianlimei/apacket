@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net"
+	"strings"
 )
 
 func InterfaceAddrsByName(ifaceName string) ([]string, error) {
@@ -28,4 +29,15 @@ func InterfaceAddrsByName(ifaceName string) ([]string, error) {
 		}
 	}
 	return buf, nil
+}
+
+type StringArray []string
+
+func (a *StringArray) Set(s string) error {
+	*a = append(*a, s)
+	return nil
+}
+
+func (a *StringArray) String() string {
+	return strings.Join(*a, ",")
 }

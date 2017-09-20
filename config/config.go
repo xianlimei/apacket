@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/Acey9/apacket/logp"
+	"github.com/Acey9/apacket/utils"
 )
 
 var Cfg Config
@@ -13,6 +14,8 @@ type Config struct {
 	Backscatter       bool
 	FirstBloodDisable bool
 	LogServer         string
+	NsqdTCPAddress    utils.StringArray
+	NsqdTopic         string
 	Token             string
 	ListenAddr        string
 }
