@@ -77,6 +77,7 @@ func (this *NSQOutputer) Send(msg []byte) {
 			logp.Err("nsq publish: %v", err)
 			continue
 		}
+		break
 	}
 }
 
