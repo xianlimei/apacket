@@ -81,6 +81,7 @@ func (http *Http) DisguiserData() (data []byte) {
 	buf.WriteString(date)
 	buf.WriteString(HttpResponseHeader)
 	buf.WriteString(server)
+	buf.WriteString("\r\n")
 	buf.WriteString(HttpBody)
 	data = buf.Bytes()
 	return data
