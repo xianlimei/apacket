@@ -15,14 +15,12 @@ It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big
 ```
 go get github.com/Acey9/apacket
 cd $GOPATH/src/github.com/Acey9/apacket
-make
-cp ./apacket $GOPATH/bin/
+make install
 apacket -h
 
 #install log server
 go get github.com/Acey9/sapacket
 cd $GOPATH/src/github.com/Acey9/sapacket
-make
-cp ./sapacket $GOPATH/bin/
+make install
 sapacket -h
 ```

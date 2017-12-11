@@ -50,5 +50,14 @@ func initHandler(conn net.Conn) {
 	if err != nil || l <= 0 {
 		return
 	}
-	conn.Write(buf[:l])
+
+	response := []byte("\x00")
+	for _, disguiser := range DisguiserMap {
+		identify, _ := disguiser.Fingerprint(buf)
+		if identify {
+			response = disguiser.DisguiserData()
+			break
+		}
+	}
+	conn.Write(response)
 }

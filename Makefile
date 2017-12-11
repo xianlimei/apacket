@@ -6,6 +6,9 @@ all:
 debug:
 	go build -o $(NAME) *.go
 
+install:
+	mv $(NAME) $(GOPATH)/bin
+
 .PHONY: clean
 clean:
-	rm -fr $(NAME)
+	rm -fr $(NAME) $(GOPATH)/bin/apacket
