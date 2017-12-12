@@ -7,6 +7,7 @@ debug:
 	go build -o $(NAME) *.go
 
 install:
+	go build -ldflags "-s -w"  -o $(NAME) *.go
 	mv $(NAME) $(GOPATH)/bin
 
 .PHONY: clean
