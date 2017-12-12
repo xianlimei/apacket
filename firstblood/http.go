@@ -9,8 +9,8 @@ import (
 
 const (
 	HttpResponse       = "HTTP/1.1 200 OK\r\n"
-	HttpResponseHeader = "Connection: keep-alive\r\nContent-Type: text/html; charset=utf-8\r\n"
-	HttpBody           = "<html><head><title>Camera</title></head><body></body></html>"
+	HttpResponseHeader = "Connection: keep-alive\r\nContent-Type: text/html; charset=UTF-8\r\nCache-Control: no-cache\r\nPragma: no-cache\r\n"
+	HttpBody           = "<html><head><title>Document Error: Unauthorized</title></head><body><h2>Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p></body></html>"
 )
 
 var HttpServer = []string{
