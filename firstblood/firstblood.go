@@ -45,19 +45,21 @@ func initHandler(conn net.Conn) {
 
 	conn.SetDeadline(time.Now().Add(10 * time.Second))
 
-	buf := make([]byte, 2048)
-	l, err := conn.Read(buf)
-	if err != nil || l <= 0 {
-		return
-	}
-
-	response := []byte("\x00")
-	for _, disguiser := range DisguiserMap {
-		identify, _ := disguiser.Fingerprint(buf)
-		if identify {
-			response = disguiser.DisguiserData()
-			break
+	for {
+		buf := make([]byte, 2048)
+		l, err := conn.Read(buf)
+		if err != nil || l < 1 {
+			return
 		}
+
+		response := []byte("\x00")
+		for _, disguiser := range DisguiserMap {
+			identify, _ := disguiser.Fingerprint(buf)
+			if identify {
+				response = disguiser.DisguiserData()
+				break
+			}
+		}
+		conn.Write(response)
 	}
-	conn.Write(response)
 }
