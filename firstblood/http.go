@@ -76,11 +76,11 @@ func (http *Http) init() {
 	}
 }
 
-func (http *Http) Fingerprint(data []byte) (identify bool, err error) {
+func (http *Http) Fingerprint(request []byte) (identify bool, err error) {
 	method := make([]byte, 7)
-	for idx, d := range data[:8] {
+	for idx, d := range request[:8] {
 		if d == 0x20 {
-			method = data[:idx]
+			method = request[:idx]
 			break
 		}
 	}
@@ -91,7 +91,7 @@ func (http *Http) Fingerprint(data []byte) (identify bool, err error) {
 	return
 }
 
-func (http *Http) DisguiserData() (data []byte) {
+func (http *Http) DisguiserResponse(request []byte) (reponse []byte) {
 	server := fmt.Sprintf("Server: %s\r\n", http.getServer())
 
 	ts := time.Now()
@@ -110,8 +110,8 @@ func (http *Http) DisguiserData() (data []byte) {
 
 	buf.WriteString(HttpBody)
 
-	data = buf.Bytes()
-	return data
+	reponse = buf.Bytes()
+	return
 }
 
 func (http *Http) getServer() string {

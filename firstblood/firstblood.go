@@ -55,7 +55,7 @@ func initHandler(conn net.Conn) {
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(buf)
 			if identify {
-				response = disguiser.DisguiserData()
+				response = disguiser.DisguiserResponse(buf)
 				break
 			}
 		}

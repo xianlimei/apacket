@@ -1,8 +1,8 @@
 package firstblood
 
 type Disguiser interface {
-	Fingerprint(data []byte) (identify bool, err error)
-	DisguiserData() (data []byte)
+	Fingerprint(request []byte) (identify bool, err error)
+	DisguiserResponse(request []byte) (response []byte)
 }
 
 var DisguiserMap []Disguiser
