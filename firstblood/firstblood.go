@@ -43,9 +43,8 @@ func (fb *FirstBlood) Listen(network, address string) error {
 func initHandler(conn net.Conn) {
 	defer conn.Close()
 
-	conn.SetDeadline(time.Now().Add(10 * time.Second))
-
 	for {
+		conn.SetDeadline(time.Now().Add(10 * time.Second))
 		buf := make([]byte, 2048)
 		l, err := conn.Read(buf)
 		if err != nil || l < 1 {
