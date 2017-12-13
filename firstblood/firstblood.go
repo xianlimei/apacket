@@ -1,19 +1,39 @@
 package firstblood
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Acey9/apacket/config"
+	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
 )
 
 type FirstBlood struct {
 	ListenAddr string
+	outputer   outputs.Outputer
 }
 
 func NewFirstBlood() *FirstBlood {
+
+	var o outputs.Outputer
+	var err error
+
+	if config.Cfg.LogServer != "" {
+		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer, config.Cfg.Token)
+	} else if len(config.Cfg.NsqdTCPAddress) != 0 {
+		o, err = outputs.NewNSQOutputer(config.Cfg.NsqdTCPAddress, config.Cfg.NsqdTopic)
+	} else {
+		o, err = outputs.NewFileOutputer()
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
 	fb := &FirstBlood{
 		ListenAddr: config.Cfg.ListenAddr,
+		outputer:   o,
 	}
 	return fb
 }
@@ -35,12 +55,12 @@ func (fb *FirstBlood) Listen(network, address string) error {
 			fmt.Println(err)
 			break
 		}
-		go initHandler(conn)
+		go fb.initHandler(conn)
 	}
 	return nil
 }
 
-func initHandler(conn net.Conn) {
+func (fb *FirstBlood) initHandler(conn net.Conn) {
 	defer conn.Close()
 
 	for {
@@ -55,6 +75,11 @@ func initHandler(conn net.Conn) {
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(buf)
 			if identify {
+				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), buf)
+				out, err := json.Marshal(pkt)
+				if err == nil {
+					fb.outputer.Output(out)
+				}
 				response = disguiser.DisguiserResponse(buf)
 				break
 			}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+	"unicode"
 )
 
 const (
@@ -50,48 +51,92 @@ const (
 	MethodConnect = "CONNECT"
 	MethodOptions = "OPTIONS"
 	MethodTrace   = "TRACE"
+
+	PtypeHTTP = "http"
 )
 
-type Http struct {
-	methodMap map[string]bool
+type parserState uint8
+
+var (
+	transferEncodingChunked = []byte("chunked")
+
+	constCRLF            = []byte("\r\n")
+	nameContentLength    = []byte("content-length")
+	nameContentType      = []byte("content-type")
+	nameTransferEncoding = []byte("transfer-encoding")
+	nameConnection       = []byte("connection")
+)
+
+const (
+	stateStart parserState = iota
+	stateFLine
+	stateHeaders
+	stateBody
+	stateBodyChunkedStart
+	stateBodyChunked
+	stateBodyChunkedWaitFinalCRLF
+)
+
+var methodMap = map[string]bool{
+	MethodGet:     true,
+	MethodHead:    true,
+	MethodPost:    true,
+	MethodPut:     true,
+	MethodPatch:   true,
+	MethodDelete:  true,
+	MethodConnect: true,
+	MethodOptions: true,
+	MethodTrace:   true,
 }
 
-func NewHttp() *Http {
-	http := &Http{}
-	http.init()
+type HTTP struct {
+}
+type HTTPMsg struct {
+	parseOffset      int
+	parseState       parserState
+	Method           string            `json:"method,omitempty"`
+	RequestURI       string            `json:"uri,omitempty"`
+	Version          string            `json:"version,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty"`
+	Body             string            `json:"body,omitempty"`
+	contentLength    int
+	hasContentLength bool
+	contentType      string
+	transferEncoding string
+	connection       string
+	data             []byte
+}
+
+func NewHTTP() *HTTP {
+	http := &HTTP{}
 	return http
 }
 
-func (http *Http) init() {
-	http.methodMap = map[string]bool{
-		MethodGet:     true,
-		MethodHead:    true,
-		MethodPost:    true,
-		MethodPut:     true,
-		MethodPatch:   true,
-		MethodDelete:  true,
-		MethodConnect: true,
-		MethodOptions: true,
-		MethodTrace:   true,
+func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
+	afterMethodIdx := bytes.IndexFunc(request[:8], unicode.IsSpace)
+	if afterMethodIdx == -1 {
+		return
 	}
-}
-
-func (http *Http) Fingerprint(request []byte) (identify bool, err error) {
-	method := make([]byte, 7)
-	for idx, d := range request[:8] {
-		if d == 0x20 {
-			method = request[:idx]
-			break
-		}
-	}
-	_, ok := http.methodMap[string(method)]
+	method := request[0:afterMethodIdx]
+	_, ok := methodMap[string(method)]
 	if ok {
 		identify = true
 	}
 	return
 }
 
-func (http *Http) DisguiserResponse(request []byte) (reponse []byte) {
+func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response *Applayer) {
+	response, err := NewApplayer(remoteAddr, localAddr, PtypeHTTP, TransportTCP)
+	if err != nil {
+		return
+	}
+
+	response.Http = &HTTPMsg{data: request}
+	response.Http.parse()
+	return
+}
+
+func (http *HTTP) DisguiserResponse(request []byte) (reponse []byte) {
 	server := fmt.Sprintf("Server: %s\r\n", http.getServer())
 
 	ts := time.Now()
@@ -114,12 +159,143 @@ func (http *Http) DisguiserResponse(request []byte) (reponse []byte) {
 	return
 }
 
-func (http *Http) getServer() string {
+func (http *HTTP) getServer() string {
 	rand.Seed(time.Now().UnixNano())
 	return HttpServer[rand.Intn(len(HttpServer))]
 }
 
-func (http *Http) getAuth() string {
+func (http *HTTP) getAuth() string {
 	rand.Seed(time.Now().UnixNano())
 	return Authenticate[rand.Intn(len(Authenticate))]
+}
+
+func (http *HTTPMsg) parseHTTPLine() (cont, ok, complete bool) {
+	i := bytes.Index(http.data[http.parseOffset:], []byte("\r\n"))
+	if i == -1 {
+		return false, false, false
+	}
+	fline := http.data[http.parseOffset:i]
+	if len(fline) < 8 {
+		return false, false, false
+	}
+	afterMethodIdx := bytes.IndexFunc(fline, unicode.IsSpace)
+	afterRequestURIIdx := bytes.LastIndexFunc(fline, unicode.IsSpace)
+
+	// Make sure we have the VERB + URI + HTTP_VERSION
+	if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
+		return false, false, false
+	}
+
+	http.Method = string(fline[:afterMethodIdx])
+	http.RequestURI = string(fline[afterMethodIdx+1 : afterRequestURIIdx])
+	http.Version = string(fline[afterRequestURIIdx+1:])
+
+	http.parseOffset = i + 2
+	http.parseState = stateHeaders
+	return true, true, true
+}
+
+func (http *HTTPMsg) parseHeader(data []byte) (bool, bool, int) {
+	if http.Headers == nil {
+		http.Headers = make(map[string]string)
+	}
+
+	i := bytes.Index(data, []byte(":"))
+	if i == -1 {
+		// Expected \":\" in headers. Assuming incomplete"
+		return true, false, 0
+	}
+	for p := i + 1; p < len(data); {
+		q := bytes.Index(data[p:], constCRLF)
+		if q == -1 {
+			return true, false, 0
+		}
+		p += q
+		if len(data) > p && (data[p+1] == ' ' || data[p+1] == '\t') {
+			p = p + 2
+		} else {
+			var headerNameBuf [140]byte
+			headerName := toLower(headerNameBuf[:], data[:i])
+			headerVal := trim(data[i+1 : p])
+
+			if bytes.Equal(headerName, nameContentLength) {
+				http.contentLength, _ = parseInt(headerVal)
+				http.hasContentLength = true
+			} else if bytes.Equal(headerName, nameContentType) {
+				http.contentType = string(headerVal)
+			} else if bytes.Equal(headerName, nameTransferEncoding) {
+				http.transferEncoding = string(headerVal)
+			} else if bytes.Equal(headerName, nameConnection) {
+				http.connection = string(headerVal)
+			}
+
+			if val, ok := http.Headers[string(headerName)]; ok {
+				composed := make([]byte, len(val)+len(headerVal)+2)
+				off := copy(composed, val)
+				off = copy(composed[off:], []byte(", "))
+				copy(composed[off:], headerVal)
+
+				http.Headers[string(headerName)] = string(composed)
+			} else {
+				http.Headers[string(headerName)] = string(headerVal)
+			}
+
+			return true, true, p + 2
+		}
+
+	}
+	return true, false, len(data)
+}
+
+func (http *HTTPMsg) parseHeaders() (cont, ok, complete bool) {
+	if len(http.data)-http.parseOffset >= 2 && bytes.Equal(http.data[http.parseOffset:http.parseOffset+2], []byte("\r\n")) {
+		http.parseOffset += 2
+
+		if bytes.Equal([]byte(http.transferEncoding), transferEncodingChunked) {
+			// support for HTTP/1.1 Chunked transfer
+			// Transfer-Encoding overrides the Content-Length
+			//s.parseState = stateBodyChunkedStart
+			//return true, true, true
+			//TODO
+		}
+		if http.contentLength == 0 {
+			// Ignore body for request that contains a message body but not a Content-Length
+			return false, true, true
+		}
+		http.parseState = stateBody
+
+	} else {
+		ok, hfcomplete, offset := http.parseHeader(http.data[http.parseOffset:])
+		if !ok {
+			return false, false, false
+		}
+		if !hfcomplete {
+			return false, true, false
+		}
+		http.parseOffset += offset
+	}
+	return true, true, true
+}
+
+func (http *HTTPMsg) parseBody() (ok, complete bool) {
+	http.Body = string(http.data[http.parseOffset : http.parseOffset+http.contentLength])
+	return true, true
+}
+
+func (http *HTTPMsg) parse() (bool, bool) {
+	for http.parseOffset < len(http.data) {
+		switch http.parseState {
+		case stateStart:
+			if cont, ok, complete := http.parseHTTPLine(); !cont {
+				return ok, complete
+			}
+		case stateHeaders:
+			if cont, ok, complete := http.parseHeaders(); !cont {
+				return ok, complete
+			}
+		case stateBody:
+			return http.parseBody()
+		}
+	}
+	return true, true
 }

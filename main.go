@@ -51,8 +51,10 @@ func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 
 	d := decoder.NewDecoder()
 
-	w := &MainWorker{publisher: p,
-		decoder: d}
+	w := &MainWorker{
+		publisher: p,
+		decoder:   d,
+	}
 	return w, nil
 }
 
