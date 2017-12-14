@@ -52,6 +52,15 @@ const (
 	MethodOptions = "OPTIONS"
 	MethodTrace   = "TRACE"
 
+	MethodRTSPDescribe     = "DESCRIBE"
+	MethodRTSPSetup        = "SETUP"
+	MethodRTSPPlay         = "PLAY"
+	MethodRTSPTeardown     = "TEARDOWN"
+	MethodRTSPPause        = "PAUSE"
+	MethodRTSPRecord       = "RECORD"
+	MethodRTSPAnnounce     = "ANNOUNCE"
+	MethodRTSPSetParameter = "SET_PARAMETER"
+
 	PtypeHTTP = "http"
 )
 
@@ -78,15 +87,22 @@ const (
 )
 
 var methodMap = map[string]bool{
-	MethodGet:     true,
-	MethodHead:    true,
-	MethodPost:    true,
-	MethodPut:     true,
-	MethodPatch:   true,
-	MethodDelete:  true,
-	MethodConnect: true,
-	MethodOptions: true,
-	MethodTrace:   true,
+	MethodGet:              true,
+	MethodHead:             true,
+	MethodPost:             true,
+	MethodPut:              true,
+	MethodPatch:            true,
+	MethodDelete:           true,
+	MethodConnect:          true,
+	MethodTrace:            true,
+	MethodRTSPDescribe:     true,
+	MethodRTSPSetup:        true,
+	MethodRTSPPlay:         true,
+	MethodRTSPTeardown:     true,
+	MethodRTSPPause:        true,
+	MethodRTSPRecord:       true,
+	MethodRTSPAnnounce:     true,
+	MethodRTSPSetParameter: true,
 }
 
 type HTTP struct {
@@ -113,7 +129,7 @@ func NewHTTP() *HTTP {
 }
 
 func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
-	afterMethodIdx := bytes.IndexFunc(request[:8], unicode.IsSpace)
+	afterMethodIdx := bytes.IndexFunc(request, unicode.IsSpace)
 	if afterMethodIdx == -1 {
 		return
 	}
