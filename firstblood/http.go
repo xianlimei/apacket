@@ -60,6 +60,8 @@ const (
 	MethodRTSPRecord       = "RECORD"
 	MethodRTSPAnnounce     = "ANNOUNCE"
 	MethodRTSPSetParameter = "SET_PARAMETER"
+	MethodRTSPGetParameter = "GET_PARAMETER"
+	MethodRTSPRedirect     = "REDIRECT"
 
 	PtypeHTTP = "http"
 )
@@ -103,6 +105,8 @@ var methodMap = map[string]bool{
 	MethodRTSPRecord:       true,
 	MethodRTSPAnnounce:     true,
 	MethodRTSPSetParameter: true,
+	MethodRTSPGetParameter: true,
+	MethodRTSPRedirect:     true,
 }
 
 type HTTP struct {
