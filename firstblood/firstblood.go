@@ -71,16 +71,18 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 			return
 		}
 
+		payload := buf[:l]
+
 		response := []byte("\x00")
 		for _, disguiser := range DisguiserMap {
-			identify, _ := disguiser.Fingerprint(buf)
+			identify, _ := disguiser.Fingerprint(payload)
 			if identify {
-				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), buf)
+				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), payload)
 				out, err := json.Marshal(pkt)
 				if err == nil {
 					fb.outputer.Output(out)
 				}
-				response = disguiser.DisguiserResponse(buf)
+				response = disguiser.DisguiserResponse(payload)
 				break
 			}
 		}
