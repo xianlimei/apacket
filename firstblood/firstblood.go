@@ -27,6 +27,8 @@ func NewFirstBlood() *FirstBlood {
 		o, err = outputs.NewFileOutputer()
 	}
 
+	o, err = outputs.NewFileOutputer() //TODO DELETE
+
 	if err != nil {
 		panic(err)
 	}
