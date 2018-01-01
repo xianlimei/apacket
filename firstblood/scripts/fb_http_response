@@ -1,0 +1,209 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import sys
+import optparse
+import json
+import random
+
+from datetime import datetime
+from os.path import basename
+from StringIO import StringIO
+
+import es
+
+http_server = (
+	"Tengine",
+	"nginx/1.10.0",
+	"Apache/2.2.21",
+	"gSOAP/2.7",
+	"GoAhead-Webs",
+	"GoAhead-http",
+	"RomPager/4.07 UPnP/1.0",
+	"lighttpd/1.4.34",
+	"Lighttpd/1.4.28",
+	"lighttpd/1.4.31",
+	"Linux/2.x UPnP/1.0 Avtech/1.0",
+	"P-660HW-T1 v3",
+	"U S Software Web Server",
+	"Netwave IP Camera",
+        )
+
+http_authenticate = ( 
+	'''WWW-Authenticate: Basic realm="iPEX Internet Cafe"''',
+	'''WWW-Authenticate: Digest realm="IgdAuthentication", domain="/", nonce="N2UyNjgxMjA6NjQ1MWZiOTA6IDJlNjI5NDA=", qop="auth", algorithm=MD5''',
+	'''WWW-Authenticate: Basic realm="NETGEAR DGN1000 "''',
+	'''WWW-Authenticate: Digest realm="GoAhead", domain=":81",qop="auth", nonce="405448722b302b85aa6ef2b444ea6b5c", opaque="5ccc069c403ebaf9f0171e9517f40e41",algorithm="MD5", stale="FALSE"''',
+	'''WWW-Authenticate: Basic realm="HomeHub"''',
+	'''WWW-Authenticate: Basic realm="MOBOTIX Camera User"''',
+	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
+        )
+
+http_body = "<html><head><title>Document Error: Unauthorized</title></head><body><h2>Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist</body></html>"
+
+class Request(object):
+
+    method = ''
+    uri = ''
+    version = ''
+    headers = {} 
+    body = ''
+    
+    def __init__(self, payload):
+        self.payload = payload
+        self.parseRequest()
+
+    def parseRequest(self):
+        head, body = payload.split('\r\n\r\n')
+        heads = head.split('\r\n')
+        self.body = body
+
+        if len(heads) < 1:
+            return
+        self.method, self.uri, self.version = heads[0].split(' ')
+
+        for line in heads[1:]:
+            k, v = line.split(':', 1)
+            self.headers.setdefault(k.lower(), v.strip())
+
+    def __repr__(self):
+        _str = '%s %s %s\n%s\n%s\n' % (
+                self.method, self.uri, self.version, 
+                json.dumps(self.headers), 
+                self.body)
+        return _str
+
+class ResponseHttp(object):
+
+    code = 200
+    status = 'ok'
+    version = 'HTTP/1.1'
+
+
+    headers_raw = []
+    headers = {
+            'Connection':'keep-alive',
+            'Content-Type':'text/html; charset=UTF-8',
+            'Cache-Control':'no-cache',
+            }
+
+    body = http_body
+
+    def __init__(self, request):
+        self.request = request
+
+    def defaultResponse(self):
+        idx = random.randint(0, len(http_server)-1)
+        server = http_server[idx]
+
+        idx = random.randint(0, len(http_authenticate)-1)
+        auth = http_authenticate[idx]
+
+        date = datetime.now().isoformat()
+
+        self.headers['Server:'] = server
+        self.headers['Date:'] = date
+        self.headers_raw.append(auth)
+        return
+
+    def __repr__(self):
+        response_line = '%s %s %s' % (self.version, self.code, self.status)
+        headers = [] 
+        for k, v in self.headers.iteritems():
+            headers.append('%s: %s' % (k, v))
+        headers.extend(self.headers_raw)
+
+        res = '%s\r\n%s\r\n\r\n%s\n' % (response_line, '\r\n'.join(headers), self.body)
+        return res
+
+    def esResponse(self):
+        body = ''
+
+        uri = self.request.uri
+    
+        if uri == '/':
+            body = es.resBanner
+        elif uri.startswith('/_nodes'):
+            body = es.resNodes
+        elif uri.startswith('/_search'):
+            out = 'root'
+            key = ''
+            try:
+                json_body = json.loads(self.request.body)
+                key = json_body.get('script_fields', {}).keys()[0]
+            except BaseException, e:
+                sys.stderr.write("%s\n" % e)
+            try:
+                script = json_body.get('script_fields', {}).get(key, {}).get('script')
+                tag = '.getRuntime().exec("'
+                idx = script.find(tag)
+                if idx != -1:
+                    script = script[idx+len(tag):]
+                    idx = script.find('"')
+                    if idx != -1:
+                        cmd = script[:idx]
+                        cmds = cmd.split(' ')
+                        if cmds[0] == 'echo':
+                            out = cmds[1]
+            except BaseException, e:
+                sys.stderr.write("%s\n" % e)
+            if key:
+                es.resCmd['hits']['hits'][0]['fields'] = {key:out}
+            body = es.resCmd #TODO 
+        else:
+            body = '' 
+
+        if body:
+            self.headers = {}
+            self.headers_raw.append('Content-Type: application/json; charset=UTF-8')
+            self.body = json.dumps(body)
+
+    def getResponse(self):
+        host = self.request.headers.get('host')
+        port = 80
+        try:
+            host, port = host.split(':')
+        except:
+            pass
+        if str(port) == '9200':
+            self.esResponse()
+        else:
+            self.defaultResponse()
+        return self.__repr__()
+
+def main(payload):
+    req = Request(payload)
+    res = ResponseHttp(req)
+    data = res.getResponse()
+    sys.stdout.write('%s' % data)
+
+def usage():
+    fn = basename(sys.argv[0])
+    s = StringIO()
+    s.write("%s [options] payload\n" % fn)
+    s.write("\t%s 'R0VUIC8gSFRUUC8xLjENCkhvc3Q6IDEyNy4wL' -d\n" % fn)
+    s.seek(0)
+    return s.read()
+
+def parseOption():
+    parser = optparse.OptionParser(usage=usage())
+    parser.add_option("-d", "--debug", action="store_true", dest="debug", default=False, help="Debug")
+    return parser
+
+if __name__ == '__main__':
+    parser = parseOption()
+    options, args = parser.parse_args()
+    payload = ''
+    if options.debug:
+        import base64, zlib
+        testpayload = base64.b64decode(args[0])
+        payload = zlib.decompress(testpayload)
+    elif len(args) > 0:
+        payload = args[0]
+    else:
+        sys.exit(1)
+    try:
+        main(payload)
+    except BaseException, e:
+        sys.stderr.write('%s\n' % str(e))
+        sys.exit(2)
+    sys.exit(0)

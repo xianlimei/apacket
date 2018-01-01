@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"os/exec"
 	"time"
 	"unicode"
 )
@@ -64,6 +65,10 @@ const (
 	MethodRTSPRedirect     = "REDIRECT"
 
 	PtypeHTTP = "http"
+)
+
+const (
+	CmdHttpResponse = "fb_http_response"
 )
 
 type parserState uint8
@@ -168,26 +173,37 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response
 	return
 }
 
-func (http *HTTP) DisguiserResponse(request []byte) (reponse []byte) {
-	server := fmt.Sprintf("Server: %s\r\n", http.getServer())
+func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
+	var out bytes.Buffer
+	cmd := exec.Command(CmdHttpResponse, string(request))
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response = out.Bytes()
+	/*
+		server := fmt.Sprintf("Server: %s\r\n", http.getServer())
 
-	ts := time.Now()
-	date := fmt.Sprintf("Date: %s\r\n", ts.UTC().Format(time.UnixDate))
+		ts := time.Now()
+		date := fmt.Sprintf("Date: %s\r\n", ts.UTC().Format(time.UnixDate))
 
-	auth := fmt.Sprintf("%s\r\n", http.getAuth())
+		auth := fmt.Sprintf("%s\r\n", http.getAuth())
 
-	buf := bytes.Buffer{}
-	buf.WriteString(HttpResponse)
-	buf.WriteString(date)
-	buf.WriteString(HttpResponseHeader)
-	buf.WriteString(server)
-	buf.WriteString(auth)
+		buf := bytes.Buffer{}
+		buf.WriteString(HttpResponse)
+		buf.WriteString(date)
+		buf.WriteString(HttpResponseHeader)
+		buf.WriteString(server)
+		buf.WriteString(auth)
 
-	buf.WriteString("\r\n")
+		buf.WriteString("\r\n")
 
-	buf.WriteString(HttpBody)
+		buf.WriteString(HttpBody)
 
-	reponse = buf.Bytes()
+		response = buf.Bytes()
+	*/
 	return
 }
 
