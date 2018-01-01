@@ -66,7 +66,7 @@ class Request(object):
             self.headers.setdefault(k.lower(), v.strip())
 
     def __repr__(self):
-        _str = '%s %s %s\n%s\n%s\n' % (
+        _str = '%s %s %s\n%s\n%s' % (
                 self.method, self.uri, self.version, 
                 json.dumps(self.headers), 
                 self.body)
@@ -112,7 +112,7 @@ class ResponseHttp(object):
             headers.append('%s: %s' % (k, v))
         headers.extend(self.headers_raw)
 
-        res = '%s\r\n%s\r\n\r\n%s\n' % (response_line, '\r\n'.join(headers), self.body)
+        res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
         return res
 
     def esResponse(self):
@@ -156,6 +156,7 @@ class ResponseHttp(object):
             self.headers = {}
             self.headers_raw.append('Content-Type: application/json; charset=UTF-8')
             self.body = json.dumps(body)
+            self.headers_raw.append('Content-Length: %s' % len(self.body))
 
     def getResponse(self):
         host = self.request.headers.get('host')
