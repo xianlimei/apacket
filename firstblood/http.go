@@ -132,14 +132,26 @@ func NewHTTP() *HTTP {
 	return http
 }
 
-func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
-	afterMethodIdx := bytes.IndexFunc(request, unicode.IsSpace)
-	if afterMethodIdx == -1 {
+func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
+	i := bytes.Index(request, []byte("\r\n"))
+	if i == -1 {
 		return
 	}
-	method := request[0:afterMethodIdx]
-	_, ok := methodMap[string(method)]
-	if ok {
+	fline := request[:i]
+	afterMethodIdx := bytes.IndexFunc(fline, unicode.IsSpace)
+	afterRequestURIIdx := bytes.LastIndexFunc(fline, unicode.IsSpace)
+	if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
+		return
+	}
+	method = string(request[:afterMethodIdx])
+	uri = string(fline[afterMethodIdx+1 : afterRequestURIIdx])
+	version = string(fline[afterRequestURIIdx+1:])
+	return method, uri, version
+}
+
+func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
+	method, uri, version := http.ParseHttpLine(request)
+	if method != "" && uri != "" && version != "" {
 		identify = true
 	}
 	return
