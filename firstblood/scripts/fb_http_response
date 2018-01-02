@@ -10,6 +10,7 @@ from os.path import basename
 from StringIO import StringIO
 
 import es
+import jsonrpc
 
 http_server = (
 	"Tengine",
@@ -188,6 +189,20 @@ class ResponseHttp(object):
         self.body = 'm=video 0 RTP/AVP 96\r\na=control:streamid=0\r\na=range:npt=0-7.741000\r\na=length:npt=7.741000\r\na=StreamName:string;"hinted video track"\r\nm=audio 0 RTP/AVP 97\r\na=StreamName:string;"hinted audio track"'
         self.headers_raw.append('Content-Length: %s' % len(self.body))
 
+    def jsonrpcResponse(self):
+        self.version = '%s' % self.request.version
+        self.headers = {}
+        self.headers_raw.append('Content-Type: application/json')
+        try:
+
+            request = json.loads(self.request.body)
+            result = jsonrpc.result.get(request.get('method'))
+            self.body = request
+            self.body['result'] = result
+            self.body = json.dumps(self.body)
+        except BaseException, e:
+            sys.stderr.write('%s\n' % str(e))
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -201,6 +216,8 @@ class ResponseHttp(object):
             self.mctpResponse()
         elif 'rtsp/' in version.lower():
             self.rtspResponse()
+        elif '"jsonrpc":' in self.request.body:
+            self.jsonrpcResponse()
         elif str(port) == '9200':
             self.esResponse()
         else:
