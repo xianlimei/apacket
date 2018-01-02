@@ -158,6 +158,25 @@ class ResponseHttp(object):
             self.body = json.dumps(body)
             self.headers_raw.append('Content-Length: %s' % len(self.body))
 
+    def mctpResponse(self):
+        self.version = 'V%s' % self.request.version
+        self.headers = {}
+        self.headers_raw.append('Content-Type: %s' % self.request.headers.get('content-type', 'text/HDP'))
+        self.headers_raw.append('CSeq: %s' % self.request.headers.get('cseq', '6'))
+        self.headers_raw.append('Return-Code: 0')
+        self.headers_raw.append('Content-Length: 2326')
+        self.headers_raw.append('Data-Length: 2240')
+
+        segmentseq = self.request.headers.get('segment-seq')
+        try:
+            segmentseq = int(segmentseq)
+            self.headers_raw.append('Segment-Seq: %s' % segmentseq)
+            segmentseq += 1
+            self.headers_raw.append('Segment-Num: %s' % segmentseq)
+        except:
+            pass
+        self.body = 'eric\n111222\n111222\nadmin\n111222'
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -165,7 +184,11 @@ class ResponseHttp(object):
             host, port = host.split(':')
         except:
             pass
-        if str(port) == '9200':
+
+        version = self.request.version
+        if 'mctp/' in version.lower():
+            self.mctpResponse()
+        elif str(port) == '9200':
             self.esResponse()
         else:
             self.defaultResponse()
