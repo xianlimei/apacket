@@ -11,6 +11,7 @@ from StringIO import StringIO
 
 import es
 import jsonrpc
+import phpadmin
 
 http_server = (
 	"Tengine",
@@ -93,6 +94,16 @@ class ResponseHttp(object):
     def __init__(self, request):
         self.request = request
 
+    def __repr__(self):
+        response_line = '%s %s %s' % (self.version, self.code, self.status)
+        headers = [] 
+        for k, v in self.headers.iteritems():
+            headers.append('%s: %s' % (k, v))
+        headers.extend(self.headers_raw)
+
+        res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
+        return res
+
     def defaultResponse(self):
         idx = random.randint(0, len(http_server)-1)
         server = http_server[idx]
@@ -107,15 +118,6 @@ class ResponseHttp(object):
         self.headers_raw.append(auth)
         return
 
-    def __repr__(self):
-        response_line = '%s %s %s' % (self.version, self.code, self.status)
-        headers = [] 
-        for k, v in self.headers.iteritems():
-            headers.append('%s: %s' % (k, v))
-        headers.extend(self.headers_raw)
-
-        res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
-        return res
 
     def esResponse(self):
         body = ''
@@ -209,6 +211,12 @@ class ResponseHttp(object):
         self.headers = self.request.headers 
         self.body = ''
 
+    def phpadminResponse(self):
+        self.headers = {}
+        self.headers_raw.append('Content-Type:text/html; charset=UTF-8')
+        self.headers_raw.append('Server:Apache')
+        self.body = phpadmin.body
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -226,6 +234,8 @@ class ResponseHttp(object):
             self.sipResponse()
         elif '"jsonrpc":' in self.request.body:
             self.jsonrpcResponse()
+        elif '/scripts/setup.php' in self.request.uri.lower():
+            self.phpadminResponse()
         elif str(port) == '9200':
             self.esResponse()
         else:
