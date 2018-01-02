@@ -84,6 +84,7 @@ class ResponseHttp(object):
     headers = {
             'Connection':'keep-alive',
             'Content-Type':'text/html; charset=UTF-8',
+            'Pragma': 'no-cache',
             'Cache-Control':'no-cache',
             }
 
@@ -203,6 +204,11 @@ class ResponseHttp(object):
         except BaseException, e:
             sys.stderr.write('%s\n' % str(e))
 
+    def sipResponse(self):
+        self.version = '%s' % self.request.version
+        self.headers = self.request.headers 
+        self.body = ''
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -216,6 +222,8 @@ class ResponseHttp(object):
             self.mctpResponse()
         elif 'rtsp/' in version.lower():
             self.rtspResponse()
+        elif 'sip/' in version.lower():
+            self.sipResponse()
         elif '"jsonrpc":' in self.request.body:
             self.jsonrpcResponse()
         elif str(port) == '9200':
