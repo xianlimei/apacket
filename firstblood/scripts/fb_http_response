@@ -55,7 +55,7 @@ class Request(object):
         self.parseRequest()
 
     def parseRequest(self):
-        head, body = payload.split('\r\n\r\n')
+        head, body = self.payload.split('\r\n\r\n', 1)
         heads = head.split('\r\n')
         self.body = body
 
@@ -225,16 +225,17 @@ class ResponseHttp(object):
         except:
             pass
 
-        version = self.request.version
-        if 'mctp/' in version.lower():
+        version = self.request.version.lower()
+        uri = self.request.uri.lower()
+        if 'mctp/' in version:
             self.mctpResponse()
-        elif 'rtsp/' in version.lower():
+        elif 'rtsp/' in version:
             self.rtspResponse()
-        elif 'sip/' in version.lower():
+        elif 'sip/' in version:
             self.sipResponse()
         elif '"jsonrpc":' in self.request.body:
             self.jsonrpcResponse()
-        elif '/scripts/setup.php' in self.request.uri.lower():
+        elif '/scripts/setup.php' in uri:
             self.phpadminResponse()
         elif str(port) == '9200':
             self.esResponse()
