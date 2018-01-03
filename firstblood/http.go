@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -114,8 +115,16 @@ var methodMap = map[string]bool{
 	MethodRTSPRedirect:     true,
 }
 
+var protocolMap = map[string]bool{
+	"HTTP": true,
+	"RTSP": true,
+	"MCTP": true,
+	"SIP":  true,
+}
+
 type HTTP struct {
 }
+
 type HTTPMsg struct {
 	parseOffset      int
 	parseState       parserState
@@ -148,9 +157,18 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
 		return
 	}
+	version = string(fline[afterRequestURIIdx+1:])
+	protoVersion := strings.Split(version, "/")
+	if len(protoVersion) != 2 {
+		return "", "", ""
+	}
+	proto := strings.ToUpper(protoVersion[0])
+	_, ok := protocolMap[proto]
+	if !ok {
+		return "", "", ""
+	}
 	method = string(request[:afterMethodIdx])
 	uri = string(fline[afterMethodIdx+1 : afterRequestURIIdx])
-	version = string(fline[afterRequestURIIdx+1:])
 	return method, uri, version
 }
 
