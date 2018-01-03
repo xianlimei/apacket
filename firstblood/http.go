@@ -344,6 +344,9 @@ func (http *HTTPMsg) parseHeaders() (cont, ok, complete bool) {
 }
 
 func (http *HTTPMsg) parseBody() (ok, complete bool) {
+	if http.parseOffset == len(http.data) || http.parseOffset+http.contentLength > len(http.data) {
+		return true, true
+	}
 	http.Body = string(http.data[http.parseOffset : http.parseOffset+http.contentLength])
 	return true, true
 }

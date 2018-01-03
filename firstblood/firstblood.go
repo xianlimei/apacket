@@ -63,7 +63,13 @@ func (fb *FirstBlood) Listen(network, address string) error {
 }
 
 func (fb *FirstBlood) initHandler(conn net.Conn) {
-	defer conn.Close()
+
+	defer func() {
+		conn.Close()
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	for {
 		conn.SetDeadline(time.Now().Add(10 * time.Second))

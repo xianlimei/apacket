@@ -55,17 +55,27 @@ class Request(object):
         self.parseRequest()
 
     def parseRequest(self):
-        head, body = self.payload.split('\r\n\r\n', 1)
+        line = self.payload.split('\r\n', 1)
+        self.method, self.uri, self.version = line[0].split(' ')
+        head = ''
+        if '\r\n\r\n' in self.payload:
+            head, body = self.payload.split('\r\n\r\n', 1)
+            self.body = body
+        else:
+            head = self.payload
         heads = head.split('\r\n')
-        self.body = body
 
         if len(heads) < 1:
             return
-        self.method, self.uri, self.version = heads[0].split(' ')
 
         for line in heads[1:]:
-            k, v = line.split(':', 1)
-            self.headers.setdefault(k.lower(), v.strip())
+            if not line:continue
+            try:
+                k, v = line.split(':', 1)
+                self.headers.setdefault(k.lower(), v.strip())
+            except:
+                pass
+
 
     def __repr__(self):
         _str = '%s %s %s\n%s\n%s' % (
@@ -113,8 +123,8 @@ class ResponseHttp(object):
 
         date = datetime.now().isoformat()
 
-        self.headers['Server:'] = server
-        self.headers['Date:'] = date
+        self.headers['Server'] = server
+        self.headers['Date'] = date
         self.headers_raw.append(auth)
         return
 
