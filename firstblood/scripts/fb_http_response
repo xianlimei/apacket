@@ -65,7 +65,7 @@ class Request(object):
             head = self.payload
         heads = head.split('\r\n')
 
-        if len(heads) < 1:
+        if len(heads) < 2:
             return
 
         for line in heads[1:]:
