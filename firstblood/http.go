@@ -131,14 +131,14 @@ type HTTPMsg struct {
 	Method           string            `json:"method,omitempty"`
 	RequestURI       string            `json:"uri,omitempty"`
 	Version          string            `json:"version,omitempty"`
-	Headers          map[string]string `json:"headers,omitempty"`
-	Body             string            `json:"body,omitempty"`
+	Headers          map[string]string `json:"-"`
+	Body             string            `json:"-"`
+	Payload          []byte            `json:"payload,omitempty"`
 	contentLength    int
 	hasContentLength bool
 	contentType      string
 	transferEncoding string
 	connection       string
-	data             []byte
 }
 
 func NewHTTP() *HTTP {
@@ -186,8 +186,11 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response
 		return
 	}
 
-	response.Http = &HTTPMsg{data: request}
+	response.Http = &HTTPMsg{Payload: request}
 	response.Http.parse()
+	cPayload := response.Compress(request)
+	response.Http.Payload = cPayload.Bytes()
+	response.Psha1 = response.Sha1HexDigest(string(request))
 	return
 }
 
@@ -236,11 +239,11 @@ func (http *HTTP) getAuth() string {
 }
 
 func (http *HTTPMsg) parseHTTPLine() (cont, ok, complete bool) {
-	i := bytes.Index(http.data[http.parseOffset:], []byte("\r\n"))
+	i := bytes.Index(http.Payload[http.parseOffset:], []byte("\r\n"))
 	if i == -1 {
 		return false, false, false
 	}
-	fline := http.data[http.parseOffset:i]
+	fline := http.Payload[http.parseOffset:i]
 	if len(fline) < 8 {
 		return false, false, false
 	}
@@ -314,7 +317,7 @@ func (http *HTTPMsg) parseHeader(data []byte) (bool, bool, int) {
 }
 
 func (http *HTTPMsg) parseHeaders() (cont, ok, complete bool) {
-	if len(http.data)-http.parseOffset >= 2 && bytes.Equal(http.data[http.parseOffset:http.parseOffset+2], []byte("\r\n")) {
+	if len(http.Payload)-http.parseOffset >= 2 && bytes.Equal(http.Payload[http.parseOffset:http.parseOffset+2], []byte("\r\n")) {
 		http.parseOffset += 2
 
 		if bytes.Equal([]byte(http.transferEncoding), transferEncodingChunked) {
@@ -331,7 +334,7 @@ func (http *HTTPMsg) parseHeaders() (cont, ok, complete bool) {
 		http.parseState = stateBody
 
 	} else {
-		ok, hfcomplete, offset := http.parseHeader(http.data[http.parseOffset:])
+		ok, hfcomplete, offset := http.parseHeader(http.Payload[http.parseOffset:])
 		if !ok {
 			return false, false, false
 		}
@@ -344,15 +347,15 @@ func (http *HTTPMsg) parseHeaders() (cont, ok, complete bool) {
 }
 
 func (http *HTTPMsg) parseBody() (ok, complete bool) {
-	if http.parseOffset == len(http.data) || http.parseOffset+http.contentLength > len(http.data) {
+	if http.parseOffset == len(http.Payload) || http.parseOffset+http.contentLength > len(http.Payload) {
 		return true, true
 	}
-	http.Body = string(http.data[http.parseOffset : http.parseOffset+http.contentLength])
+	http.Body = string(http.Payload[http.parseOffset : http.parseOffset+http.contentLength])
 	return true, true
 }
 
 func (http *HTTPMsg) parse() (bool, bool) {
-	for http.parseOffset < len(http.data) {
+	for http.parseOffset < len(http.Payload) {
 		switch http.parseState {
 		case stateStart:
 			if cont, ok, complete := http.parseHTTPLine(); !cont {

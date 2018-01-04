@@ -2,6 +2,10 @@ package firstblood
 
 import (
 	"bytes"
+	"compress/zlib"
+	"crypto/sha1"
+	"encoding/hex"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -37,12 +41,27 @@ type UDP struct {
 type Applayer struct {
 	Ts    time.Time `json:"ts"`
 	Ptype string    `json:"ptype"`
+	Psha1 string    `json:"psha1,omitempty"`
 	IPv   uint8     `json:"ipv"`
 	IP4   *IP4      `json:"ip4,omitempty"`
 	IP6   *IP6      `json:"ip6,omitempty"`
 	TCP   *TCP      `json:"tcp,omitempty"`
 	UDP   *UDP      `json:"udp,omitempty"`
 	Http  *HTTPMsg  `json:"http,omitempty"`
+}
+
+func (app *Applayer) Compress(source []byte) bytes.Buffer {
+	var buf bytes.Buffer
+	w := zlib.NewWriter(&buf)
+	w.Write(source)
+	w.Close()
+	return buf
+}
+
+func (app *Applayer) Sha1HexDigest(str string) string {
+	h := sha1.New()
+	io.WriteString(h, str)
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 type Disguiser interface {
