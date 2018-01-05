@@ -398,6 +398,129 @@ resClusterStats = {
     }
 }
 
+resStatsIndexing = {
+    "_shards": {
+        "total": 30,
+        "successful": 15,
+        "failed": 0
+    },
+    "_all": {
+        "primaries": {
+            "indexing": {
+                "index_total": 0,
+                "index_time_in_millis": 0,
+                "index_current": 0,
+                "delete_total": 0,
+                "delete_time_in_millis": 0,
+                "delete_current": 0,
+                "noop_update_total": 0,
+                "is_throttled": 'false',
+                "throttle_time_in_millis": 0
+            }
+        },
+        "total": {
+            "indexing": {
+                "index_total": 0,
+                "index_time_in_millis": 0,
+                "index_current": 0,
+                "delete_total": 0,
+                "delete_time_in_millis": 0,
+                "delete_current": 0,
+                "noop_update_total": 0,
+                "is_throttled": 'false',
+                "throttle_time_in_millis": 0
+            }
+        }
+    },
+    "indices": {
+        "piratepu_pp2": {
+            "primaries": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            },
+            "total": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            }
+        },
+        "anarchop_apn": {
+            "primaries": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            },
+            "total": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            }
+        },
+        "readme": {
+            "primaries": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            },
+            "total": {
+                "indexing": {
+                    "index_total": 0,
+                    "index_time_in_millis": 0,
+                    "index_current": 0,
+                    "delete_total": 0,
+                    "delete_time_in_millis": 0,
+                    "delete_current": 0,
+                    "noop_update_total": 0,
+                    "is_throttled": 'false',
+                    "throttle_time_in_millis": 0
+                }
+            }
+        }
+    }
+}
+
 if __name__ == '__main__':
     import json
     print json.dumps(resClusterStats)
+    print json.dumps(resStatsIndexing)

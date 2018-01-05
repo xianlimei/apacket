@@ -142,6 +142,8 @@ class ResponseHttp(object):
         elif uri.startswith('/_cluster/stats'):
             es.resClusterStats['timestamp'] = int(time.time())
             body = es.resClusterStats
+        elif uri.startswith('/_stats/indexing'):
+            body = es.resStatsIndexing
         elif uri.startswith('/_search'):
             out = 'root'
             key = ''
@@ -240,6 +242,32 @@ class ResponseHttp(object):
         self.status = "ServerError"
         self.body = "<html><head><title>Jboss jboss</title></head><body>Jboss jboss</body></html>"
 
+    def mooResponse(self):
+        self.headers = {}
+        h = [
+                'access-control-allow-origin:*',
+                'cache-control:max-age=86400',
+                'cf-cache-status:HIT',
+                'cf-ray:3d8559d72f509354-SJC',
+                'etag:"5a4ef825-a725"',
+                'server:cloudflare-nginx',
+                'status:200',
+                'vary:Accept-Encoding',
+                'via:1.1 vegur',
+                ]
+        self.headers_raw.extend(h)
+        self.body = "<html><head><title>moo MOO</title></head><body>moo MOO</body></html>"
+
+    def ipmiResponse(self):
+        self.headers = {}
+        h = [
+                'SERVER: Linux/2.6.30.9-cig-4, UPnP/1.0, Portable SDK for UPnP devices/1.6.18',
+                'CONNECTION: close',
+                'CONTENT-TYPE: text/html',
+                ]
+        self.headers_raw.extend(h)
+        self.body = '<html><body><h1>200 OK</h1></body></html>'
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -262,8 +290,12 @@ class ResponseHttp(object):
             self.phpadminResponse()
         elif '/invoker/readonly' in uri:
             self.pyCryptoMinerResponse()
+        elif uri.startswith('/moo'):
+            self.mooResponse()
         elif str(port) == '9200':
             self.esResponse()
+        elif str(port) == '49152':
+            self.ipmiResponse()
         else:
             self.defaultResponse()
         return self.__repr__()
