@@ -227,6 +227,15 @@ class ResponseHttp(object):
         self.headers_raw.append('Server:Apache')
         self.body = phpadmin.body
 
+
+    def pyCryptoMinerResponse(self):
+        self.headers = {}
+        self.headers_raw.append('Content-Type:text/html; charset=UTF-8')
+        self.headers_raw.append('Server:Apache')
+        self.code = 500
+        self.status = "ServerError"
+        self.body = "<html><head><title>Jboss jboss</title></head><body>Jboss jboss</body></html>"
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -247,6 +256,8 @@ class ResponseHttp(object):
             self.jsonrpcResponse()
         elif '/scripts/setup.php' in uri:
             self.phpadminResponse()
+        elif '/invoker/readonly' in uri:
+            self.pyCryptoMinerResponse()
         elif str(port) == '9200':
             self.esResponse()
         else:
