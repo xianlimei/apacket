@@ -4,6 +4,7 @@ import sys
 import optparse
 import json
 import random
+import time
 
 from datetime import datetime
 from os.path import basename
@@ -138,6 +139,9 @@ class ResponseHttp(object):
             body = es.resBanner
         elif uri.startswith('/_nodes'):
             body = es.resNodes
+        elif uri.startswith('/_cluster/stats'):
+            es.resClusterStats['timestamp'] = int(time.time())
+            body = es.resClusterStats
         elif uri.startswith('/_search'):
             out = 'root'
             key = ''
@@ -164,7 +168,7 @@ class ResponseHttp(object):
                 es.resCmd['hits']['hits'][0]['fields'] = {key:out}
             body = es.resCmd #TODO 
         else:
-            body = '' 
+            body = es.resBanner 
 
         if body:
             self.headers = {}

@@ -258,6 +258,146 @@ resNodes = {
     }
 }
 
+resClusterStats = {
+    "timestamp": 1515140759136,
+    "cluster_name": "elasticsearch",
+    "status": "green",
+    "indices": {
+        "count": 3,
+        "shards": {
+            "total": 15,
+            "primaries": 15,
+            "replication": 0,
+            "index": {
+                "shards": {
+                    "min": 5,
+                    "max": 5,
+                    "avg": 5
+                },
+                "primaries": {
+                    "min": 5,
+                    "max": 5,
+                    "avg": 5
+                },
+                "replication": {
+                    "min": 0,
+                    "max": 0,
+                    "avg": 0
+                }
+            }
+        },
+        "docs": {
+            "count": 10,
+            "deleted": 0
+        },
+        "store": {
+            "size_in_bytes": 40039,
+            "throttle_time_in_millis": 0
+        },
+        "fielddata": {
+            "memory_size_in_bytes": 0,
+            "evictions": 0
+        },
+        "filter_cache": {
+            "memory_size_in_bytes": 132,
+            "evictions": 0
+        },
+        "id_cache": {
+            "memory_size_in_bytes": 0
+        },
+        "completion": {
+            "size_in_bytes": 0
+        },
+        "segments": {
+            "count": 10,
+            "memory_in_bytes": 52564,
+            "index_writer_memory_in_bytes": 0,
+            "index_writer_max_memory_in_bytes": 7680000,
+            "version_map_memory_in_bytes": 0,
+            "fixed_bit_set_memory_in_bytes": 0
+        },
+        "percolate": {
+            "total": 0,
+            "time_in_millis": 0,
+            "current": 0,
+            "memory_size_in_bytes": -1,
+            "memory_size": "-1b",
+            "queries": 0
+        }
+    },
+    "nodes": {
+        "count": {
+            "total": 1,
+            "master_only": 0,
+            "data_only": 0,
+            "master_data": 1,
+            "client": 0
+        },
+        "versions": [
+            "1.7.3"
+        ],
+        "os": {
+            "available_processors": 8,
+            "mem": {
+                "total_in_bytes": 67584700416
+            },
+            "cpu": [
+                {
+                    "vendor": "Intel",
+                    "model": "Xeon",
+                    "mhz": 3699,
+                    "total_cores": 8,
+                    "total_sockets": 8,
+                    "cores_per_socket": 32,
+                    "cache_size_in_bytes": 10240,
+                    "count": 1
+                }
+            ]
+        },
+        "process": {
+            "cpu": {
+                "percent": 0
+            },
+            "open_file_descriptors": {
+                "min": 265,
+                "max": 265,
+                "avg": 265
+            }
+        },
+        "jvm": {
+            "max_uptime_in_millis": 1044574181,
+            "versions": [
+                {
+                    "version": "1.8.0_72",
+                    "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+                    "vm_version": "25.72-b15",
+                    "vm_vendor": "Oracle Corporation",
+                    "count": 1
+                }
+            ],
+            "mem": {
+                "heap_used_in_bytes": 136690512,
+                "heap_max_in_bytes": 1037959168
+            },
+            "threads": 90
+        },
+        "fs": {
+            "total_in_bytes": 51470012416,
+            "free_in_bytes": 5698859008,
+            "available_in_bytes": 3077476352,
+            "disk_reads": 1490266,
+            "disk_writes": 44818691,
+            "disk_io_op": 46308957,
+            "disk_read_size_in_bytes": 27341878272,
+            "disk_write_size_in_bytes": 182892331008,
+            "disk_io_size_in_bytes": 210234209280,
+            "disk_queue": "0",
+            "disk_service_time": "0"
+        },
+        "plugins": []
+    }
+}
+
 if __name__ == '__main__':
     import json
-    print json.dumps(resCmd)
+    print json.dumps(resClusterStats)
