@@ -65,6 +65,7 @@ class Request(object):
         else:
             head = self.payload
         heads = head.split('\r\n')
+        self.uri = self.uri.replace('//', '/')
 
         if len(heads) < 2:
             return
