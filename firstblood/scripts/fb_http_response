@@ -43,6 +43,19 @@ http_authenticate = (
 
 http_body = "<html><head><title>Document Error: Unauthorized</title></head><body><h2>Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist</body></html>"
 
+http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
+<html xmlns=\"http://www.w3.org/1999/xhtml\"> \
+<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><title>login</title></head> \
+<body> \
+<form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
+<input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" style=\"width:100px;\" />\
+<input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" style=\"width:100px;\" />\
+<input type=\"submit\" name=\"Button1\" value=\"login\" onclick=\"login\" id=\"Button1\" class=\"button2\" />\
+</form>\
+<span id=\"L_copyright\"><a href='http://www.cbcms.cn' target='_blank' class='tt7'><strong><font color='#CCCCCC' face='Arial, Helvetica, sans-serif'>Powered By</font><font face='Arial, Helvetica, sans-serif'> cbcms <font color='#FFCC00'>v1.09.12.19</font></font></strong></a></span>\
+</body>\
+</html>"
+
 class Request(object):
 
     method = ''
@@ -105,6 +118,7 @@ class ResponseHttp(object):
 
     def __init__(self, request):
         self.request = request
+        self.date = datetime.now().isoformat()
 
     def __repr__(self):
         response_line = '%s %s %s' % (self.version, self.code, self.status)
@@ -112,6 +126,10 @@ class ResponseHttp(object):
         for k, v in self.headers.iteritems():
             headers.append('%s: %s' % (k, v))
         headers.extend(self.headers_raw)
+
+        if self.body:
+            content_len = len(self.body)
+            headers.append('Content-Length: %s' % content_len)
 
         res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
         return res
@@ -123,10 +141,9 @@ class ResponseHttp(object):
         idx = random.randint(0, len(http_authenticate)-1)
         auth = http_authenticate[idx]
 
-        date = datetime.now().isoformat()
 
         self.headers['Server'] = server
-        self.headers['Date'] = date
+        self.headers['Date'] = self.date
         self.headers_raw.append(auth)
         if self.request.body:
             self.body = self.request.body
@@ -179,7 +196,6 @@ class ResponseHttp(object):
             self.headers = {}
             self.headers_raw.append('Content-Type: application/json; charset=UTF-8')
             self.body = json.dumps(body)
-            self.headers_raw.append('Content-Length: %s' % len(self.body))
 
     def mctpResponse(self):
         self.version = 'V%s' % self.request.version
@@ -187,7 +203,6 @@ class ResponseHttp(object):
         self.headers_raw.append('Content-Type: %s' % self.request.headers.get('content-type', 'text/HDP'))
         self.headers_raw.append('CSeq: %s' % self.request.headers.get('cseq', '6'))
         self.headers_raw.append('Return-Code: 0')
-        self.headers_raw.append('Content-Length: 2326')
 
         segmentseq = self.request.headers.get('segment-seq')
         try:
@@ -198,7 +213,6 @@ class ResponseHttp(object):
         except:
             pass
         self.body = 'eric\r\n111222\r\n111222\nadmin\r\n111222'
-        self.headers_raw.append('Content-Length: %s' % len(self.body))
         self.headers_raw.append('Data-Length: %s' % len(self.body))
 
     def rtspResponse(self):
@@ -209,7 +223,6 @@ class ResponseHttp(object):
         self.headers_raw.append('Content-Base: %s' % self.request.uri)
         self.headers_raw.append('Return-Code: 0')
         self.body = 'm=video 0 RTP/AVP 96\r\na=control:streamid=0\r\na=range:npt=0-7.741000\r\na=length:npt=7.741000\r\na=StreamName:string;"hinted video track"\r\nm=audio 0 RTP/AVP 97\r\na=StreamName:string;"hinted audio track"'
-        self.headers_raw.append('Content-Length: %s' % len(self.body))
 
     def jsonrpcResponse(self):
         self.version = '%s' % self.request.version
@@ -271,6 +284,11 @@ class ResponseHttp(object):
         self.headers_raw.extend(h)
         self.body = '<html><body><h1>200 OK</h1></body></html>'
 
+    def cbcmsResponse(self):
+        self.headers['Server'] = 'Microsoft-IIS/6.0'
+        self.headers['Date'] = self.date
+        self.body = http_login_body
+
     def getResponse(self):
         host = self.request.headers.get('host')
         port = 80
@@ -293,6 +311,8 @@ class ResponseHttp(object):
             self.phpadminResponse()
         elif '/invoker/readonly' in uri:
             self.pyCryptoMinerResponse()
+        elif '/news/admin/login.aspx' in uri:
+            self.cbcmsResponse()
         elif uri.startswith('/moo'):
             self.mooResponse()
         elif str(port) == '9200':
