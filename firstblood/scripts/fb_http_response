@@ -119,6 +119,7 @@ class ResponseHttp(object):
     def __init__(self, request):
         self.request = request
         self.date = datetime.now().isoformat()
+        self.seed = random.randint(0, 1)
 
     def __repr__(self):
         response_line = '%s %s %s' % (self.version, self.code, self.status)
@@ -254,8 +255,9 @@ class ResponseHttp(object):
         self.headers = {}
         self.headers_raw.append('Content-Type:text/html; charset=UTF-8')
         self.headers_raw.append('Server:Apache')
-        self.code = 500
-        self.status = "ServerError"
+        if self.seed != 1:
+            self.code = 500
+            self.status = "ServerError"
         self.body = "<html><head><title>Jboss jboss</title></head><body>Jboss jboss</body></html>"
 
     def mooResponse(self):
@@ -282,10 +284,12 @@ class ResponseHttp(object):
                 'CONTENT-TYPE: text/html',
                 ]
         self.headers_raw.extend(h)
-        self.code = 500
-        self.status = 'Internal Server Error'
-        #self.body = '<html><body><h1>200 OK</h1></body></html>'
-        self.body = '<html><body><h1>500 Internal Server Error</h1></body></html>'
+        if self.seed  == 1:
+            self.body = '<html><body><h1>200 OK</h1></body></html>'
+        else:
+            self.code = 500
+            self.status = 'Internal Server Error'
+            self.body = '<html><body><h1>500 Internal Server Error</h1></body></html>'
 
     def cbcmsResponse(self):
         self.headers['Server'] = 'Microsoft-IIS/6.0'
