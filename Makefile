@@ -12,4 +12,4 @@ install:
 
 .PHONY: clean
 clean:
-	rm -fr $(NAME) $(GOPATH)/bin/apacket
+	rm -fr $(NAME) $(GOPATH)/bin/$(NAME)

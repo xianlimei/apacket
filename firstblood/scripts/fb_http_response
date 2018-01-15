@@ -291,6 +291,31 @@ class ResponseHttp(object):
             self.status = 'Internal Server Error'
             self.body = '<html><body><h1>500 Internal Server Error</h1></body></html>'
 
+    def intelAMTResponse(self):
+        if self.seed  == 1:
+            self.headers = {}
+            h = [
+                'Cache-Control:no cache',
+                'Content-Type:text/html',
+                'Server:Intel(R) Active Management Technology 9.1.30',
+                ]
+            self.headers_raw.extend(h)
+            self.body='''<html><head><link rel="stylesheet" href="styles.css">
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+                <title>Intel&reg; Active Management Technology</title></head>
+                <body>
+                <table class="header">
+                <tr><td valign="top" nowrap="nowrap">
+                <p class="top1">Intel<font class="r"><sup>&reg;</sup></font> Active Management Technology</td>
+                <td valign="top"><img src="logo.gif" align="right" alt="Intel"></td></tr>
+                </table>
+
+                <h1>Log On</h1>
+                <P>Log on to Intel&reg; Active Management Technology on this computer.</p>
+                <P><form METHOD="GET" action="index.htm"><h2><input type="submit" value="  Log On... ">
+                </h2></form></p></body></html>
+                '''
+
     def cbcmsResponse(self):
         self.headers['Server'] = 'Microsoft-IIS/6.0'
         self.headers['Date'] = self.date
@@ -326,6 +351,8 @@ class ResponseHttp(object):
             self.esResponse()
         elif str(port) == '49152':
             self.ipmiResponse()
+        elif str(port) == '16992':
+            self.intelAMTResponse()
         else:
             self.defaultResponse()
         return self.__repr__()
