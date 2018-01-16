@@ -29,6 +29,7 @@ http_server = (
 	"P-660HW-T1 v3",
 	"U S Software Web Server",
 	"Netwave IP Camera",
+        "Boa/0.94.14rc21",
         )
 
 http_authenticate = ( 
@@ -41,7 +42,13 @@ http_authenticate = (
 	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
         )
 
-http_body = "<html><head><title>Document Error: Unauthorized</title></head><body><h2>Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist</body></html>"
+http_body = "<html><head><title>Document Error: Unauthorized</title></head><body><h2>Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist \
+<form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
+<input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" style=\"width:100px;\" />\
+<input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" style=\"width:100px;\" />\
+<input type=\"submit\" name=\"Button1\" value=\"login\" onclick=\"login\" id=\"Button1\" class=\"button2\" />\
+</form>\
+</body></html>"
 
 http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
 <html xmlns=\"http://www.w3.org/1999/xhtml\"> \
