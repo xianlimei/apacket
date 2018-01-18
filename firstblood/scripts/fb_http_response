@@ -259,7 +259,7 @@ class ResponseHttp(object):
         self.body = phpadmin.body
 
 
-    def pyCryptoMinerResponse(self):
+    def jbossResponse(self):
         self.headers = {}
         self.headers_raw.append('Content-Type:text/html; charset=UTF-8')
         self.headers_raw.append('Server:Apache')
@@ -337,10 +337,15 @@ class ResponseHttp(object):
                 }
 
         url_map = {
-                r'/invoker/readonly.*':self.pyCryptoMinerResponse,
+                #jboss
+                r'^/invoker/readonly.*':self.jbossResponse,
+                r'^/invoker/JMXInvokerServlet.*':self.jbossResponse,
+                r'^/web-console/ServerInfo.jsp.*':self.jbossResponse,
+                r'^/jmx-console/HtmlAdaptor.*':self.jbossResponse,
+
                 r'.*/scripts/setup.php.*':self.phpadminResponse,
-                r'/news/admin/login.aspx.*':self.cbcmsResponse,
-                r'/moo.*':self.mooResponse,
+                r'^/news/admin/login.aspx.*':self.cbcmsResponse,
+                r'^/moo.*':self.mooResponse,
                 }
 
         host = self.request.headers.get('host')
@@ -353,6 +358,7 @@ class ResponseHttp(object):
 
         version = self.request.version.lower()
         uri = self.request.uri.lower()
+        uri.replace('//', '/')
 
         setResponse = None
         if 'mctp/' in version:
@@ -367,7 +373,7 @@ class ResponseHttp(object):
             setResponse = port_map.get(port)
         else:
             for reg, func in url_map.iteritems():
-                regex = re.compile(reg)
+                regex = re.compile(reg, re.I)
                 if regex.match(uri):
                     setResponse = func
                     break
@@ -403,6 +409,7 @@ if __name__ == '__main__':
         import base64, zlib
         testpayload = base64.b64decode(args[0])
         payload = zlib.decompress(testpayload)
+        sys.stderr.write('%s\n\n' % str(payload))
     elif len(args) > 0:
         payload = args[0]
     else:
