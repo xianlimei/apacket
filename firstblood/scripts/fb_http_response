@@ -349,6 +349,7 @@ class ResponseHttp(object):
             host, port = host.split(':')
         except:
             pass
+        port = str(port)
 
         version = self.request.version.lower()
         uri = self.request.uri.lower()
@@ -362,8 +363,8 @@ class ResponseHttp(object):
             setResponse = self.sipResponse
         elif '"jsonrpc":' in self.request.body:
             setResponse = self.jsonrpcResponse
-        elif port_map.get(str(port)):
-            setResponse = port_map.get(str(port))
+        elif port_map.get(port):
+            setResponse = port_map.get(port)
         else:
             for reg, func in url_map.iteritems():
                 regex = re.compile(reg)
