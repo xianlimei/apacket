@@ -14,6 +14,7 @@ from StringIO import StringIO
 import es
 import jsonrpc
 import phpadmin
+import boa
 
 http_server = (
 	"Tengine",
@@ -329,6 +330,24 @@ class ResponseHttp(object):
         self.headers['Date'] = self.date
         self.body = http_login_body
 
+    def boaResponse(self):
+        h = [
+                'Accept-Ranges:bytes',
+                'Connection:close',
+                'Content-Type:text/html',
+                'Server:Boa/0.94.14rc21',
+                'Via:1.0 Hello (squid/3.1.23)',
+                'X-Cache:MISS from Hello',
+                'X-Cache:MISS from Hello',
+                'X-Cache-Lookup:MISS from Hello:8080',
+                'X-Cache-Lookup:MISS from Hello:8080',
+                ]
+        self.headers = {
+                'Date':self.date,
+                }
+        self.headers_raw.extend(h)
+        self.body = boa.boa
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -369,6 +388,8 @@ class ResponseHttp(object):
             setResponse = self.sipResponse
         elif '"jsonrpc":' in self.request.body:
             setResponse = self.jsonrpcResponse
+        elif 'cgi-bin/login.cgi' in uri:
+                setResponse = self.boaResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
