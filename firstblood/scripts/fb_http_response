@@ -5,6 +5,7 @@ import optparse
 import json
 import random
 import time
+import re
 
 from datetime import datetime
 from os.path import basename
@@ -329,6 +330,19 @@ class ResponseHttp(object):
         self.body = http_login_body
 
     def getResponse(self):
+        port_map = {
+                '9200':self.esResponse,
+                '49152':self.ipmiResponse,
+                '16992':self.intelAMTResponse,
+                }
+
+        url_map = {
+                r'/invoker/readonly.*':self.pyCryptoMinerResponse,
+                r'.*/scripts/setup.php.*':self.phpadminResponse,
+                r'/news/admin/login.aspx.*':self.cbcmsResponse,
+                r'/moo.*':self.mooResponse,
+                }
+
         host = self.request.headers.get('host')
         port = 80
         try:
@@ -338,30 +352,27 @@ class ResponseHttp(object):
 
         version = self.request.version.lower()
         uri = self.request.uri.lower()
+
+        setResponse = None
         if 'mctp/' in version:
-            self.mctpResponse()
+            setResponse = self.mctpResponse
         elif 'rtsp/' in version:
-            self.rtspResponse()
+            setResponse = self.rtspResponse
         elif 'sip/' in version:
-            self.sipResponse()
+            setResponse = self.sipResponse
         elif '"jsonrpc":' in self.request.body:
-            self.jsonrpcResponse()
-        elif '/scripts/setup.php' in uri:
-            self.phpadminResponse()
-        elif '/invoker/readonly' in uri:
-            self.pyCryptoMinerResponse()
-        elif '/news/admin/login.aspx' in uri:
-            self.cbcmsResponse()
-        elif uri.startswith('/moo'):
-            self.mooResponse()
-        elif str(port) == '9200':
-            self.esResponse()
-        elif str(port) == '49152':
-            self.ipmiResponse()
-        elif str(port) == '16992':
-            self.intelAMTResponse()
+            setResponse = self.jsonrpcResponse
+        elif port_map.get(str(port)):
+            setResponse = port_map.get(str(port))
         else:
-            self.defaultResponse()
+            for reg, func in url_map.iteritems():
+                regex = re.compile(reg)
+                if regex.match(uri):
+                    setResponse = func
+                    break
+        if not setResponse:
+            setResponse = self.defaultResponse
+        setResponse()
         return self.__repr__()
 
 def main(payload):
