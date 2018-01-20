@@ -131,8 +131,8 @@ type HTTPMsg struct {
 	Method           string            `json:"method,omitempty"`
 	RequestURI       string            `json:"uri,omitempty"`
 	Version          string            `json:"version,omitempty"`
-	Headers          map[string]string `json:"headers,omitempty"`
-	Body             string            `json:"body,omitempty"`
+	Headers          map[string]string `json:"-"`
+	Body             string            `json:"-"`
 	Payload          []byte            `json:"payload,omitempty"`
 	contentLength    int
 	hasContentLength bool
