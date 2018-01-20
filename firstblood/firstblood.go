@@ -73,7 +73,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 
 	for {
 		conn.SetDeadline(time.Now().Add(10 * time.Second))
-		buf := make([]byte, 2048)
+		buf := make([]byte, 4096)
 		l, err := conn.Read(buf)
 		if err != nil || l < 1 {
 			return
