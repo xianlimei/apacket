@@ -32,6 +32,7 @@ http_server = (
 	"U S Software Web Server",
 	"Netwave IP Camera",
         "Boa/0.94.14rc21",
+        "DVRDVS-Webs",
         )
 
 http_authenticate = ( 
@@ -64,6 +65,12 @@ http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//E
 <span id=\"L_copyright\"><a href='http://www.cbcms.cn' target='_blank' class='tt7'><strong><font color='#CCCCCC' face='Arial, Helvetica, sans-serif'>Powered By</font><font face='Arial, Helvetica, sans-serif'> cbcms <font color='#FFCC00'>v1.09.12.19</font></font></strong></a></span>\
 </body>\
 </html>"
+
+http_code = [
+        200,
+        500,
+        401,
+        ]
 
 class Request(object):
 
@@ -151,6 +158,8 @@ class ResponseHttp(object):
         idx = random.randint(0, len(http_authenticate)-1)
         auth = http_authenticate[idx]
 
+        idx = random.randint(0, len(http_code)-1)
+        self.code = http_code[idx]
 
         self.headers['Server'] = server
         self.headers['Date'] = self.date
@@ -399,10 +408,7 @@ class ResponseHttp(object):
                     setResponse = func
                     break
         if not setResponse:
-            if self.seed == 1:
-                setResponse = self.defaultResponse
-            else:
-                setResponse = self.boaResponse
+            setResponse = self.defaultResponse
         setResponse()
         return self.__repr__()
 
