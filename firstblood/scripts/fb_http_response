@@ -358,11 +358,36 @@ class ResponseHttp(object):
         self.headers_raw.extend(h)
         self.body = boa.boa
 
+    def couchdbResponse(self):
+        uri = self.request.uri.lower()
+        h = [
+                'Server:CouchDB/2.1.0 (Erlang OTP/17)',
+                'Content-Type:application/json',
+                ]
+        self.headers = {
+                'Date':self.date,
+                }
+        self.headers_raw.extend(h)
+
+        if '/_users/org.couchdb.user' in uri:
+            self.code = 201
+            self.status = 'Created'
+            reqbody = json.loads(self.request.body)
+            user = reqbody.get('name', 'root')
+            self.body = json.dumps({'ok':'true', 'id':"org.couchdb.user:%s" %  user, 'rev':'1-c0d78363e89f834bfaefa3a6dcdf0996'}) 
+        elif '/_membership' in uri:
+            self.code = 200
+            self.status = 'ok'
+            self.body = json.dumps({'all_nodes':["nonode@nohost"],'cluster_nodes':["nonode@nohost"]})
+        else:
+            self.body = json.dumps({'ok':'true'})
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
                 '49152':self.ipmiResponse,
                 '16992':self.intelAMTResponse,
+                '5984':self.couchdbResponse,
                 }
 
         url_map = {
