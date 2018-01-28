@@ -33,6 +33,7 @@ http_server = (
 	"Netwave IP Camera",
         "Boa/0.94.14rc21",
         "DVRDVS-Webs",
+        "CouchDB/2.1.0 (Erlang OTP/17)",
         )
 
 http_authenticate = ( 
