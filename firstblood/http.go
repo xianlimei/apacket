@@ -64,8 +64,6 @@ const (
 	MethodRTSPSetParameter = "SET_PARAMETER"
 	MethodRTSPGetParameter = "GET_PARAMETER"
 	MethodRTSPRedirect     = "REDIRECT"
-
-	PtypeHTTP = "http"
 )
 
 const (
@@ -181,7 +179,7 @@ func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
 }
 
 func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response *Applayer) {
-	response, err := NewApplayer(remoteAddr, localAddr, PtypeHTTP, TransportTCP)
+	response, err := NewApplayer(remoteAddr, localAddr, PtypeHTTP, TransportTCP, nil)
 	if err != nil {
 		return
 	}

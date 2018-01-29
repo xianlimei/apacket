@@ -82,9 +82,11 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 		payload := buf[:l]
 
 		response := []byte("\x00")
+		var isidentify bool
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(payload)
 			if identify {
+				isidentify = true
 				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), payload)
 				out, err := json.Marshal(pkt)
 				if err == nil {
@@ -95,5 +97,13 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 			}
 		}
 		conn.Write(response)
+
+		if !isidentify {
+			pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payload)
+			out, err := json.Marshal(pkt)
+			if err == nil {
+				fb.outputer.Output(out)
+			}
+		}
 	}
 }

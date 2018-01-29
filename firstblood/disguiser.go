@@ -18,6 +18,11 @@ const (
 	IPv6         = 6
 )
 
+const (
+	PtypeHTTP  = "http"
+	PtypeOther = "other"
+)
+
 type IP4 struct {
 	Sip string `json:"sip"`
 	Dip string `json:"dip"`
@@ -29,13 +34,15 @@ type IP6 struct {
 }
 
 type TCP struct {
-	Sport uint16 `json:"sport"`
-	Dport uint16 `json:"dport"`
+	Sport   uint16 `json:"sport"`
+	Dport   uint16 `json:"dport"`
+	Payload []byte `json:"payload,omitempty"`
 }
 
 type UDP struct {
-	Sport uint16 `json:"sport"`
-	Dport uint16 `json:"dport"`
+	Sport   uint16 `json:"sport"`
+	Dport   uint16 `json:"dport"`
+	Payload []byte `json:"payload,omitempty"`
 }
 
 type Applayer struct {
@@ -96,7 +103,7 @@ func getIPPort(addr string) (ip string, port uint16, ipv int, err error) {
 	return
 }
 
-func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16) (applayer *Applayer, err error) {
+func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte) (applayer *Applayer, err error) {
 
 	ip4 := &IP4{}
 	ip6 := &IP6{}
@@ -130,13 +137,27 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16) (applayer *A
 		applayer.IP6 = ip6
 	}
 
+	var cPayload []byte
+	if len(payload) != 0 {
+		cP := applayer.Compress(payload)
+		cPayload = cP.Bytes()
+		applayer.Psha1 = applayer.Sha1HexDigest(string(payload))
+
+	}
+
 	if proto == TransportTCP {
 		tcp.Sport = sport
 		tcp.Dport = dport
+		if len(cPayload) != 0 {
+			tcp.Payload = cPayload
+		}
 		applayer.TCP = tcp
 	} else if proto == TransportUDP {
 		udp.Sport = sport
 		udp.Dport = dport
+		if len(cPayload) != 0 {
+			udp.Payload = cPayload
+		}
 		applayer.UDP = udp
 	}
 
