@@ -24,13 +24,15 @@ const (
 )
 
 type IP4 struct {
-	Sip string `json:"sip"`
-	Dip string `json:"dip"`
+	Sip      string `json:"sip"`
+	Dip      string `json:"dip"`
+	Protocol uint16 `json:"proto"`
 }
 
 type IP6 struct {
-	Sip string `json:"sip"`
-	Dip string `json:"dip"`
+	Sip      string `json:"sip"`
+	Dip      string `json:"dip"`
+	Protocol uint16 `json:"proto"`
 }
 
 type TCP struct {
@@ -130,10 +132,12 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 	if ipv == IPv4 {
 		ip4.Sip = sip
 		ip4.Dip = dip
+		ip4.Protocol = proto
 		applayer.IP4 = ip4
 	} else {
 		ip6.Sip = sip
 		ip6.Dip = dip
+		ip6.Protocol = proto
 		applayer.IP6 = ip6
 	}
 
