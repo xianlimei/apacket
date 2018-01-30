@@ -15,6 +15,7 @@ import es
 import jsonrpc
 import phpadmin
 import boa
+import belkin
 
 http_server = (
 	"Tengine",
@@ -381,6 +382,25 @@ class ResponseHttp(object):
             self.body = json.dumps({'all_nodes':["nonode@nohost"],'cluster_nodes':["nonode@nohost"]})
         else:
             self.body = json.dumps({'ok':'true'})
+    
+    def belkinResponse(self):
+        self.headers = {
+                'Date':self.date,
+                }
+
+        uri = self.request.uri.lower()
+        if '/langchg.cgi' in uri or '/adv_wifidef.cgi' in uri:
+            h = belkin.H_HTML.split('\n')
+            self.headers_raw.extend(h)
+            self.body = belkin.passwd_leak
+        elif '/dev.htm' in uri:
+            h = belkin.H_HTML.split('\n')
+            self.headers_raw.extend(h)
+            self.body = belkin.shell
+        else:
+            h = belkin.H_TXT.split('\n')
+            self.headers_raw.extend(h)
+            self.body = 'returned error: -998'
 
     def getResponse(self):
         port_map = {
@@ -397,9 +417,12 @@ class ResponseHttp(object):
                 r'^/web-console/ServerInfo.jsp.*':self.jbossResponse,
                 r'^/jmx-console/HtmlAdaptor.*':self.jbossResponse,
 
-                r'.*/scripts/setup.php.*':self.phpadminResponse,
-                r'^/news/admin/login.aspx.*':self.cbcmsResponse,
-                r'^/moo.*':self.mooResponse,
+                r'.*/scripts/setup\.php.*':self.phpadminResponse,
+                r'^/news/admin/login\.aspx.*':self.cbcmsResponse,
+                r'^/langchg\.cgi$':self.belkinResponse,
+                r'^/adv_wifidef\.cgi$':self.belkinResponse,
+                r'^/dev\.htm$':self.belkinResponse,
+                r'^/proxy\.cgi\?chk&':self.belkinResponse,
                 }
 
         host = self.request.headers.get('host')
