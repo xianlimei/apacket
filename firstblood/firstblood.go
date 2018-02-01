@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const PAYLOAD_MAX_LEN = 8192
+
 type FirstBlood struct {
 	ListenAddr string
 	outputer   outputs.Outputer
@@ -73,7 +75,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 
 	for {
 		conn.SetDeadline(time.Now().Add(10 * time.Second))
-		buf := make([]byte, 4096)
+		buf := make([]byte, PAYLOAD_MAX_LEN)
 		l, err := conn.Read(buf)
 		if err != nil || l < 1 {
 			return
