@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const PAYLOAD_MAX_LEN = 8192
+const PAYLOAD_MAX_LEN = 524288 //512KB
 
 type FirstBlood struct {
 	ListenAddr string
