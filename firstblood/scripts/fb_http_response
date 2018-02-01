@@ -47,7 +47,8 @@ http_authenticate = (
 	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
         )
 
-http_body = "<html><head><title>Document Error: Unauthorized</title></head><body><h2> The Cross Web Server Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist \
+http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"http://micros-hosting.com/EGateway/\">base64Binary</base64Binary>\
+<html><head><title>Document Error: Unauthorized</title></head><body><h2> The Cross Web Server Access Error: Unauthorized</h2><p>Access to this document requires a User ID</p>CGI process file does not exist \
 <form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
 <input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" style=\"width:100px;\" />\
 <input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" style=\"width:100px;\" />\
