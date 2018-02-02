@@ -520,6 +520,11 @@ resStatsIndexing = {
     }
 }
 
+resCatIndices='''health status index        pri rep docs.count docs.deleted store.size pri.store.size 
+yellow open   anarchop_apn   5   1          8            0     30.3kb         30.3kb 
+yellow open   readme         5   1          1            0      4.4kb          4.4kb 
+yellow open   piratepu_pp2   5   1          1            0      4.2kb          4.2kb'''
+
 if __name__ == '__main__':
     import json
     print json.dumps(resClusterStats)

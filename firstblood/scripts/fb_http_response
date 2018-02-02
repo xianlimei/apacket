@@ -176,6 +176,8 @@ class ResponseHttp(object):
         body = ''
 
         uri = self.request.uri
+
+        content_type = "application/json"
     
         if uri == '/':
             body = es.resBanner
@@ -185,7 +187,10 @@ class ResponseHttp(object):
             es.resClusterStats['timestamp'] = int(time.time())
             body = es.resClusterStats
         elif uri.startswith('/_stats/indexing'):
+            content_type = "text/plain"
             body = es.resStatsIndexing
+        elif uri.startswith('/_cat/indices'):
+            body = es.resCatIndices
         elif uri.startswith('/_search'):
             out = 'root'
             key = ''
@@ -216,8 +221,11 @@ class ResponseHttp(object):
 
         if body:
             self.headers = {}
-            self.headers_raw.append('Content-Type: application/json; charset=UTF-8')
-            self.body = json.dumps(body)
+            self.headers_raw.append('Content-Type: %s; charset=UTF-8' % content_type)
+            if content_type == "application/json":
+                self.body = json.dumps(body)
+            else:
+                self.body = body
 
     def mctpResponse(self):
         self.version = 'V%s' % self.request.version
