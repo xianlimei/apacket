@@ -1,6 +1,7 @@
 package firstblood
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/Acey9/apacket/config"
@@ -73,6 +74,9 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 		}
 	}()
 
+	str := "Q05YTgAAAAEAEAAAVgAAAOweAAC8saexZGV2aWNlOjpyby5wcm9kdWN0Lm5hbWU9aG0gbm90ZSAxcztyby5wcm9kdWN0Lm1vZGVsPWhtIG5vdGUgMXM7cm8ucHJvZHVjdC5kZXZpY2U9eDg2OwA="
+	defaultResponse, _ := base64.StdEncoding.DecodeString(str)
+
 	for {
 		conn.SetDeadline(time.Now().Add(10 * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
@@ -83,7 +87,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 
 		payload := buf[:l]
 
-		response := []byte("\x00")
+		response := []byte(defaultResponse)
 		var isidentify bool
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(payload)
