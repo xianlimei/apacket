@@ -110,12 +110,14 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 		}
 
 	}
-	pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payloadBuf.Bytes())
-	if err != nil {
-		return
-	}
-	out, err := json.Marshal(pkt)
-	if err == nil {
-		fb.outputer.Output(out)
+	if payloadBuf.Len() > 0 {
+		pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payloadBuf.Bytes())
+		if err != nil {
+			return
+		}
+		out, err := json.Marshal(pkt)
+		if err == nil {
+			fb.outputer.Output(out)
+		}
 	}
 }
