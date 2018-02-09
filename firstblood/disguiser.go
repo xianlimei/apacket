@@ -51,6 +51,7 @@ type Applayer struct {
 	Ts    time.Time `json:"ts"`
 	Ptype string    `json:"ptype"`
 	Psha1 string    `json:"psha1,omitempty"`
+	Plen  uint      `json:"plen,omitempty"`
 	IPv   uint8     `json:"ipv"`
 	IP4   *IP4      `json:"ip4,omitempty"`
 	IP6   *IP6      `json:"ip6,omitempty"`
@@ -146,6 +147,7 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 		cP := applayer.Compress(payload)
 		cPayload = cP.Bytes()
 		applayer.Psha1 = applayer.Sha1HexDigest(string(payload))
+		applayer.Plen = uint(len(payload))
 
 	}
 

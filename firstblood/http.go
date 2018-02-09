@@ -189,6 +189,7 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response
 	cPayload := response.Compress(request)
 	response.Http.Payload = cPayload.Bytes()
 	response.Psha1 = response.Sha1HexDigest(string(request))
+	response.Plen = uint(len(request))
 	return
 }
 
