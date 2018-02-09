@@ -2,6 +2,7 @@ package firstblood
 
 import (
 	//"encoding/base64"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/Acey9/apacket/config"
@@ -10,7 +11,7 @@ import (
 	"time"
 )
 
-const PAYLOAD_MAX_LEN = 524288 //512KB
+const PAYLOAD_MAX_LEN = 1048576 //1MB
 
 type FirstBlood struct {
 	ListenAddr string
@@ -77,40 +78,44 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 	//str := "Q05YTgAAAAEAEAAAVgAAAOweAAC8saexZGV2aWNlOjpyby5wcm9kdWN0Lm5hbWU9aG0gbm90ZSAxcztyby5wcm9kdWN0Lm1vZGVsPWhtIG5vdGUgMXM7cm8ucHJvZHVjdC5kZXZpY2U9eDg2OwA="
 	//defaultResponse, _ := base64.StdEncoding.DecodeString(str)
 
+	response := []byte("\x00\x00")
+	payloadBuf := bytes.Buffer{}
+
 	for {
-		conn.SetDeadline(time.Now().Add(10 * time.Second))
+		conn.SetDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
 		l, err := conn.Read(buf)
 		if err != nil || l < 1 {
-			return
+			break
 		}
 
 		payload := buf[:l]
+		payloadBuf.Write(payload)
+		if payloadBuf.Len() > PAYLOAD_MAX_LEN {
+			break
+		}
 
-		//response := []byte(defaultResponse)
-		response := payload
-		var isidentify bool
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(payload)
 			if identify {
-				isidentify = true
 				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), payload)
 				out, err := json.Marshal(pkt)
 				if err == nil {
 					fb.outputer.Output(out)
 				}
 				response = disguiser.DisguiserResponse(payload)
+				conn.Write(response)
 				break
 			}
 		}
-		conn.Write(response)
 
-		if !isidentify {
-			pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payload)
-			out, err := json.Marshal(pkt)
-			if err == nil {
-				fb.outputer.Output(out)
-			}
-		}
+	}
+	pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payloadBuf.Bytes())
+	if err != nil {
+		return
+	}
+	out, err := json.Marshal(pkt)
+	if err == nil {
+		fb.outputer.Output(out)
 	}
 }
