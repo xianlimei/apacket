@@ -16,6 +16,7 @@ const PAYLOAD_MAX_LEN = 524288 //512KB
 type FirstBlood struct {
 	ListenAddr string
 	outputer   outputs.Outputer
+	//sha1Filter *outputs.ShaOneFilter
 }
 
 func NewFirstBlood() *FirstBlood {
@@ -37,9 +38,12 @@ func NewFirstBlood() *FirstBlood {
 		panic(err)
 	}
 
+	//shaone := outputs.NewShaOneFilter()
+
 	fb := &FirstBlood{
 		ListenAddr: config.Cfg.ListenAddr,
 		outputer:   o,
+		//sha1Filter: shaone,
 	}
 	return fb
 }
@@ -99,6 +103,11 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 			identify, _ := disguiser.Fingerprint(payload)
 			if identify {
 				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), payload)
+				/*
+					if fb.sha1Filter.Hit(pkt.Psha1) {
+						break
+					}
+				*/
 				out, err := json.Marshal(pkt)
 				if err == nil {
 					fb.outputer.Output(out)
@@ -115,6 +124,11 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 		if err != nil {
 			return
 		}
+		/*
+			if fb.sha1Filter.Hit(pkt.Psha1) {
+				return
+			}
+		*/
 		out, err := json.Marshal(pkt)
 		if err == nil {
 			fb.outputer.Output(out)

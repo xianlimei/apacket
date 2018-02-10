@@ -15,15 +15,18 @@ type Publisher struct {
 	filterQueue chan *decoder.Packet
 	outputer    Outputer
 	session     *Session
+	//sha1Filter  *ShaOneFilter
 }
 
 func NewPublisher(o Outputer) *Publisher {
 	s := NewSesson()
+	//shaone := NewShaOneFilter()
 	p := &Publisher{
 		pktQueue:    make(chan *decoder.Packet),
 		filterQueue: make(chan *decoder.Packet),
 		session:     s,
 		outputer:    o,
+		//sha1Filter:  shaone,
 	}
 	go p.Start()
 	return p
@@ -45,6 +48,11 @@ func (pub *Publisher) output(pkt *decoder.Packet) {
 	}()
 
 	pkt.PayloadSha1 = pkt.CompressPayload()
+	/*
+		if pub.sha1Filter.Hit(pkt.PayloadSha1) {
+			return
+		}
+	*/
 
 	b, err := json.Marshal(pkt)
 	if err != nil {
