@@ -18,24 +18,25 @@ import boa
 import belkin
 
 http_server = (
-	"Tengine",
-	"nginx/1.10.0",
+	#"Tengine",
+	#"nginx/1.10.0",
 	"Apache/2.2.21",
 	"gSOAP/2.7",
 	"GoAhead-Webs",
 	"GoAhead-http",
 	"RomPager/4.07 UPnP/1.0",
 	"lighttpd/1.4.34",
-	"Lighttpd/1.4.28",
-	"lighttpd/1.4.31",
+	#"Lighttpd/1.4.28",
+	#"lighttpd/1.4.31",
 	"Linux/2.x UPnP/1.0 Avtech/1.0",
 	"P-660HW-T1 v3",
-	"U S Software Web Server",
+	#"U S Software Web Server",
 	"Netwave IP Camera",
-        "Boa/0.94.14rc21",
+        #"Boa/0.94.14rc21",
         "DVRDVS-Webs",
         "CouchDB/2.1.0 (Erlang OTP/17)",
         "miniupnpd/1.0 UPnP/1.0",
+        "DasanNetwork Solution",
         )
 
 http_authenticate = ( 
