@@ -420,9 +420,7 @@ class ResponseHttp(object):
                 'Content-Type': 'text/javascript',
                 'Server': 'DasanNetwork Solution',
                 }
-        self.code = 411
-        self.status = '- Length Required'
-        self.body = "'Server': 'DasanNetwork Solution', 411 - Length Required"
+        self.body = "<html>411 - Length Required<html>"
 
     def getResponse(self):
         port_map = {
