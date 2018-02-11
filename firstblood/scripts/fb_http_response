@@ -413,12 +413,24 @@ class ResponseHttp(object):
             self.headers_raw.extend(h)
             self.body = 'returned error: -998'
 
+    def tmpResponse(self):
+        self.headers = {
+                'Date':self.date,
+                'Accept-Ranges': 'bytes',
+                'Content-Type': 'text/javascript',
+                'Server': 'DasanNetwork Solution',
+                }
+        self.code = 411
+        self.status = '- Length Required'
+        self.body = "'Server': 'DasanNetwork Solution', 411 - Length Required"
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
                 '49152':self.ipmiResponse,
                 '16992':self.intelAMTResponse,
                 '5984':self.couchdbResponse,
+                '8080':self.tmpResponse,
                 }
 
         url_map = {
