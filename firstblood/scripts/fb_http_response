@@ -413,11 +413,11 @@ class ResponseHttp(object):
             self.headers_raw.extend(h)
             self.body = 'returned error: -998'
 
-    def tmpResponse(self):
+    def dasanResponse(self):
         self.headers = {
                 'Date':self.date,
-                'Accept-Ranges': 'bytes',
-                'Content-Type': 'text/javascript',
+                'Content-Type': 'text/html',
+                'Connection': 'close',
                 'Server': 'DasanNetwork Solution',
                 }
         self.code = 411
@@ -440,7 +440,6 @@ class ResponseHttp(object):
                 '49152':self.ipmiResponse,
                 '16992':self.intelAMTResponse,
                 '5984':self.couchdbResponse,
-                '8080':self.tmpResponse,
                 }
 
         url_map = {
@@ -456,6 +455,7 @@ class ResponseHttp(object):
                 r'^/adv_wifidef\.cgi$':self.belkinResponse,
                 r'^/dev\.htm$':self.belkinResponse,
                 r'^/proxy\.cgi\?chk&':self.belkinResponse,
+                r'^/cgi-bin/login_action\.cgi$':self.dasanResponse,
                 }
 
         host = self.request.headers.get('host')
