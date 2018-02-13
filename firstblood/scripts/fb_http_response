@@ -137,10 +137,11 @@ class ResponseHttp(object):
 
     body = http_body
 
-    def __init__(self, request):
+    def __init__(self, request, auto_add_item=True):
         self.request = request
         self.date = datetime.now().isoformat()
         self.seed = random.randint(0, 1)
+        self.auto_add_item = auto_add_item
 
     def __repr__(self):
         response_line = '%s %s %s' % (self.version, self.code, self.status)
@@ -149,10 +150,12 @@ class ResponseHttp(object):
             headers.append('%s: %s' % (k, v))
         headers.extend(self.headers_raw)
 
-        if self.body:
+        if self.body and self.auto_add_item:
             content_len = len(self.body)
             headers.append('Content-Length: %s' % content_len)
 
+        if self.auto_add_item:
+            headers.sort()
         res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
         return res
 
@@ -414,12 +417,16 @@ class ResponseHttp(object):
             self.body = 'returned error: -998'
 
     def dasanResponse(self):
-        self.headers = {
-                'Date':self.date,
-                'Content-Type': 'text/html',
-                'Connection': 'close',
-                'Server': 'DasanNetwork Solution',
-                }
+        self.headers = {}
+        h = [
+                'Content-Type: text/html',
+                'Content-Length: 357',
+                'Connection: close',
+                'Date: Tue, 04 Jan 2000 15:03:49 GMT',
+                'Server: DasanNetwork Solution',
+            ]
+        self.headers_raw.extend(h)
+        self.auto_add_item = False
         self.code = 411
         self.status = 'Length Required'
         self.body = '''<?xml version="1.0" encoding="iso-8859-1"?>
@@ -432,7 +439,7 @@ class ResponseHttp(object):
  <body>
   <h1>411 - Length Required</h1>
  </body>
-</html>'''
+</html>\n'''
 
     def getResponse(self):
         port_map = {
