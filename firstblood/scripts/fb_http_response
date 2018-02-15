@@ -91,7 +91,10 @@ class Request(object):
 
     def parseRequest(self):
         line = self.payload.split('\r\n', 1)
-        self.method, self.uri, self.version = line[0].split(' ')
+        try:
+            self.method, self.uri, self.version = line[0].split(' ')
+        except:
+            self.method, self.uri = line[0].split(' ')
         head = ''
         if '\r\n\r\n' in self.payload:
             head, body = self.payload.split('\r\n\r\n', 1)
@@ -441,6 +444,24 @@ class ResponseHttp(object):
  </body>
 </html>\n'''
 
+    def tmpResponse(self):
+        self.headers = {}
+        h = [
+                'Server: GoAhead-Webs',
+                'Date: Mon Feb 12 05:43:01 2018',
+                'WWW-Authenticate: Digest realm="WIFICAM", domain=":81",qop="auth", nonce="050eb5f249a24ed51d1a4a9a6e53fc61", opaque="5ccc069c403ebaf9f0171e9517f40e41",algorithm="MD5", stale="FALSE"',
+                'Pragma: no-cache',
+                'Cache-Control: no-cache',
+                'Content-Type: text/html',
+            ]
+        self.headers_raw.extend(h)
+        self.auto_add_item = False
+        self.code = 401
+        self.status = 'Unauthorized'
+        self.body = '''<html><head><title>Document Error: Unauthorized</title></head>
+		<body><h2>Access Error: Unauthorized</h2>
+		<p>Access to this document requires a User ID</p></body></html>'''
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -497,7 +518,8 @@ class ResponseHttp(object):
                     setResponse = func
                     break
         if not setResponse:
-            setResponse = self.defaultResponse
+            #setResponse = self.defaultResponse
+            setResponse = self.tmpResponse
         setResponse()
         return self.__repr__()
 
