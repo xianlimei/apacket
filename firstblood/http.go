@@ -147,6 +147,9 @@ func NewHTTP() *HTTP {
 func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	i := bytes.Index(request, []byte("\r\n"))
 	if i == -1 {
+		afterMethodIdx := bytes.IndexFunc(request, unicode.IsSpace)
+		method = string(request[:afterMethodIdx])
+		uri = string(request[afterMethodIdx+1:])
 		return
 	}
 	fline := request[:i]
@@ -155,24 +158,27 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
 		return
 	}
+	method = string(fline[:afterMethodIdx])
+	uri = string(fline[afterMethodIdx+1 : afterRequestURIIdx])
+
 	version = string(fline[afterRequestURIIdx+1:])
 	protoVersion := strings.Split(version, "/")
 	if len(protoVersion) != 2 {
-		return "", "", ""
+		return
 	}
 	proto := strings.ToUpper(protoVersion[0])
 	_, ok := protocolMap[proto]
 	if !ok {
-		return "", "", ""
+		return
 	}
-	method = string(request[:afterMethodIdx])
-	uri = string(fline[afterMethodIdx+1 : afterRequestURIIdx])
-	return method, uri, version
+	return
 }
 
 func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
-	method, uri, version := http.ParseHttpLine(request)
-	if method != "" && uri != "" && version != "" {
+	method, _, _ := http.ParseHttpLine(request)
+	//if method != "" && uri != "" && version != "" {
+	_, ok := methodMap[method]
+	if ok {
 		identify = true
 	}
 	return
