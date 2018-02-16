@@ -3,6 +3,7 @@ package firstblood
 import (
 	//"encoding/base64"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/Acey9/apacket/config"
@@ -14,8 +15,9 @@ import (
 const PAYLOAD_MAX_LEN = 524288 //512KB
 
 type FirstBlood struct {
-	ListenAddr string
-	outputer   outputs.Outputer
+	ListenAddr    string
+	TLSListenAddr string
+	outputer      outputs.Outputer
 	//sha1Filter *outputs.ShaOneFilter
 }
 
@@ -41,14 +43,18 @@ func NewFirstBlood() *FirstBlood {
 	//shaone := outputs.NewShaOneFilter()
 
 	fb := &FirstBlood{
-		ListenAddr: config.Cfg.ListenAddr,
-		outputer:   o,
+		ListenAddr:    config.Cfg.ListenAddr,
+		TLSListenAddr: config.Cfg.TLSListenAddr,
+		outputer:      o,
 		//sha1Filter: shaone,
 	}
 	return fb
 }
 
 func (fb *FirstBlood) Start() {
+	if fb.TLSListenAddr != "" {
+		go fb.TLSListen("tcp", fb.TLSListenAddr)
+	}
 	fb.Listen("tcp", fb.ListenAddr)
 }
 
@@ -65,15 +71,69 @@ func (fb *FirstBlood) Listen(network, address string) error {
 			fmt.Println(err)
 			break
 		}
-		go fb.initHandler(conn)
+		go fb.initHandler(conn, false)
 	}
 	return nil
 }
 
-func (fb *FirstBlood) initHandler(conn net.Conn) {
+func (fb *FirstBlood) TLSListen(network, address string) error {
+	cer, err := tls.LoadX509KeyPair(config.Cfg.ServerCrt, config.Cfg.ServerKey)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+
+	srv, err := tls.Listen(network, address, config)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	for {
+		conn, err := srv.Accept()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		go fb.initHandler(conn, true)
+	}
+	return nil
+}
+
+func (fb *FirstBlood) tlsRedirect(payload []byte, conn net.Conn) (response []byte) {
+	l, err := conn.Write(payload)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	buf := make([]byte, PAYLOAD_MAX_LEN)
+	l, err = conn.Read(buf)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response = buf[:l]
+	return
+}
+
+func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn) {
+	conn, err := net.DialTimeout("tcp", config.Cfg.TLSListenAddr, time.Second*3)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	return
+}
+
+func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
+	var tlsProxyConn net.Conn
 
 	defer func() {
 		conn.Close()
+		if tlsProxyConn != nil {
+			tlsProxyConn.Close()
+		}
 		if err := recover(); err != nil {
 			fmt.Println(err)
 		}
@@ -85,6 +145,8 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 	response := []byte("\x00\x00")
 	payloadBuf := bytes.Buffer{}
 
+	var stageTls bool
+
 	for {
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
@@ -94,6 +156,20 @@ func (fb *FirstBlood) initHandler(conn net.Conn) {
 		}
 
 		payload := buf[:l]
+
+		//TODO ssl protocol identify
+		if !stageTls && !isTLSConn && l >= 3 && payload[0] == 0x16 && payload[1] == 0x03 && payload[2] == 0x01 {
+			stageTls = true
+			tlsProxyConn = fb.getTLSProxyConn()
+		}
+		if stageTls {
+			res := fb.tlsRedirect(payload, tlsProxyConn)
+			if len(res) != 0 {
+				conn.Write(res)
+			}
+			continue
+		}
+
 		payloadBuf.Write(payload)
 		if payloadBuf.Len() > PAYLOAD_MAX_LEN {
 			break

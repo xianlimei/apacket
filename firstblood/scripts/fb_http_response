@@ -518,8 +518,8 @@ class ResponseHttp(object):
                     setResponse = func
                     break
         if not setResponse:
-            #setResponse = self.defaultResponse
-            setResponse = self.tmpResponse
+            setResponse = self.defaultResponse
+            #setResponse = self.tmpResponse
         setResponse()
         return self.__repr__()
 

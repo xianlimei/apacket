@@ -101,6 +101,9 @@ func optParse() {
 
 	flag.BoolVar(&config.Cfg.FirstBloodDisable, "dfb", false, "Disable firstblood")
 	flag.StringVar(&config.Cfg.ListenAddr, "listen", "", "Listen address")
+	flag.StringVar(&config.Cfg.TLSListenAddr, "tlslisten", "", "TLS Listen address")
+	flag.StringVar(&config.Cfg.ServerCrt, "crt", "", "TLS server crt")
+	flag.StringVar(&config.Cfg.ServerKey, "key", "", "TLS server key")
 
 	printVersion := flag.Bool("V", false, "Version")
 

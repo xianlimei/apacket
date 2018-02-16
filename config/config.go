@@ -18,6 +18,9 @@ type Config struct {
 	NsqdTopic         string
 	Token             string
 	ListenAddr        string
+	TLSListenAddr     string
+	ServerCrt         string
+	ServerKey         string
 }
 
 type InterfacesConfig struct {
