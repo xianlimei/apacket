@@ -13,6 +13,11 @@ import (
 )
 
 const PAYLOAD_MAX_LEN = 524288 //512KB
+const (
+	TypeHandshake   uint8 = 0x16
+	TypeClientHello uint8 = 0x01
+	VersionSSLH     uint8 = 0x03
+)
 
 type FirstBlood struct {
 	ListenAddr    string
@@ -157,8 +162,13 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 
 		payload := buf[:l]
 
+		//fmt.Println(payload)
 		//TODO ssl protocol identify
-		if !stageTls && !isTLSConn && l >= 3 && payload[0] == 0x16 && payload[1] == 0x03 && payload[2] == 0x01 {
+		if !stageTls && !isTLSConn &&
+			l >= 6 && payload[0] == TypeHandshake &&
+			payload[1] == VersionSSLH &&
+			payload[1] >= 0x00 && payload[1] <= 0x03 && //SSL/3.0 TLS/1.0/1.1/1.2
+			payload[5] == TypeClientHello {
 			stageTls = true
 			tlsProxyConn = fb.getTLSProxyConn()
 		}
