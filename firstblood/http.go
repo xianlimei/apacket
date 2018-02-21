@@ -175,10 +175,13 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 }
 
 func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
-	method, _, _ := http.ParseHttpLine(request)
-	//if method != "" && uri != "" && version != "" {
+	method, uri, version := http.ParseHttpLine(request)
 	_, ok := methodMap[method]
 	if ok {
+		identify = true
+		return
+	}
+	if method != "" && uri != "" && version != "" {
 		identify = true
 	}
 	return
