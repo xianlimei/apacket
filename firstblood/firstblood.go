@@ -151,6 +151,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	payloadBuf := bytes.Buffer{}
 
 	var stageTls bool
+	var firstPalyloadLen int
 
 	for {
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
@@ -160,6 +161,9 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			break
 		}
 
+		if firstPalyloadLen == 0 {
+			firstPalyloadLen = l
+		}
 		payload := buf[:l]
 
 		//fmt.Println(payload)
@@ -205,7 +209,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 
 	}
-	if payloadBuf.Len() > 0 {
+	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
 		pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payloadBuf.Bytes())
 		if err != nil {
 			return
