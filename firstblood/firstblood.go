@@ -23,6 +23,7 @@ type FirstBlood struct {
 	ListenAddr    string
 	TLSListenAddr string
 	outputer      outputs.Outputer
+	session       *Session
 	//sha1Filter *outputs.ShaOneFilter
 }
 
@@ -51,6 +52,7 @@ func NewFirstBlood() *FirstBlood {
 		ListenAddr:    config.Cfg.ListenAddr,
 		TLSListenAddr: config.Cfg.TLSListenAddr,
 		outputer:      o,
+		session:       NewSesson(),
 		//sha1Filter: shaone,
 	}
 	return fb
@@ -122,21 +124,24 @@ func (fb *FirstBlood) tlsRedirect(payload []byte, conn net.Conn) (response []byt
 	return
 }
 
-func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn) {
+func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) {
 	conn, err := net.DialTimeout("tcp", config.Cfg.TLSListenAddr, time.Second*3)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	tlsProxyLocalAddr = conn.LocalAddr().String()
 	return
 }
 
 func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	var tlsProxyConn net.Conn
+	var tlsProxyLocalAddr, remoteAddr, localAddr string
 
 	defer func() {
 		conn.Close()
 		if tlsProxyConn != nil {
+			fb.session.DeleteSession(tlsProxyLocalAddr)
 			tlsProxyConn.Close()
 		}
 		if err := recover(); err != nil {
@@ -174,7 +179,9 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			payload[1] >= 0x00 && payload[1] <= 0x03 && //SSL/3.0 TLS/1.0/1.1/1.2
 			payload[5] == TypeClientHello {
 			stageTls = true
-			tlsProxyConn = fb.getTLSProxyConn()
+			tlsProxyConn, tlsProxyLocalAddr = fb.getTLSProxyConn()
+			nf := &Netflow{conn.RemoteAddr().String(), conn.LocalAddr().String()}
+			fb.session.AddSession(tlsProxyLocalAddr, nf)
 		}
 		if stageTls {
 			res := fb.tlsRedirect(payload, tlsProxyConn)
@@ -189,10 +196,18 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			break
 		}
 
+		remoteAddr = conn.RemoteAddr().String()
+		localAddr = conn.LocalAddr().String()
+		netflow, ok := fb.session.QuerySession(conn.RemoteAddr().String())
+		if ok {
+			remoteAddr = netflow.RemoteAddr
+			localAddr = netflow.LocalAddr
+		}
+
 		for _, disguiser := range DisguiserMap {
 			identify, _ := disguiser.Fingerprint(payload)
 			if identify {
-				pkt := disguiser.Parser(conn.RemoteAddr().String(), conn.LocalAddr().String(), payload)
+				pkt := disguiser.Parser(remoteAddr, localAddr, payload)
 				/*
 					if fb.sha1Filter.Hit(pkt.Psha1) {
 						break
@@ -210,7 +225,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
-		pkt, err := NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(), PtypeOther, TransportTCP, payloadBuf.Bytes())
+		pkt, err := NewApplayer(remoteAddr, localAddr, PtypeOther, TransportTCP, payloadBuf.Bytes())
 		if err != nil {
 			return
 		}
