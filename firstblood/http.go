@@ -187,8 +187,8 @@ func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
 	return
 }
 
-func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte) (response *Applayer) {
-	response, err := NewApplayer(remoteAddr, localAddr, PtypeHTTP, TransportTCP, nil)
+func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer) {
+	response, err := NewApplayer(remoteAddr, localAddr, ptype, TransportTCP, nil)
 	if err != nil {
 		return
 	}

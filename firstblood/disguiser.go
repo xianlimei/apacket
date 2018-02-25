@@ -20,6 +20,7 @@ const (
 
 const (
 	PtypeHTTP  = "http"
+	PtypeHTTPS = "https"
 	PtypeOther = "other"
 )
 
@@ -77,7 +78,7 @@ func (app *Applayer) Sha1HexDigest(str string) string {
 type Disguiser interface {
 	Fingerprint(request []byte) (identify bool, err error)
 	DisguiserResponse(request []byte) (response []byte)
-	Parser(remoteAddr, localAddr string, request []byte) (response *Applayer)
+	Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer)
 }
 
 var DisguiserMap []Disguiser
