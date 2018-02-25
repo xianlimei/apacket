@@ -171,6 +171,8 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 		payload := buf[:l]
 
+		remoteAddr = conn.RemoteAddr().String()
+		localAddr = conn.LocalAddr().String()
 		//fmt.Println(payload)
 		//TODO ssl protocol identify
 		if !stageTls && !isTLSConn &&
@@ -180,7 +182,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			payload[5] == TypeClientHello {
 			stageTls = true
 			tlsProxyConn, tlsProxyLocalAddr = fb.getTLSProxyConn()
-			nf := &Netflow{conn.RemoteAddr().String(), conn.LocalAddr().String()}
+			nf := &Netflow{remoteAddr, localAddr}
 			fb.session.AddSession(tlsProxyLocalAddr, nf)
 		}
 		if stageTls {
@@ -196,8 +198,6 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			break
 		}
 
-		remoteAddr = conn.RemoteAddr().String()
-		localAddr = conn.LocalAddr().String()
 		ptype = PtypeHTTP
 		netflow, ok := fb.session.QuerySession(conn.RemoteAddr().String())
 		if ok {
