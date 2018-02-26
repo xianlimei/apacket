@@ -111,13 +111,11 @@ func (fb *FirstBlood) TLSListen(network, address string) error {
 func (fb *FirstBlood) tlsRedirect(payload []byte, conn net.Conn) (response []byte) {
 	l, err := conn.Write(payload)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	buf := make([]byte, PAYLOAD_MAX_LEN)
 	l, err = conn.Read(buf)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	response = buf[:l]
@@ -158,6 +156,9 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	var stageTls bool
 	var firstPalyloadLen int
 
+	remoteAddr = conn.RemoteAddr().String()
+	localAddr = conn.LocalAddr().String()
+
 	for {
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
@@ -171,8 +172,6 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 		payload := buf[:l]
 
-		remoteAddr = conn.RemoteAddr().String()
-		localAddr = conn.LocalAddr().String()
 		//fmt.Println(payload)
 		//TODO ssl protocol identify
 		if !stageTls && !isTLSConn &&
