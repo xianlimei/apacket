@@ -188,6 +188,7 @@ func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
 }
 
 func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer) {
+	var reqAddr string
 	response, err := NewApplayer(remoteAddr, localAddr, ptype, TransportTCP, nil)
 	if err != nil {
 		return
@@ -199,6 +200,30 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	response.Http.Payload = cPayload.Bytes()
 	response.Psha1 = response.Sha1HexDigest(string(request))
 	response.Plen = uint(len(request))
+
+	hostPort, ok := response.Http.Headers["host"]
+	if !ok {
+		return
+	}
+
+	host, port, ipv, err := getIPPort(hostPort)
+	if err != nil {
+		return
+	}
+
+	if ipv == IPv4 {
+		reqAddr = response.IP4.Dip
+	} else if ipv == IPv6 {
+		reqAddr = response.IP6.Dip
+	} else {
+		return
+	}
+
+	if reqAddr == host || intranetIP(host) {
+		if port != 0 {
+			response.TCP.Dport = port
+		}
+	}
 	return
 }
 

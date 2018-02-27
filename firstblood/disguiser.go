@@ -6,8 +6,6 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -88,25 +86,6 @@ func init() {
 	DisguiserMap = append(DisguiserMap, http)
 }
 
-func getIPPort(addr string) (ip string, port uint16, ipv int, err error) {
-	var iPort int
-	ipPort := strings.Split(addr, ":")
-	_len := len(ipPort)
-	if _len > 2 {
-		ip = strings.Join(ipPort[0:_len-1], ":")
-		iPort, err = strconv.Atoi(ipPort[_len-1])
-		ipv = IPv6
-	} else {
-		ip = ipPort[0]
-		iPort, err = strconv.Atoi(ipPort[_len-1])
-		ipv = IPv4
-	}
-	if err == nil {
-		port = uint16(iPort)
-	}
-	return
-}
-
 func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte) (applayer *Applayer, err error) {
 
 	ip4 := &IP4{}
@@ -169,54 +148,4 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 	}
 
 	return
-}
-
-func parseInt(line []byte) (int, error) {
-	i, err := strconv.Atoi(string(line))
-	return int(i), err
-	// TODO: is it an error if 'buf.Len() != 0 {}' ?
-}
-
-func trim(buf []byte) []byte {
-	return trimLeft(trimRight(buf))
-}
-
-func trimLeft(buf []byte) []byte {
-	for i, b := range buf {
-		if b != ' ' && b != '\t' {
-			return buf[i:]
-		}
-	}
-	return nil
-}
-
-func trimRight(buf []byte) []byte {
-	for i := len(buf) - 1; i > 0; i-- {
-		b := buf[i]
-		if b != ' ' && b != '\t' {
-			return buf[:i+1]
-		}
-	}
-	return nil
-}
-
-func toLower(buf, in []byte) []byte {
-	if len(in) > len(buf) {
-		goto unbufferedToLower
-	}
-
-	for i, b := range in {
-		if b > 127 {
-			goto unbufferedToLower
-		}
-
-		if 'A' <= b && b <= 'Z' {
-			b = b - 'A' + 'a'
-		}
-		buf[i] = b
-	}
-	return buf[:len(in)]
-
-unbufferedToLower:
-	return bytes.ToLower(in)
 }
