@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"net"
 	"os/exec"
 	"strings"
 	"time"
@@ -211,6 +212,10 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 		return
 	}
 
+	if port == 0 {
+		return
+	}
+
 	if ipv == IPv4 {
 		reqAddr = response.IP4.Dip
 	} else if ipv == IPv6 {
@@ -220,9 +225,21 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	}
 
 	if reqAddr == host || intranetIP(host) {
-		if port != 0 {
+		response.TCP.Dport = port
+	} else {
+		//May need to modify 24 to 32
+		_, reqAddrNet, err := net.ParseCIDR(reqAddr + "/24")
+		if err != nil {
+			return
+		}
+		_, hostNet, err := net.ParseCIDR(host + "/24")
+		if err != nil {
+			return
+		}
+		if reqAddrNet.String() == hostNet.String() {
 			response.TCP.Dport = port
 		}
+
 	}
 	return
 }
