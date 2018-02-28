@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/firstblood/core"
-	"github.com/Acey9/apacket/firstblood/http"
 	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
@@ -245,11 +244,4 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			fb.outputer.Output(out)
 		}
 	}
-}
-
-var DisguiserMap []core.Disguiser
-
-func init() {
-	http := http.NewHTTP()
-	DisguiserMap = append(DisguiserMap, http)
 }
