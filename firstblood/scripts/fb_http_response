@@ -56,6 +56,10 @@ http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"htt
 <input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" style=\"width:100px;\" />\
 <input type=\"submit\" name=\"Button1\" value=\"login\" onclick=\"login\" id=\"Button1\" class=\"button2\" />\
 </form>\
+<config-auth client=\"vpn\" type=\"complete\">\
+<version who=\"sg\">9.0(1)</version>\
+<error id=\"98\" param1=\"\" param2=\"\">VPN Server could not parse request.</error>\
+</config-auth>\
 </body></html>"
 
 http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
@@ -159,7 +163,7 @@ class ResponseHttp(object):
 
         if self.auto_add_item:
             headers.sort()
-        res = '%s\r\n%s\r\n\r\n%s' % (response_line, '\r\n'.join(headers), self.body)
+        res = '%s\r\n%s\r\n\r\n%s\r\n' % (response_line, '\r\n'.join(headers), self.body)
         return res
 
     def defaultResponse(self):
