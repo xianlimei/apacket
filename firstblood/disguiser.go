@@ -9,19 +9,6 @@ import (
 	"time"
 )
 
-const (
-	TransportTCP = 6
-	TransportUDP = 17
-	IPv4         = 4
-	IPv6         = 6
-)
-
-const (
-	PtypeHTTP  = "http"
-	PtypeHTTPS = "https"
-	PtypeOther = "other"
-)
-
 type IP4 struct {
 	Sip      string `json:"sip"`
 	Dip      string `json:"dip"`
@@ -74,7 +61,7 @@ func (app *Applayer) Sha1HexDigest(str string) string {
 }
 
 type Disguiser interface {
-	Fingerprint(request []byte) (identify bool, err error)
+	Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error)
 	DisguiserResponse(request []byte) (response []byte)
 	Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer)
 }

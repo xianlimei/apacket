@@ -134,7 +134,7 @@ func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string
 
 func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	var tlsProxyConn net.Conn
-	var tlsProxyLocalAddr, remoteAddr, localAddr, ptype string
+	var tlsProxyLocalAddr, remoteAddr, localAddr string
 
 	defer func() {
 		conn.Close()
@@ -153,7 +153,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	response := []byte("\x00\x00")
 	payloadBuf := bytes.Buffer{}
 
-	var stageTls bool
+	var stageTls, tlsTag bool
 	var firstPalyloadLen int
 
 	remoteAddr = conn.RemoteAddr().String()
@@ -197,20 +197,19 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			break
 		}
 
-		ptype = PtypeHTTP
 		if isTLSConn {
-			ptype = PtypeHTTPS
+			tlsTag = true
 		}
 
 		netflow, ok := fb.session.QuerySession(conn.RemoteAddr().String())
 		if ok {
 			remoteAddr = netflow.RemoteAddr
 			localAddr = netflow.LocalAddr
-			ptype = PtypeHTTPS
+			tlsTag = true
 		}
 
 		for _, disguiser := range DisguiserMap {
-			identify, _ := disguiser.Fingerprint(payload)
+			identify, ptype, _ := disguiser.Fingerprint(payload, tlsTag)
 			if identify {
 				pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype)
 				/*

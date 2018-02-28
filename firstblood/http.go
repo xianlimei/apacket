@@ -175,7 +175,11 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	return
 }
 
-func (http *HTTP) Fingerprint(request []byte) (identify bool, err error) {
+func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
+	ptype = PtypeHTTP
+	if tlsTag {
+		ptype = PtypeHTTPS
+	}
 	method, uri, version := http.ParseHttpLine(request)
 	_, ok := methodMap[method]
 	if ok {
