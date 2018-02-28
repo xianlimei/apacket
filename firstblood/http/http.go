@@ -1,8 +1,9 @@
-package firstblood
+package http
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/Acey9/apacket/firstblood/core"
 	"math/rand"
 	"net"
 	"os/exec"
@@ -176,9 +177,9 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 }
 
 func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
-	ptype = PtypeHTTP
+	ptype = core.PtypeHTTP
 	if tlsTag {
-		ptype = PtypeHTTPS
+		ptype = core.PtypeHTTPS
 	}
 	method, uri, version := http.ParseHttpLine(request)
 	_, ok := methodMap[method]
@@ -192,26 +193,27 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 	return
 }
 
-func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer) {
+func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *core.Applayer) {
 	var reqAddr string
-	response, err := NewApplayer(remoteAddr, localAddr, ptype, TransportTCP, nil)
+	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, nil)
 	if err != nil {
 		return
 	}
 
-	response.Http = &HTTPMsg{Payload: request}
-	response.Http.parse()
+	httpMSG := &HTTPMsg{Payload: request}
+	httpMSG.parse()
 	cPayload := response.Compress(request)
-	response.Http.Payload = cPayload.Bytes()
+	httpMSG.Payload = cPayload.Bytes()
+	response.Appp = httpMSG
 	response.Psha1 = response.Sha1HexDigest(string(request))
 	response.Plen = uint(len(request))
 
-	hostPort, ok := response.Http.Headers["host"]
+	hostPort, ok := httpMSG.Headers["host"]
 	if !ok {
 		return
 	}
 
-	host, port, ipv, err := getIPPort(hostPort)
+	host, port, ipv, err := core.GetIPPort(hostPort)
 	if err != nil {
 		return
 	}
@@ -220,15 +222,15 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 		return
 	}
 
-	if ipv == IPv4 {
+	if ipv == core.IPv4 {
 		reqAddr = response.IP4.Dip
-	} else if ipv == IPv6 {
+	} else if ipv == core.IPv6 {
 		reqAddr = response.IP6.Dip
 	} else {
 		return
 	}
 
-	if reqAddr == host || intranetIP(host) {
+	if reqAddr == host || core.IntranetIP(host) {
 		response.TCP.Dport = port
 	} else {
 		//May need to modify 24 to 32
@@ -338,11 +340,11 @@ func (http *HTTPMsg) parseHeader(data []byte) (bool, bool, int) {
 			p = p + 2
 		} else {
 			var headerNameBuf [140]byte
-			headerName := toLower(headerNameBuf[:], data[:i])
-			headerVal := trim(data[i+1 : p])
+			headerName := core.ToLower(headerNameBuf[:], data[:i])
+			headerVal := core.Trim(data[i+1 : p])
 
 			if bytes.Equal(headerName, nameContentLength) {
-				http.contentLength, _ = parseInt(headerVal)
+				http.contentLength, _ = core.ParseInt(headerVal)
 				http.hasContentLength = true
 			} else if bytes.Equal(headerName, nameContentType) {
 				http.contentType = string(headerVal)

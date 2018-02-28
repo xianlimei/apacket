@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Acey9/apacket/config"
+	"github.com/Acey9/apacket/firstblood/core"
+	"github.com/Acey9/apacket/firstblood/http"
 	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
@@ -229,7 +231,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
-		pkt, err := NewApplayer(remoteAddr, localAddr, PtypeOther, TransportTCP, payloadBuf.Bytes())
+		pkt, err := core.NewApplayer(remoteAddr, localAddr, core.PtypeOther, core.TransportTCP, payloadBuf.Bytes())
 		if err != nil {
 			return
 		}
@@ -243,4 +245,11 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			fb.outputer.Output(out)
 		}
 	}
+}
+
+var DisguiserMap []core.Disguiser
+
+func init() {
+	http := http.NewHTTP()
+	DisguiserMap = append(DisguiserMap, http)
 }

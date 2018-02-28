@@ -1,4 +1,4 @@
-package firstblood
+package core
 
 const (
 	TransportTCP = 6

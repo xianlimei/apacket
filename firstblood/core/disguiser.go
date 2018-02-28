@@ -1,4 +1,4 @@
-package firstblood
+package core
 
 import (
 	"bytes"
@@ -43,7 +43,8 @@ type Applayer struct {
 	IP6   *IP6      `json:"ip6,omitempty"`
 	TCP   *TCP      `json:"tcp,omitempty"`
 	UDP   *UDP      `json:"udp,omitempty"`
-	Http  *HTTPMsg  `json:"http,omitempty"`
+	//Http  *HTTPMsg  `json:"http,omitempty"`
+	Appp interface{} `json:"appp,omitempty"`
 }
 
 func (app *Applayer) Compress(source []byte) bytes.Buffer {
@@ -66,13 +67,6 @@ type Disguiser interface {
 	Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer)
 }
 
-var DisguiserMap []Disguiser
-
-func init() {
-	http := NewHTTP()
-	DisguiserMap = append(DisguiserMap, http)
-}
-
 func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte) (applayer *Applayer, err error) {
 
 	ip4 := &IP4{}
@@ -85,12 +79,12 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 		Ptype: ptype,
 	}
 
-	sip, sport, ipv, err := getIPPort(remoteAddr)
+	sip, sport, ipv, err := GetIPPort(remoteAddr)
 	if err != nil {
 		return
 	}
 
-	dip, dport, ipv, err := getIPPort(localAddr)
+	dip, dport, ipv, err := GetIPPort(localAddr)
 	if err != nil {
 		return
 	}

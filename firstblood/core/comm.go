@@ -1,4 +1,4 @@
-package firstblood
+package core
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func intranetIP(ipStr string) bool {
+func IntranetIP(ipStr string) bool {
 	var ipInt uint32
 	ip, _, err := net.ParseCIDR(ipStr + "/32")
 	if err != nil {
@@ -42,7 +42,7 @@ func intranetIP(ipStr string) bool {
 	return false
 }
 
-func getIPPort(addr string) (ip string, port uint16, ipv int, err error) {
+func GetIPPort(addr string) (ip string, port uint16, ipv int, err error) {
 	var iPort int
 	ipPort := strings.Split(addr, ":")
 	_len := len(ipPort)
@@ -61,17 +61,17 @@ func getIPPort(addr string) (ip string, port uint16, ipv int, err error) {
 	return
 }
 
-func parseInt(line []byte) (int, error) {
+func ParseInt(line []byte) (int, error) {
 	i, err := strconv.Atoi(string(line))
 	return int(i), err
 	// TODO: is it an error if 'buf.Len() != 0 {}' ?
 }
 
-func trim(buf []byte) []byte {
-	return trimLeft(trimRight(buf))
+func Trim(buf []byte) []byte {
+	return TrimLeft(TrimRight(buf))
 }
 
-func trimLeft(buf []byte) []byte {
+func TrimLeft(buf []byte) []byte {
 	for i, b := range buf {
 		if b != ' ' && b != '\t' {
 			return buf[i:]
@@ -80,7 +80,7 @@ func trimLeft(buf []byte) []byte {
 	return nil
 }
 
-func trimRight(buf []byte) []byte {
+func TrimRight(buf []byte) []byte {
 	for i := len(buf) - 1; i > 0; i-- {
 		b := buf[i]
 		if b != ' ' && b != '\t' {
@@ -90,7 +90,7 @@ func trimRight(buf []byte) []byte {
 	return nil
 }
 
-func toLower(buf, in []byte) []byte {
+func ToLower(buf, in []byte) []byte {
 	if len(in) > len(buf) {
 		goto unbufferedToLower
 	}
