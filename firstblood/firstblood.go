@@ -198,6 +198,10 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 
 		ptype = PtypeHTTP
+		if isTLSConn {
+			ptype = PtypeHTTPS
+		}
+
 		netflow, ok := fb.session.QuerySession(conn.RemoteAddr().String())
 		if ok {
 			remoteAddr = netflow.RemoteAddr

@@ -40,6 +40,7 @@ type Packet struct {
 	Icmp6       *ICMPv6   `json:"icmp6,omitempty"`
 	Flow        *Flow     `json:"-"`
 	PayloadSha1 string    `json:"psha1,omitempty"`
+	Plen        uint      `json:"plen,omitempty"`
 }
 
 func (pkt *Packet) Compress(source []byte) bytes.Buffer {
@@ -56,10 +57,11 @@ func (pkt *Packet) Sha1HexDigest(str string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (pkt *Packet) CompressPayload() (psha1 string) {
+func (pkt *Packet) CompressPayload() (psha1 string, plen uint) {
 	switch pkt.PktType {
 	case PktTypeTCPACK:
-		if len(pkt.Tcp.Payload) != 0 {
+		plen = uint(len(pkt.Tcp.Payload))
+		if plen != 0 {
 			psha1 = pkt.Sha1HexDigest(string(pkt.Tcp.Payload))
 			cPayload := pkt.Compress(pkt.Tcp.Payload)
 			pkt.Tcp.Payload = cPayload.Bytes()
@@ -67,19 +69,21 @@ func (pkt *Packet) CompressPayload() (psha1 string) {
 	//case PktTypeTCPSYNACK:
 	//	pl = pkt.Tcp.Payload
 	case PktTypeTCP:
-		if len(pkt.Tcp.Payload) != 0 {
+		plen = uint(len(pkt.Tcp.Payload))
+		if plen != 0 {
 			psha1 = pkt.Sha1HexDigest(string(pkt.Tcp.Payload))
 			cPayload := pkt.Compress(pkt.Tcp.Payload)
 			pkt.Tcp.Payload = cPayload.Bytes()
 		}
 	case PktTypeUDP:
-		if len(pkt.Udp.Payload) != 0 {
+		plen = uint(len(pkt.Udp.Payload))
+		if plen != 0 {
 			psha1 = pkt.Sha1HexDigest(string(pkt.Udp.Payload))
 			cPayload := pkt.Compress(pkt.Udp.Payload)
 			pkt.Udp.Payload = cPayload.Bytes()
 		}
 	}
-	return psha1
+	return
 }
 
 type PktType uint8

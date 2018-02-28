@@ -47,7 +47,9 @@ func (pub *Publisher) output(pkt *decoder.Packet) {
 		}
 	}()
 
-	pkt.PayloadSha1 = pkt.CompressPayload()
+	payloadSha1, plen := pkt.CompressPayload()
+	pkt.PayloadSha1 = payloadSha1
+	pkt.Plen = plen
 	/*
 		if pub.sha1Filter.Hit(pkt.PayloadSha1) {
 			return
