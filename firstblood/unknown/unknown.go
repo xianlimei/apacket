@@ -2,6 +2,7 @@ package unknown
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/Acey9/apacket/firstblood/core"
 	"os/exec"
@@ -27,7 +28,8 @@ func (s *Unknown) Parser(remoteAddr, localAddr string, request []byte, ptype str
 
 func (s *Unknown) DisguiserResponse(request []byte) (response []byte) {
 	var out bytes.Buffer
-	cmd := exec.Command(CmdUnknownResponse, string(request))
+	str := base64.StdEncoding.EncodeToString(request)
+	cmd := exec.Command(CmdUnknownResponse, str)
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {

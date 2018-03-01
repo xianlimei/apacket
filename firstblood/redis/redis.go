@@ -2,6 +2,7 @@ package redis
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/Acey9/apacket/firstblood/core"
 	"os/exec"
@@ -91,7 +92,8 @@ func (s *Redis) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 
 func (s *Redis) DisguiserResponse(request []byte) (response []byte) {
 	var out bytes.Buffer
-	cmd := exec.Command(CmdRedisResponse, string(request))
+	str := base64.StdEncoding.EncodeToString(request)
+	cmd := exec.Command(CmdRedisResponse, str)
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {

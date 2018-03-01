@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/firstblood/core"
-	//"github.com/Acey9/apacket/firstblood/unknown"
+	"github.com/Acey9/apacket/firstblood/unknown"
 	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
@@ -162,7 +162,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
 
-	//unk := unknown.NewUnknown()
+	unk := unknown.NewUnknown()
 
 	for {
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
@@ -223,8 +223,8 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			}
 		}
 		if !identify {
-			//response = unk.DisguiserResponse(payload)
-			response = []byte("\x00\x00")
+			response = unk.DisguiserResponse(payload)
+			//response = []byte("\x00\x00")
 			if len(response) != 0 {
 				conn.Write(response)
 			}

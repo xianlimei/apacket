@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/Acey9/apacket/firstblood/core"
 	"math/rand"
@@ -252,7 +253,8 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 
 func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
 	var out bytes.Buffer
-	cmd := exec.Command(CmdHttpResponse, string(request))
+	str := base64.StdEncoding.EncodeToString(request)
+	cmd := exec.Command(CmdHttpResponse, str)
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
