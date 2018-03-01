@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/firstblood/core"
+	"github.com/Acey9/apacket/firstblood/unknown"
 	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
@@ -161,6 +162,8 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
 
+	unk := unknown.NewUnknown()
+
 	for {
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
@@ -213,10 +216,16 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		for _, disguiser := range DisguiserMap {
 			identify, response = fb.identifyProto(disguiser, payload, remoteAddr, localAddr, tlsTag)
 			if identify {
-				if response != nil {
+				if len(response) != 0 {
 					conn.Write(response)
 				}
 				break
+			}
+		}
+		if !identify {
+			response = unk.DisguiserResponse(payload)
+			if len(response) != 0 {
+				conn.Write(response)
 			}
 		}
 
