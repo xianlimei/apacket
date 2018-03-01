@@ -10,5 +10,8 @@ const (
 const (
 	PtypeHTTP  = "http"
 	PtypeHTTPS = "https"
+
+	PtypeRedis = "redis"
+
 	PtypeOther = "other"
 )

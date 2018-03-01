@@ -38,13 +38,14 @@ type Applayer struct {
 	Ptype string    `json:"ptype"`
 	Psha1 string    `json:"psha1,omitempty"`
 	Plen  uint      `json:"plen,omitempty"`
+	TLS   bool      `json:"tls,omitempty"`
 	IPv   uint8     `json:"ipv"`
 	IP4   *IP4      `json:"ip4,omitempty"`
 	IP6   *IP6      `json:"ip6,omitempty"`
 	TCP   *TCP      `json:"tcp,omitempty"`
 	UDP   *UDP      `json:"udp,omitempty"`
 	//Http  *HTTPMsg  `json:"http,omitempty"`
-	Appp interface{} `json:"appp,omitempty"`
+	Appl interface{} `json:"appl,omitempty"`
 }
 
 func (app *Applayer) Compress(source []byte) bytes.Buffer {
@@ -64,10 +65,10 @@ func (app *Applayer) Sha1HexDigest(str string) string {
 type Disguiser interface {
 	Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error)
 	DisguiserResponse(request []byte) (response []byte)
-	Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *Applayer)
+	Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *Applayer)
 }
 
-func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte) (applayer *Applayer, err error) {
+func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte, tls bool) (applayer *Applayer, err error) {
 
 	ip4 := &IP4{}
 	ip6 := &IP6{}
@@ -77,6 +78,7 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 	applayer = &Applayer{
 		Ts:    time.Now(),
 		Ptype: ptype,
+		TLS:   tls,
 	}
 
 	sip, sport, ipv, err := GetIPPort(remoteAddr)

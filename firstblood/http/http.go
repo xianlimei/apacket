@@ -193,9 +193,9 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 	return
 }
 
-func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string) (response *core.Applayer) {
+func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *core.Applayer) {
 	var reqAddr string
-	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, nil)
+	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, nil, tls)
 	if err != nil {
 		return
 	}
@@ -204,7 +204,7 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	httpMSG.parse()
 	cPayload := response.Compress(request)
 	httpMSG.Payload = cPayload.Bytes()
-	response.Appp = httpMSG
+	response.Appl = httpMSG
 	response.Psha1 = response.Sha1HexDigest(string(request))
 	response.Plen = uint(len(request))
 

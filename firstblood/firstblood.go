@@ -136,6 +136,7 @@ func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string
 func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 	var tlsProxyConn net.Conn
 	var tlsProxyLocalAddr, remoteAddr, localAddr string
+	var identify bool
 
 	defer func() {
 		conn.Close()
@@ -144,7 +145,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			tlsProxyConn.Close()
 		}
 		if err := recover(); err != nil {
-			fmt.Println(err)
+			fmt.Println("initHandler:", err)
 		}
 	}()
 
@@ -210,27 +211,18 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 
 		for _, disguiser := range DisguiserMap {
-			identify, ptype, _ := disguiser.Fingerprint(payload, tlsTag)
+			identify, response = fb.identifyProto(disguiser, payload, remoteAddr, localAddr, tlsTag)
 			if identify {
-				pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype)
-				/*
-					if fb.sha1Filter.Hit(pkt.Psha1) {
-						break
-					}
-				*/
-				out, err := json.Marshal(pkt)
-				if err == nil {
-					fb.outputer.Output(out)
+				if response != nil {
+					conn.Write(response)
 				}
-				response = disguiser.DisguiserResponse(payload)
-				conn.Write(response)
 				break
 			}
 		}
 
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
-		pkt, err := core.NewApplayer(remoteAddr, localAddr, core.PtypeOther, core.TransportTCP, payloadBuf.Bytes())
+		pkt, err := core.NewApplayer(remoteAddr, localAddr, core.PtypeOther, core.TransportTCP, payloadBuf.Bytes(), tlsTag)
 		if err != nil {
 			return
 		}
@@ -244,4 +236,30 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			fb.outputer.Output(out)
 		}
 	}
+}
+
+func (fb *FirstBlood) identifyProto(disguiser core.Disguiser, payload []byte, remoteAddr, localAddr string, tlsTag bool) (identify bool, response []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("identifyProto:", err)
+		}
+	}()
+
+	identify, ptype, _ := disguiser.Fingerprint(payload, tlsTag)
+	if identify {
+		pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype, tlsTag)
+		/*
+			if fb.sha1Filter.Hit(pkt.Psha1) {
+				break
+			}
+		*/
+		out, err := json.Marshal(pkt)
+		if err == nil {
+			fb.outputer.Output(out)
+		}
+		response = disguiser.DisguiserResponse(payload)
+		//fmt.Printf("response:% 2x\t\ts:%s:s\n", response, string(response))
+
+	}
+	return
 }
