@@ -10,10 +10,6 @@ import (
 var DisguiserMap []core.Disguiser
 var serviceMap = map[string]core.Services{}
 
-const (
-	nameServiceMail = "mail"
-)
-
 func init() {
 	http := http.NewHTTP()
 	DisguiserMap = append(DisguiserMap, http)
