@@ -177,7 +177,6 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 		payload := buf[:l]
 
-		//fmt.Println(payload)
 		//TODO ssl protocol identify
 		if !stageTls && !isTLSConn &&
 			l >= 6 && payload[0] == TypeHandshake &&
@@ -256,6 +255,7 @@ func (fb *FirstBlood) identifyProto(disguiser core.Disguiser, payload []byte, re
 	}()
 
 	identify, ptype, _ := disguiser.Fingerprint(payload, tlsTag)
+	logp.Debug("firstblood", "disguiser.Fingerprint identify:%v, ptype:%v", identify, ptype)
 	if identify {
 		pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype, tlsTag)
 		/*
@@ -268,7 +268,6 @@ func (fb *FirstBlood) identifyProto(disguiser core.Disguiser, payload []byte, re
 			fb.outputer.Output(out)
 		}
 		response = disguiser.DisguiserResponse(payload)
-		//fmt.Printf("response:% 2x\t\ts:%s:s\n", response, string(response))
 
 	}
 	return

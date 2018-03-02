@@ -3,8 +3,8 @@ package redis
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"github.com/Acey9/apacket/firstblood/core"
+	"github.com/Acey9/apacket/logp"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -28,8 +28,8 @@ func NewRedis() *Redis {
 }
 
 func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
-	//fmt.Printf("request:% 2x\n", request)
-	//fmt.Println(string(request))
+
+	ptype = core.PtypeRedis
 
 	dataType := request[0]
 	if dataType != 0x2a { //*
@@ -70,7 +70,6 @@ func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype s
 	_, ok := allowCMDMap[cmd]
 	if ok {
 		identify = true
-		ptype = core.PtypeRedis
 		return
 	}
 	return
@@ -97,7 +96,7 @@ func (s *Redis) DisguiserResponse(request []byte) (response []byte) {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("Redis.DisguiserResponse.cmd:%v", err)
 		return
 	}
 	response = out.Bytes()

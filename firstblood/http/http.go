@@ -3,8 +3,9 @@ package http
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
+	//"fmt"
 	"github.com/Acey9/apacket/firstblood/core"
+	"github.com/Acey9/apacket/logp"
 	"math/rand"
 	"net"
 	"os/exec"
@@ -151,6 +152,10 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	i := bytes.Index(request, []byte("\r\n"))
 	if i == -1 {
 		afterMethodIdx := bytes.IndexFunc(request, unicode.IsSpace)
+		afterRequestURIIdx := bytes.LastIndexFunc(request, unicode.IsSpace)
+		if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
+			return
+		}
 		method = string(request[:afterMethodIdx])
 		uri = string(request[afterMethodIdx+1:])
 		return
@@ -258,7 +263,7 @@ func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("http.DisguiserResponse.cmd:%v", err)
 		return
 	}
 	response = out.Bytes()
