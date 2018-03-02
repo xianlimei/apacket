@@ -5,10 +5,10 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/firstblood/core"
 	"github.com/Acey9/apacket/firstblood/unknown"
+	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
 	"net"
 	"time"
@@ -70,14 +70,14 @@ func (fb *FirstBlood) Start() {
 func (fb *FirstBlood) Listen(network, address string) error {
 	srv, err := net.Listen(network, address)
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("Listen: %v", err)
 		return err
 	}
 
 	for {
 		conn, err := srv.Accept()
 		if err != nil {
-			fmt.Println(err)
+			logp.Err("Listen.Accept %v", err)
 			break
 		}
 		go fb.initHandler(conn, false)
@@ -88,21 +88,21 @@ func (fb *FirstBlood) Listen(network, address string) error {
 func (fb *FirstBlood) TLSListen(network, address string) error {
 	cer, err := tls.LoadX509KeyPair(config.Cfg.ServerCrt, config.Cfg.ServerKey)
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("TLSListen.tls.config:%v", err)
 		return err
 	}
 	config := &tls.Config{Certificates: []tls.Certificate{cer}}
 
 	srv, err := tls.Listen(network, address, config)
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("TLSListen:%v", err)
 		return err
 	}
 
 	for {
 		conn, err := srv.Accept()
 		if err != nil {
-			fmt.Println(err)
+			logp.Err("TLSListen.Accept:%v", err)
 			break
 		}
 		go fb.initHandler(conn, true)
@@ -127,7 +127,7 @@ func (fb *FirstBlood) tlsRedirect(payload []byte, conn net.Conn) (response []byt
 func (fb *FirstBlood) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) {
 	conn, err := net.DialTimeout("tcp", config.Cfg.TLSListenAddr, time.Second*3)
 	if err != nil {
-		fmt.Println(err)
+		logp.Err("getTLSProxyConn:%v", err)
 		return
 	}
 	tlsProxyLocalAddr = conn.LocalAddr().String()
@@ -146,7 +146,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 			tlsProxyConn.Close()
 		}
 		if err := recover(); err != nil {
-			fmt.Println("initHandler:", err)
+			logp.Err("initHandler remote:%s local:%s info:%v", remoteAddr, localAddr, err)
 		}
 	}()
 
@@ -251,7 +251,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 func (fb *FirstBlood) identifyProto(disguiser core.Disguiser, payload []byte, remoteAddr, localAddr string, tlsTag bool) (identify bool, response []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("identifyProto:", err)
+			logp.Err("identifyProto remote:%s local:%s info:%v", remoteAddr, localAddr, err)
 		}
 	}()
 
