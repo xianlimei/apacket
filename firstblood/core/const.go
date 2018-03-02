@@ -6,12 +6,3 @@ const (
 	IPv4         = 4
 	IPv6         = 6
 )
-
-const (
-	PtypeHTTP  = "http"
-	PtypeHTTPS = "https"
-
-	PtypeRedis = "redis"
-
-	PtypeOther = "other"
-)

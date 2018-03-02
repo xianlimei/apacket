@@ -14,7 +14,11 @@ import (
 	"time"
 )
 
-const PAYLOAD_MAX_LEN = 524288 //512KB
+const (
+	PAYLOAD_MAX_LEN = 524288 //512KB
+	PtypeOther      = "other"
+)
+
 const (
 	TypeHandshake   uint8 = 0x16
 	TypeClientHello uint8 = 0x01
@@ -61,10 +65,25 @@ func NewFirstBlood() *FirstBlood {
 }
 
 func (fb *FirstBlood) Start() {
+
+	fb.ServicesStart()
+
 	if fb.TLSListenAddr != "" {
 		go fb.TLSListen("tcp", fb.TLSListenAddr)
 	}
 	fb.Listen("tcp", fb.ListenAddr)
+}
+
+func (fb *FirstBlood) ServicesStart() {
+	for _, module := range config.Cfg.Args {
+		svr, ok := serviceMap[module]
+		if !ok {
+			logp.Warn("service %s not found.", module)
+			continue
+		}
+		go svr.Start(fb.outputer)
+		logp.Info("%s service start.", module)
+	}
 }
 
 func (fb *FirstBlood) Listen(network, address string) error {
@@ -231,7 +250,7 @@ func (fb *FirstBlood) initHandler(conn net.Conn, isTLSConn bool) {
 
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
-		pkt, err := core.NewApplayer(remoteAddr, localAddr, core.PtypeOther, core.TransportTCP, payloadBuf.Bytes(), tlsTag)
+		pkt, err := core.NewApplayer(remoteAddr, localAddr, PtypeOther, core.TransportTCP, payloadBuf.Bytes(), tlsTag)
 		if err != nil {
 			return
 		}

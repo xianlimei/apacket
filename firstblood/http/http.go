@@ -72,6 +72,8 @@ const (
 
 const (
 	CmdHttpResponse = "fb_http_response"
+	PtypeHTTP       = "http"
+	PtypeHTTPS      = "https"
 )
 
 type parserState uint8
@@ -183,9 +185,9 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 }
 
 func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
-	ptype = core.PtypeHTTP
+	ptype = PtypeHTTP
 	if tlsTag {
-		ptype = core.PtypeHTTPS
+		ptype = PtypeHTTPS
 	}
 	method, uri, version := http.ParseHttpLine(request)
 	_, ok := methodMap[method]

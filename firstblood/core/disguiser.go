@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+type Disguiser interface {
+	Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error)
+	DisguiserResponse(request []byte) (response []byte)
+	Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *Applayer)
+}
+
 type IP4 struct {
 	Sip      string `json:"sip"`
 	Dip      string `json:"dip"`
@@ -60,12 +66,6 @@ func (app *Applayer) Sha1HexDigest(str string) string {
 	h := sha1.New()
 	io.WriteString(h, str)
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-type Disguiser interface {
-	Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error)
-	DisguiserResponse(request []byte) (response []byte)
-	Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *Applayer)
 }
 
 func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte, tls bool) (applayer *Applayer, err error) {

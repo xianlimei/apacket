@@ -21,6 +21,7 @@ type Config struct {
 	TLSListenAddr     string
 	ServerCrt         string
 	ServerKey         string
+	Args              []string
 }
 
 type InterfacesConfig struct {

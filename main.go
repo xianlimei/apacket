@@ -61,7 +61,7 @@ func NewWorker(dl layers.LinkType) (sniffer.Worker, error) {
 func optParse() {
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s [option]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage of %s [option] [services]\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 
@@ -108,6 +108,8 @@ func optParse() {
 	printVersion := flag.Bool("V", false, "Version")
 
 	flag.Parse()
+
+	config.Cfg.Args = flag.Args()
 
 	if *printVersion {
 		fmt.Println(version)

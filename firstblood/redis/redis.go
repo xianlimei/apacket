@@ -17,7 +17,10 @@ var dataTypeMap = map[uint8]bool{
 	0x3a: true, //:
 }
 
-const CmdRedisResponse = "fb_redis_response"
+const (
+	CmdRedisResponse = "fb_redis_response"
+	PtypeRedis       = "redis"
+)
 
 type Redis struct {
 }
@@ -29,7 +32,7 @@ func NewRedis() *Redis {
 
 func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
 
-	ptype = core.PtypeRedis
+	ptype = PtypeRedis
 
 	dataType := request[0]
 	if dataType != 0x2a { //*
