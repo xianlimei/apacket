@@ -44,7 +44,7 @@ type SmtpMsg struct {
 func NewSmtp() *Smtp {
 	m := &Smtp{
 		name:       "smtp",
-		listenAddr: "127.0.0.1:25",
+		listenAddr: "0.0.0.0:25",
 	}
 	return m
 }
