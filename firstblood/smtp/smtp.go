@@ -36,10 +36,15 @@ type Smtp struct {
 	outputer   outputs.Outputer
 }
 
+type SmtpMsg struct {
+	Payload     []byte `json:"payload,omitempty"`
+	ContentType string `json:"ctype,omitempty"`
+}
+
 func NewSmtp() *Smtp {
 	m := &Smtp{
 		name:       "smtp",
-		listenAddr: "0.0.0.0:25",
+		listenAddr: "127.0.0.1:25",
 	}
 	return m
 }
@@ -96,6 +101,7 @@ func (m *Smtp) parserCmd(payload []byte) (cmd string, content []byte) {
 }
 
 func (m *Smtp) initHandler(conn net.Conn) {
+
 	defer func() {
 		conn.Close()
 		if err := recover(); err != nil {
@@ -106,6 +112,9 @@ func (m *Smtp) initHandler(conn net.Conn) {
 	conn.Write(ServerHello)
 
 	var stageAuth, stageSend bool
+
+	raddr := conn.RemoteAddr().String()
+	laddr := conn.LocalAddr().String()
 
 	for {
 		conn.SetDeadline(time.Now().Add(15 * time.Second))
@@ -131,25 +140,33 @@ func (m *Smtp) initHandler(conn net.Conn) {
 			logp.Debug("smtp", "response auth ok:%s", string(authSuccessful))
 			stageAuth = false
 			conn.Write(authSuccessful)
-			m.sendLog(conn, payload)
+			m.sendLog(raddr, laddr, "auth", payload)
 		} else if stageSend {
 			logp.Debug("smtp", "response send ok:%s", string(sendOK))
 			stageSend = false
 			conn.Write(sendOK)
-			m.sendLog(conn, payload)
+			m.sendLog(raddr, laddr, "content", payload)
 		} else {
 			conn.Write(OK)
 		}
 	}
 }
 
-func (m *Smtp) sendLog(conn net.Conn, payload []byte) {
-	pkt, err := core.NewApplayer(conn.RemoteAddr().String(), conn.LocalAddr().String(),
-		PtypeSmtp, core.TransportTCP, payload, false)
+func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
+	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, nil, false)
 	if err != nil {
 		logp.Err("Smtp.sendLog:%v", err)
 		return
 	}
+
+	msg := &SmtpMsg{
+		Payload:     payload,
+		ContentType: ctype,
+	}
+	cPayload := pkt.Compress(payload)
+	msg.Payload = cPayload.Bytes()
+	pkt.ResetAppl(payload, msg)
+
 	out, err := json.Marshal(pkt)
 	if err == nil {
 		m.outputer.Output(out)

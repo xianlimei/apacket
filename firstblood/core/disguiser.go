@@ -68,6 +68,12 @@ func (app *Applayer) Sha1HexDigest(str string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+func (app *Applayer) ResetAppl(payload []byte, appl interface{}) {
+	app.Psha1 = app.Sha1HexDigest(string(payload))
+	app.Plen = uint(len(payload))
+	app.Appl = appl
+}
+
 func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []byte, tls bool) (applayer *Applayer, err error) {
 
 	ip4 := &IP4{}

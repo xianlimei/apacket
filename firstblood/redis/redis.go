@@ -86,9 +86,7 @@ func (s *Redis) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 	msg := &RedisMsg{Payload: request}
 	cPayload := response.Compress(request)
 	msg.Payload = cPayload.Bytes()
-	response.Appl = msg
-	response.Psha1 = response.Sha1HexDigest(string(request))
-	response.Plen = uint(len(request))
+	response.ResetAppl(request, msg)
 	return
 }
 

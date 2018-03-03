@@ -212,9 +212,7 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	httpMSG.parse()
 	cPayload := response.Compress(request)
 	httpMSG.Payload = cPayload.Bytes()
-	response.Appl = httpMSG
-	response.Psha1 = response.Sha1HexDigest(string(request))
-	response.Plen = uint(len(request))
+	response.ResetAppl(request, httpMSG)
 
 	hostPort, ok := httpMSG.Headers["host"]
 	if !ok {
