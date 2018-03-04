@@ -7,7 +7,7 @@ It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big
 # Features
 
 * Capture TCP/SYN and backscatter packet only.
-* Capture TCP first payload，reference [blackhole](https://github.com/dudeintheshell/blackhole).
+* Capture TCP payload，reference [blackhole](https://github.com/dudeintheshell/blackhole).
 * Capture all packets.
 
 # Installation from source

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
-	"github.com/Acey9/apacket/firstblood"
+	"github.com/Acey9/apacket/honeypot"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
 	"github.com/Acey9/apacket/sniffer"
@@ -99,7 +99,7 @@ func optParse() {
 
 	flag.StringVar(&config.Cfg.Token, "a", "", "Log server auth token")
 
-	flag.BoolVar(&config.Cfg.FirstBloodDisable, "dfb", false, "Disable firstblood")
+	flag.BoolVar(&config.Cfg.HoneypotDisable, "dfb", false, "Disable honeypot")
 	flag.StringVar(&config.Cfg.ListenAddr, "listen", "", "Listen address")
 	flag.StringVar(&config.Cfg.TLSListenAddr, "tlslisten", "", "TLS Listen address")
 	flag.StringVar(&config.Cfg.ServerCrt, "crt", "", "TLS server crt")
@@ -163,8 +163,8 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	sayHi()
-	if !config.Cfg.FirstBloodDisable && config.Cfg.ListenAddr != "" {
-		fb := firstblood.NewFirstBlood()
+	if !config.Cfg.HoneypotDisable && config.Cfg.ListenAddr != "" {
+		fb := honeypot.NewHoneypot()
 		go fb.Start()
 	}
 	sniff := &sniffer.SnifferSetup{}

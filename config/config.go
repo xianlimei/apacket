@@ -8,20 +8,20 @@ import (
 var Cfg Config
 
 type Config struct {
-	Iface             *InterfacesConfig
-	IfaceAddrs        map[string]bool
-	Logging           *logp.Logging
-	Backscatter       bool
-	FirstBloodDisable bool
-	LogServer         string
-	NsqdTCPAddress    utils.StringArray
-	NsqdTopic         string
-	Token             string
-	ListenAddr        string
-	TLSListenAddr     string
-	ServerCrt         string
-	ServerKey         string
-	Args              []string
+	Iface           *InterfacesConfig
+	IfaceAddrs      map[string]bool
+	Logging         *logp.Logging
+	Backscatter     bool
+	HoneypotDisable bool
+	LogServer       string
+	NsqdTCPAddress  utils.StringArray
+	NsqdTopic       string
+	Token           string
+	ListenAddr      string
+	TLSListenAddr   string
+	ServerCrt       string
+	ServerKey       string
+	Args            []string
 }
 
 type InterfacesConfig struct {

@@ -101,13 +101,13 @@ func (pub *Publisher) filterTCP(pkt *decoder.Packet) *decoder.Packet {
 			logp.Debug("filter", "device syn, flow id:%s", pkt.Flow.FlowID())
 			pub.session.AddSession(pkt.Flow.FlowID())
 			return nil
-		} else if !config.Cfg.FirstBloodDisable {
+		} else if !config.Cfg.HoneypotDisable {
 			logp.Debug("filter", "add syn, flow id:%s%v", pkt.Flow.FlowID(), pkt.Tcp.Seq)
 			synID := pub.getSynID(pkt.Flow.FlowID(), pkt.Tcp.Seq)
 			pub.session.AddSession(synID)
 		}
 		return pkt
-	} else if !config.Cfg.FirstBloodDisable && pkt.Tcp.ACK {
+	} else if !config.Cfg.HoneypotDisable && pkt.Tcp.ACK {
 		_, ok := config.Cfg.IfaceAddrs[pkt.Flow.Sip.String()]
 		if ok {
 			return nil
