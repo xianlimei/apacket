@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import sys
+import optparse
+import base64
+
+from os.path import basename
+from StringIO import StringIO
+
+class Request(object):
+
+
+    def __init__(self, payload):
+        self.payload = payload
+        self.parseRequest()
+
+    def parseRequest(self):
+        pass
+
+    def __repr__(self):
+        _str = ''
+        return _str
+
+class ResponseHttp(object):
+
+    resp = ''
+
+    def __init__(self, request):
+        self.request = request
+
+    def __repr__(self):
+        return self.resp
+
+    def getResponse(self):
+        self.resp = '\x00'
+        return self.__repr__()
+
+def main(payload):
+    req = Request(payload)
+    res = ResponseHttp(req)
+    data = res.getResponse()
+    sys.stdout.write('%s' % data)
+
+def usage():
+    fn = basename(sys.argv[0])
+    s = StringIO()
+    s.write("%s [options] payload\n" % fn)
+    s.write("\t%s 'R0VUIC8gSFRUUC8xLjENCkhvc3Q6IDEyNy4wL' -d\n" % fn)
+    s.seek(0)
+    return s.read()
+
+def parseOption():
+    parser = optparse.OptionParser(usage=usage())
+    parser.add_option("-d", "--debug", action="store_true", dest="debug", default=False, help="Debug")
+    return parser
+
+if __name__ == '__main__':
+    parser = parseOption()
+    options, args = parser.parse_args()
+    payload = ''
+    if options.debug:
+        import zlib
+        testpayload = base64.b64decode(args[0])
+        payload = zlib.decompress(testpayload)
+        sys.stderr.write('%s\n\n' % str(payload))
+    elif len(args) > 0:
+        payload = base64.b64decode(args[0])
+    else:
+        sys.exit(1)
+    try:
+        main(payload)
+    except BaseException, e:
+        sys.stderr.write('%s\n' % str(e))
+        sys.exit(2)
+    sys.exit(0)
