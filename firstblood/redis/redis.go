@@ -79,14 +79,12 @@ func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype s
 }
 
 func (s *Redis) Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *core.Applayer) {
-	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, nil, tls)
+	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, request, tls)
 	if err != nil {
 		return
 	}
-	msg := &RedisMsg{Payload: request}
-	cPayload := response.Compress(request)
-	msg.Payload = cPayload.Bytes()
-	response.ResetAppl(request, msg)
+	//msg := &RedisMsg{Payload: request}
+	//response.Appl = msg
 	return
 }
 

@@ -37,7 +37,7 @@ type Smtp struct {
 }
 
 type SmtpMsg struct {
-	Payload     []byte `json:"payload,omitempty"`
+	Payload     []byte `json:"-"`
 	ContentType string `json:"ctype,omitempty"`
 }
 
@@ -153,7 +153,7 @@ func (m *Smtp) initHandler(conn net.Conn) {
 }
 
 func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
-	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, nil, false)
+	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, payload, false)
 	if err != nil {
 		logp.Err("Smtp.sendLog:%v", err)
 		return
@@ -163,9 +163,7 @@ func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
 		Payload:     payload,
 		ContentType: ctype,
 	}
-	cPayload := pkt.Compress(payload)
-	msg.Payload = cPayload.Bytes()
-	pkt.ResetAppl(payload, msg)
+	pkt.Appl = msg
 
 	out, err := json.Marshal(pkt)
 	if err == nil {

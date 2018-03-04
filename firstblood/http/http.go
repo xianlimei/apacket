@@ -137,7 +137,7 @@ type HTTPMsg struct {
 	Version          string            `json:"version,omitempty"`
 	Headers          map[string]string `json:"-"`
 	Body             string            `json:"-"`
-	Payload          []byte            `json:"payload,omitempty"`
+	Payload          []byte            `json:"-"`
 	contentLength    int
 	hasContentLength bool
 	contentType      string
@@ -203,16 +203,14 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 
 func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *core.Applayer) {
 	var reqAddr string
-	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, nil, tls)
+	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, request, tls)
 	if err != nil {
 		return
 	}
 
 	httpMSG := &HTTPMsg{Payload: request}
 	httpMSG.parse()
-	cPayload := response.Compress(request)
-	httpMSG.Payload = cPayload.Bytes()
-	response.ResetAppl(request, httpMSG)
+	response.Appl = httpMSG
 
 	hostPort, ok := httpMSG.Headers["host"]
 	if !ok {
