@@ -203,14 +203,13 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 
 func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *core.Applayer) {
 	var reqAddr string
-	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, request, tls)
+	httpMSG := &HTTPMsg{Payload: request}
+	httpMSG.parse()
+
+	response, err := core.NewApplayer(remoteAddr, localAddr, ptype, core.TransportTCP, request, tls, httpMSG)
 	if err != nil {
 		return
 	}
-
-	httpMSG := &HTTPMsg{Payload: request}
-	httpMSG.parse()
-	response.Appl = httpMSG
 
 	hostPort, ok := httpMSG.Headers["host"]
 	if !ok {

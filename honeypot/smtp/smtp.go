@@ -27,7 +27,7 @@ var cmdMap = map[string][]byte{
 	"hello": ClientHello,
 	"ehlo":  ClientHello,
 	"auth":  []byte("334 YWRtaW5AbWFpbC5naXRodWIuY29tCg==\r\n"),
-	"data":  []byte("354 354 End data with <CR><LF>.<CR><LF>\r\n"),
+	"data":  []byte("354 End data with <CR><LF>.<CR><LF>\r\n"),
 }
 
 type Smtp struct {
@@ -153,17 +153,16 @@ func (m *Smtp) initHandler(conn net.Conn) {
 }
 
 func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
-	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, payload, false)
-	if err != nil {
-		logp.Err("Smtp.sendLog:%v", err)
-		return
-	}
-
 	msg := &SmtpMsg{
 		Payload:     payload,
 		ContentType: ctype,
 	}
-	pkt.Appl = msg
+
+	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, payload, false, msg)
+	if err != nil {
+		logp.Err("Smtp.sendLog:%v", err)
+		return
+	}
 
 	out, err := json.Marshal(pkt)
 	if err == nil {
