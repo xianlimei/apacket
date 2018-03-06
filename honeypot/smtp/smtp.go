@@ -3,7 +3,6 @@ package smtp
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
@@ -172,28 +171,11 @@ func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
 		return
 	}
 
-	boundaryLineIdx := bytes.Index(payload, []byte("boundary=\""))
-	if boundaryLineIdx == -1 {
-		logp.Debug("smtp", "boundary not found.")
-		return
-	}
-	crlfIdx := bytes.Index(payload[boundaryLineIdx+10:], []byte("\""))
-	if crlfIdx == -1 {
-		logp.Debug("smtp", "\" not found.")
-		return
-	}
-	if crlfIdx < 1 {
-		logp.Debug("smtp", "crlfIdx <= boundaryLineIdx.")
-		return
-	}
-
-	boundary := fmt.Sprintf("--%s", string(payload[boundaryLineIdx+10:boundaryLineIdx+crlfIdx]))
-
-	headersIdx := bytes.Index(payload, []byte(boundary))
-
 	headers := make(map[string]string)
-	data := payload[:headersIdx]
-	for _, line := range strings.Split(string(data), "\r\n") {
+	for _, line := range strings.Split(string(payload), "\r\n") {
+		if line == "" {
+			break
+		}
 		i := strings.Index(line, ":")
 		if i == -1 {
 			continue
