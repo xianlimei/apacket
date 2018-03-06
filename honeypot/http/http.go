@@ -190,11 +190,12 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 		ptype = PtypeHTTPS
 	}
 	method, uri, version := http.ParseHttpLine(request)
-	_, ok := methodMap[method]
-	if ok {
-		identify = true
-		return
-	}
+	/*
+		_, ok := methodMap[method]
+		if ok {
+			identify = true
+			return
+		}*/
 	if method != "" && uri != "" && version != "" {
 		identify = true
 	}
