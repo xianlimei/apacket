@@ -5,6 +5,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/http"
 	"github.com/Acey9/apacket/honeypot/redis"
 	"github.com/Acey9/apacket/honeypot/smtp"
+	"github.com/Acey9/apacket/honeypot/telnet"
 )
 
 var DisguiserMap []core.Disguiser
@@ -20,4 +21,7 @@ func init() {
 	//services
 	smtp := smtp.NewSmtp()
 	serviceMap[smtp.Name()] = smtp
+
+	telnet := telnet.NewTelnet()
+	serviceMap[telnet.Name()] = telnet
 }
