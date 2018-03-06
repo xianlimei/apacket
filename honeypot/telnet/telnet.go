@@ -102,7 +102,7 @@ func (t *Telnet) initHandler(conn net.Conn) {
 	conn.Write([]byte(t.motd))
 	username, err := t.ReadLine(conn, false)
 	if err != nil {
-		logp.Err("username: %s", err)
+		//logp.Err("username: %s", err)
 		return
 	}
 
@@ -128,7 +128,7 @@ func (t *Telnet) initHandler(conn net.Conn) {
 		conn.SetDeadline(time.Now().Add(6 * time.Second))
 		line, err := t.ReadLine(conn, false)
 		if err != nil {
-			logp.Err("read line: %s", err)
+			//logp.Err("read line: %s", err)
 			break
 		}
 
