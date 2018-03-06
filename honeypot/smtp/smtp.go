@@ -3,6 +3,7 @@ package smtp
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
@@ -46,6 +47,7 @@ func NewSmtp() *Smtp {
 	m := &Smtp{
 		name:       "smtp",
 		listenAddr: "0.0.0.0:25",
+		//listenAddr: "127.0.0.1:8902",
 	}
 	return m
 }
@@ -170,17 +172,31 @@ func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
 		return
 	}
 
-	emailHeaderIdx := bytes.Index(payload, []byte("\r\n\r\n"))
-	if emailHeaderIdx == -1 {
+	boundaryLineIdx := bytes.Index(payload, []byte("boundary=\""))
+	if boundaryLineIdx == -1 {
+		logp.Debug("smtp", "boundary not found.")
+		return
+	}
+	crlfIdx := bytes.Index(payload[boundaryLineIdx+10:], []byte("\""))
+	if crlfIdx == -1 {
+		logp.Debug("smtp", "\" not found.")
+		return
+	}
+	if crlfIdx < 1 {
+		logp.Debug("smtp", "crlfIdx <= boundaryLineIdx.")
 		return
 	}
 
+	boundary := fmt.Sprintf("--%s", string(payload[boundaryLineIdx+10:boundaryLineIdx+crlfIdx]))
+
+	headersIdx := bytes.Index(payload, []byte(boundary))
+
 	headers := make(map[string]string)
-	data := payload[:emailHeaderIdx]
+	data := payload[:headersIdx]
 	for _, line := range strings.Split(string(data), "\r\n") {
 		i := strings.Index(line, ":")
 		if i == -1 {
-			return
+			continue
 		}
 		headerName := strings.ToLower(line[:i])
 		_, ok := allowHeaderKey[headerName]
