@@ -37,8 +37,9 @@ type Smtp struct {
 }
 
 type SmtpMsg struct {
-	Payload     []byte `json:"-"`
-	ContentType string `json:"ctype,omitempty"`
+	Payload     []byte            `json:"-"`
+	ContentType string            `json:"ctype,omitempty"`
+	Headers     map[string]string `json:"headers,omitempty"`
 }
 
 func NewSmtp() *Smtp {
@@ -152,12 +153,50 @@ func (m *Smtp) initHandler(conn net.Conn) {
 	}
 }
 
-func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
-	msg := &SmtpMsg{
+func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
+
+	var allowHeaderKey = map[string]bool{
+		"from":     true,
+		"to":       true,
+		"subject":  true,
+		"reply-to": true,
+	}
+
+	msg = &SmtpMsg{
 		Payload:     payload,
 		ContentType: ctype,
 	}
+	if ctype != "content" {
+		return
+	}
 
+	emailHeaderIdx := bytes.Index(payload, []byte("\r\n\r\n"))
+	if emailHeaderIdx == -1 {
+		return
+	}
+
+	headers := make(map[string]string)
+	data := payload[:emailHeaderIdx]
+	for _, line := range strings.Split(string(data), "\r\n") {
+		i := strings.Index(line, ":")
+		if i == -1 {
+			return
+		}
+		headerName := strings.ToLower(line[:i])
+		_, ok := allowHeaderKey[headerName]
+		if !ok {
+			continue
+		}
+		headerValue := strings.ToLower(strings.Trim(line[i+1:], " "))
+		headers[headerName] = headerValue
+
+	}
+	msg.Headers = headers
+	return
+}
+
+func (m *Smtp) sendLog(raddr, laddr, ctype string, payload []byte) {
+	msg := m.parser(ctype, payload)
 	pkt, err := core.NewApplayer(raddr, laddr, PtypeSmtp, core.TransportTCP, payload, false, msg)
 	if err != nil {
 		logp.Err("Smtp.sendLog:%v", err)
