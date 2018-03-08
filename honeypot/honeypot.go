@@ -71,6 +71,7 @@ func (hp *Honeypot) Start() {
 	if hp.TLSListenAddr != "" {
 		go hp.TLSListen("tcp", hp.TLSListenAddr)
 	}
+	go hp.ListenUDP("udp", hp.ListenAddr)
 	hp.Listen("tcp", hp.ListenAddr)
 }
 
@@ -83,6 +84,52 @@ func (hp *Honeypot) ServicesStart() {
 		}
 		go svr.Start(hp.outputer)
 		logp.Info("%s service start.", module)
+	}
+}
+
+func (hp *Honeypot) ListenUDP(network, address string) (err error) {
+	udpAddr, err := net.ResolveUDPAddr(network, address)
+	if err != nil {
+		logp.Err("ListenUDP.ResolveUDPAddr: %v", err)
+		return
+	}
+	conn, err := net.ListenUDP(network, udpAddr)
+	if err != nil {
+		logp.Err("ListenUDP.ResolveUDPAddr: %v", err)
+		return
+	}
+	defer conn.Close()
+	for {
+		hp.HandlerUDP(conn)
+	}
+	return
+}
+
+func (hp *Honeypot) HandlerUDP(conn *net.UDPConn) {
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("HandlerUDP err:%v", err)
+		}
+	}()
+
+	for {
+		payload := make([]byte, 4096)
+		plen, remoteAddr, err := conn.ReadFromUDP(payload)
+		if err != nil {
+			break
+		}
+		if plen == 0 {
+			break
+		}
+		payload = payload[:plen]
+		logp.Debug("HandlerUDP", "plen:%d, remoteaddr:%s, payload:%s", plen, remoteAddr.String(), string(payload))
+		//response := []byte("hello client!")
+		response := payload
+		_, err = conn.WriteToUDP(response, remoteAddr)
+		if err != nil {
+			logp.Err("WriteToUDP remoteaddr:%s err:%v", remoteAddr.String(), err)
+			break
+		}
 	}
 }
 
