@@ -370,6 +370,6 @@ func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAdd
 		hp.outputer.Output(out)
 	}
 	response = disguiser.DisguiserResponse(payload)
-	logp.Debug("tcp.response", "tcp.response:% 2x", response)
+	logp.Debug("response", "hp.DisguiserResponse:% 2x", response)
 	return
 }

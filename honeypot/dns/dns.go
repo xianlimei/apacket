@@ -3,6 +3,8 @@ package dns
 import (
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
+	"github.com/tsg/gopacket"
+	"github.com/tsg/gopacket/layers"
 )
 
 const (
@@ -18,20 +20,17 @@ func NewDNS() *DNS {
 
 func (dns *DNS) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
 	ptype = PtypeDNS
-	if len(request) < 31 {
-		return
+	packet := gopacket.NewPacket(request, layers.LayerTypeDNS, gopacket.NoCopy)
+	if dnsLayer := packet.Layer(layers.LayerTypeDNS); dnsLayer != nil {
+		dnsPkt, ok := dnsLayer.(*layers.DNS)
+		if !ok {
+			return
+		}
+		if !dnsPkt.QR {
+			identify = true
+			logp.Debug("dns", "dns.QR:%v", dnsPkt.QR)
+		}
 	}
-	logp.Debug("dns.Fingerprint", "dns...")
-	tid := request[0:2]
-	flag := request[2:4]
-	questions := request[4:6]
-	anserRRS := request[6:8]
-	authorityRRS := request[8:10]
-	additionalRRS := request[10:12]
-	logp.Debug("dns.Fingerprint", "tid:% 2x, flag:% 2x, questions:% 2x, anserRRS:% 2x, authorityRRS:% 2x, additionalRRS:% 2x", tid, flag, questions, anserRRS, authorityRRS, additionalRRS)
-	queries := request[12:]
-	logp.Debug("dns.Fingerprint", "queries:% 2x", queries)
-	//TODO
 	return
 }
 
@@ -40,5 +39,7 @@ func (dns *DNS) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 }
 
 func (dns *DNS) DisguiserResponse(request []byte) (response []byte) {
+	//TODO
+	response = []byte("\x00")
 	return
 }
