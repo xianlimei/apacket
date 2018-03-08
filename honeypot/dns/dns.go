@@ -29,6 +29,7 @@ func (dns *DNS) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype s
 		if !dnsPkt.QR {
 			identify = true
 			logp.Debug("dns", "dns.QR:%v", dnsPkt.QR)
+			return
 		}
 	}
 	return
@@ -40,6 +41,6 @@ func (dns *DNS) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 
 func (dns *DNS) DisguiserResponse(request []byte) (response []byte) {
 	//TODO
-	response = []byte("\x00")
+	//response = []byte("\x00")
 	return
 }

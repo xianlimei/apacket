@@ -113,9 +113,10 @@ func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 	}()
 
 	var response []byte
+	var identify bool
+	var ptype string
 
 	for {
-		var identify bool
 		payload := make([]byte, 4096)
 		plen, remoteAddr, err := conn.ReadFromUDP(payload)
 		if err != nil {
@@ -127,21 +128,17 @@ func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 		payload = payload[:plen]
 		logp.Debug("handlerUDP", "plen:%d, remoteaddr:%s, ReadFromUdp:% 2x", plen, remoteAddr.String(), payload)
 		for _, disguiser := range DisguiserMapUDP {
-			identify, ptype := hp.fingerprint(disguiser, payload, true)
+			identify, ptype = hp.fingerprint(disguiser, payload, true)
 			logp.Debug("honeypot", "hp.fingerprint.udp identify:%v, ptype:%v", identify, ptype)
 			if identify {
 				response = hp.response(disguiser, payload, remoteAddr.String(), conn.LocalAddr().String(), ptype, true)
+				logp.Debug("honeypot", "udp.response:% 2x", response)
 				break
 			}
 		}
 
-		if !identify {
-			//response = unk.DisguiserResponse(payload)
-			response = payload
-		}
-
 		if len(response) == 0 {
-			break
+			response = payload
 		}
 
 		_, err = conn.WriteToUDP(response, remoteAddr)
