@@ -2,6 +2,7 @@ package honeypot
 
 import (
 	"github.com/Acey9/apacket/honeypot/core"
+	"github.com/Acey9/apacket/honeypot/dns"
 	"github.com/Acey9/apacket/honeypot/http"
 	"github.com/Acey9/apacket/honeypot/redis"
 	"github.com/Acey9/apacket/honeypot/smtp"
@@ -9,14 +10,20 @@ import (
 )
 
 var DisguiserMap []core.Disguiser
+var DisguiserMapUDP []core.Disguiser
 var serviceMap = map[string]core.Services{}
 
 func init() {
+	//TCP
 	http := http.NewHTTP()
 	DisguiserMap = append(DisguiserMap, http)
 
 	redis := redis.NewRedis()
 	DisguiserMap = append(DisguiserMap, redis)
+
+	//UDP
+	dns := dns.NewDNS()
+	DisguiserMapUDP = append(DisguiserMapUDP, dns)
 
 	//services
 	smtp := smtp.NewSmtp()

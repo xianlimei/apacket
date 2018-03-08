@@ -156,11 +156,11 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 		afterMethodIdx := bytes.IndexFunc(request, unicode.IsSpace)
 		afterRequestURIIdx := bytes.LastIndexFunc(request, unicode.IsSpace)
 		if afterMethodIdx == -1 || afterRequestURIIdx == -1 || afterMethodIdx == afterRequestURIIdx {
-			return
+			return "", "", ""
 		}
 		method = string(request[:afterMethodIdx])
 		uri = string(request[afterMethodIdx+1:])
-		return
+		return "", "", ""
 	}
 	fline := request[:i]
 	afterMethodIdx := bytes.IndexFunc(fline, unicode.IsSpace)
@@ -174,12 +174,12 @@ func (http *HTTP) ParseHttpLine(request []byte) (method, uri, version string) {
 	version = string(fline[afterRequestURIIdx+1:])
 	protoVersion := strings.Split(version, "/")
 	if len(protoVersion) != 2 {
-		return
+		return "", "", ""
 	}
 	proto := strings.ToUpper(protoVersion[0])
 	_, ok := protocolMap[proto]
 	if !ok {
-		return
+		return "", "", ""
 	}
 	return
 }
@@ -197,6 +197,7 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 			return
 		}*/
 	if method != "" && uri != "" && version != "" {
+		logp.Debug("HTTP", "http.Fingerprint: method:%s, uri:%s, version:%s", method, uri, version)
 		identify = true
 	}
 	return

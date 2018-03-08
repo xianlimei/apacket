@@ -100,19 +100,22 @@ func (hp *Honeypot) ListenUDP(network, address string) (err error) {
 	}
 	defer conn.Close()
 	for {
-		hp.HandlerUDP(conn)
+		hp.handlerUDP(conn)
 	}
 	return
 }
 
-func (hp *Honeypot) HandlerUDP(conn *net.UDPConn) {
+func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 	defer func() {
 		if err := recover(); err != nil {
-			logp.Err("HandlerUDP err:%v", err)
+			logp.Err("handlerUDP err:%v", err)
 		}
 	}()
 
+	var response []byte
+
 	for {
+		var identify bool
 		payload := make([]byte, 4096)
 		plen, remoteAddr, err := conn.ReadFromUDP(payload)
 		if err != nil {
@@ -122,14 +125,31 @@ func (hp *Honeypot) HandlerUDP(conn *net.UDPConn) {
 			break
 		}
 		payload = payload[:plen]
-		logp.Debug("HandlerUDP", "plen:%d, remoteaddr:%s, payload:%s", plen, remoteAddr.String(), string(payload))
-		//response := []byte("hello client!")
-		response := payload
+		logp.Debug("handlerUDP", "plen:%d, remoteaddr:%s, ReadFromUdp:% 2x", plen, remoteAddr.String(), payload)
+		for _, disguiser := range DisguiserMapUDP {
+			identify, ptype := hp.fingerprint(disguiser, payload, true)
+			logp.Debug("honeypot", "hp.fingerprint.udp identify:%v, ptype:%v", identify, ptype)
+			if identify {
+				response = hp.response(disguiser, payload, remoteAddr.String(), conn.LocalAddr().String(), ptype, true)
+				break
+			}
+		}
+
+		if !identify {
+			//response = unk.DisguiserResponse(payload)
+			response = payload
+		}
+
+		if len(response) == 0 {
+			break
+		}
+
 		_, err = conn.WriteToUDP(response, remoteAddr)
 		if err != nil {
 			logp.Err("WriteToUDP remoteaddr:%s err:%v", remoteAddr.String(), err)
 			break
 		}
+		logp.Debug("handlerUDP", "plen:%d, remoteaddr:%s, WirteToUdp:% 2x", plen, remoteAddr.String(), response)
 	}
 }
 
@@ -203,7 +223,11 @@ func (hp *Honeypot) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) 
 func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	var tlsProxyConn net.Conn
 	var tlsProxyLocalAddr, remoteAddr, localAddr string
-	var identify bool
+
+	var stageTls, tlsTag, identify bool
+	var firstPalyloadLen int
+	var ptype string
+	var disguiser core.Disguiser
 
 	defer func() {
 		conn.Close()
@@ -222,9 +246,6 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	response := []byte("\x00\x00")
 	payloadBuf := bytes.Buffer{}
 
-	var stageTls, tlsTag bool
-	var firstPalyloadLen int
-
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
 
@@ -242,6 +263,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			firstPalyloadLen = l
 		}
 		payload := buf[:l]
+		logp.Debug("payload", "payload:% 2x", payload)
 
 		//TODO ssl protocol identify
 		if !stageTls && !isTLSConn &&
@@ -278,16 +300,22 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			tlsTag = true
 		}
 
-		for _, disguiser := range DisguiserMap {
-			identify, response = hp.identifyProto(disguiser, payload, remoteAddr, localAddr, tlsTag)
-			if identify {
-				if len(response) != 0 {
-					conn.Write(response)
+		if !identify {
+			for _, disguiser = range DisguiserMap {
+				identify, ptype = hp.fingerprint(disguiser, payload, tlsTag)
+				logp.Debug("honeypot", "disguiser.Fingerprint identify:%v, ptype:%v", identify, ptype)
+				if identify {
+					break
 				}
-				break
 			}
 		}
-		if !identify {
+
+		if identify {
+			response = hp.response(disguiser, payload, remoteAddr, localAddr, ptype, tlsTag)
+			if len(response) != 0 {
+				conn.Write(response)
+			}
+		} else {
 			response = unk.DisguiserResponse(payload)
 			//response = []byte("\x00\x00")
 			if len(response) != 0 {
@@ -313,28 +341,35 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	}
 }
 
-func (hp *Honeypot) identifyProto(disguiser core.Disguiser, payload []byte, remoteAddr, localAddr string, tlsTag bool) (identify bool, response []byte) {
+func (hp *Honeypot) fingerprint(disguiser core.Disguiser, payload []byte, tag bool) (identify bool, ptype string) {
 	defer func() {
 		if err := recover(); err != nil {
-			logp.Err("identifyProto remote:%s local:%s info:%v", remoteAddr, localAddr, err)
+			logp.Err("hp.fingerprint:%v", err)
 		}
 	}()
 
-	identify, ptype, _ := disguiser.Fingerprint(payload, tlsTag)
-	logp.Debug("honeypot", "disguiser.Fingerprint identify:%v, ptype:%v", identify, ptype)
-	if identify {
-		pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype, tlsTag)
-		/*
-			if hp.sha1Filter.Hit(pkt.Psha1) {
-				break
-			}
-		*/
-		out, err := json.Marshal(pkt)
-		if err == nil {
-			hp.outputer.Output(out)
-		}
-		response = disguiser.DisguiserResponse(payload)
+	identify, ptype, _ = disguiser.Fingerprint(payload, tag)
+	return
+}
 
+func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAddr, localAddr, ptype string, tlsTag bool) (response []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			logp.Err("hp.response remote:%s local:%s info:%v", remoteAddr, localAddr, err)
+		}
+	}()
+
+	pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype, tlsTag)
+	/*
+		if hp.sha1Filter.Hit(pkt.Psha1) {
+			break
+		}
+	*/
+	out, err := json.Marshal(pkt)
+	if err == nil {
+		hp.outputer.Output(out)
 	}
+	response = disguiser.DisguiserResponse(payload)
+	logp.Debug("tcp.response", "tcp.response:% 2x", response)
 	return
 }
