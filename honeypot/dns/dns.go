@@ -229,6 +229,8 @@ func (m *Msg) randomRdata(rtype layers.DNSType, name []byte) (rdata string) {
 		rdata = m.randomDomain()
 	case layers.DNSTypeTXT:
 		rdata = "v=spf1 mx ~all"
+	default:
+		rdata = "com"
 	}
 	return
 }
@@ -241,9 +243,6 @@ func NewMsg(query *layers.DNS) (msg *Msg) {
 
 	for _, rr := range msg.query.Questions {
 		rdata := msg.randomRdata(rr.Type, rr.Name)
-		if rdata == "" {
-			continue
-		}
 		msg.appendRR(rr.Name, rdata, rr.Type, rr.Class)
 	}
 	return
