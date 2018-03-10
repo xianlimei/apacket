@@ -155,7 +155,7 @@ func (m *Msg) answerRecordField(answers []layers.DNSResourceRecord) {
 }
 
 func (m *Msg) appendRR(rname []byte, rdata string, rtype layers.DNSType, class layers.DNSClass) {
-	aRecord := layers.DNSResourceRecord{
+	rRecord := layers.DNSResourceRecord{
 		Name:  rname,
 		Type:  rtype,
 		Class: class,
@@ -164,15 +164,23 @@ func (m *Msg) appendRR(rname []byte, rdata string, rtype layers.DNSType, class l
 	switch rtype {
 	case layers.DNSTypeA:
 		ip := net.ParseIP(rdata)
-		aRecord.Data = ip[12:16]
+		rRecord.Data = ip[12:16]
 	case layers.DNSTypeAAAA:
-		aRecord.Data = net.ParseIP(rdata)
+		rRecord.Data = net.ParseIP(rdata)
+	case layers.DNSTypeCNAME:
+		rRecord.Data = m.encodeName(rdata)
+		rRecord.DataLength = uint16(len(rRecord.Data))
+		m.query.Answers = append(m.query.Answers, rRecord)
+
+		cnameIP := m.randomIPv4()
+		m.appendRR([]byte(rdata), cnameIP, layers.DNSTypeA, layers.DNSClassIN)
+		return
 	default:
-		aRecord.Data = m.encodeName(rdata)
+		rRecord.Data = m.encodeName(rdata)
 	}
 
-	aRecord.DataLength = uint16(len(aRecord.Data))
-	m.query.Answers = append(m.query.Answers, aRecord)
+	rRecord.DataLength = uint16(len(rRecord.Data))
+	m.query.Answers = append(m.query.Answers, rRecord)
 }
 
 func (m *Msg) Bytes() (payload []byte) {
@@ -242,8 +250,23 @@ func NewMsg(query *layers.DNS) (msg *Msg) {
 	}
 
 	for _, rr := range msg.query.Questions {
-		rdata := msg.randomRdata(rr.Type, rr.Name)
-		msg.appendRR(rr.Name, rdata, rr.Type, rr.Class)
+		if rr.Type == 255 {
+			//add A
+			rdata := msg.randomRdata(layers.DNSTypeA, rr.Name)
+			msg.appendRR(rr.Name, rdata, layers.DNSTypeA, rr.Class)
+			//add CNAME
+			rdata = msg.randomRdata(layers.DNSTypeCNAME, rr.Name)
+			msg.appendRR(rr.Name, rdata, layers.DNSTypeCNAME, rr.Class)
+			//add TXT
+			rdata = "v=spf1 mx ~all"
+			msg.appendRR(rr.Name, rdata, layers.DNSTypeTXT, rr.Class)
+			//add MX
+			rdata = msg.randomRdata(layers.DNSTypeMX, rr.Name)
+			msg.appendRR(rr.Name, rdata, layers.DNSTypeMX, rr.Class)
+		} else {
+			rdata := msg.randomRdata(rr.Type, rr.Name)
+			msg.appendRR(rr.Name, rdata, rr.Type, rr.Class)
+		}
 	}
 	return
 }
