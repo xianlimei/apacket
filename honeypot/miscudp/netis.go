@@ -43,7 +43,6 @@ func (netis *Netis) Command() bool {
 func (netis *Netis) Response() (resp []byte) {
 	if netis.Login() {
 		resp = []byte("AA\x00\x05ABAA\x00\x00\x00\x00Login successed!\r\n")
-		return
 	} else if netis.Command() {
 		resp = []byte("kcimu")
 	}
