@@ -7,6 +7,7 @@ import (
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
 	"net"
+	"net/mail"
 	"strings"
 	"time"
 	"unicode"
@@ -155,12 +156,11 @@ func (m *Smtp) initHandler(conn net.Conn) {
 }
 
 func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
-
 	var allowHeaderKey = map[string]bool{
-		"from":     true,
-		"to":       true,
-		"subject":  true,
-		"reply-to": true,
+		"From":     true,
+		"To":       true,
+		"Subject":  true,
+		"Reply-to": true,
 	}
 
 	msg = &SmtpMsg{
@@ -171,25 +171,20 @@ func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
 		return
 	}
 
-	headers := make(map[string]string)
-	for _, line := range strings.Split(string(payload), "\r\n") {
-		if line == "" {
-			break
-		}
-		i := strings.Index(line, ":")
-		if i == -1 {
-			continue
-		}
-		headerName := strings.ToLower(line[:i])
-		_, ok := allowHeaderKey[headerName]
-		if !ok {
-			continue
-		}
-		headerValue := strings.ToLower(strings.Trim(line[i+1:], " "))
-		headers[headerName] = headerValue
-
+	r := strings.NewReader(string(payload))
+	message, err := mail.ReadMessage(r)
+	if err != nil {
+		return
 	}
-	msg.Headers = headers
+
+	header := message.Header
+	msg.Headers = make(map[string]string)
+	for key := range allowHeaderKey {
+		value := header.Get(key)
+		if value != "" {
+			msg.Headers[strings.ToLower(key)] = value
+		}
+	}
 	return
 }
 
