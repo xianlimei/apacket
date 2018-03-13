@@ -171,7 +171,7 @@ func (m *Smtp) parser(ctype string, payload []byte) (msg *SmtpMsg) {
 		return
 	}
 
-	r := strings.NewReader(string(payload))
+	r := bytes.NewReader(payload)
 	message, err := mail.ReadMessage(r)
 	if err != nil {
 		return

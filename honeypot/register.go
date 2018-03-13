@@ -4,6 +4,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/honeypot/dns"
 	"github.com/Acey9/apacket/honeypot/http"
+	"github.com/Acey9/apacket/honeypot/memcached"
 	"github.com/Acey9/apacket/honeypot/miscudp"
 	"github.com/Acey9/apacket/honeypot/redis"
 	"github.com/Acey9/apacket/honeypot/smtp"
@@ -34,6 +35,9 @@ func init() {
 	//services
 	smtp := smtp.NewSmtp()
 	serviceMap[smtp.Name()] = smtp
+
+	memcached := memcached.NewMemcached()
+	serviceMap[memcached.Name()] = memcached
 
 	telnet := telnet.NewTelnet()
 	serviceMap[telnet.Name()] = telnet
