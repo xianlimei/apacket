@@ -60,6 +60,9 @@ func (this *NSQOutputer) Init() error {
 }
 
 func (this *NSQOutputer) Output(msg []byte) {
+	if len(msg) == 0 {
+		return
+	}
 	logp.Info("pkt %s", msg)
 
 	var buf bytes.Buffer
