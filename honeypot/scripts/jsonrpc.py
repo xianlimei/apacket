@@ -15,10 +15,12 @@ result = {
         }
         ,
         "eth_coinbase":"0x407d73d8a49eeb85d32cf465507dd71d507100c1",
+        "dumpprivkey":"L3FdgAisCmV9XM65cvjYQ19XM65cvjYQ19XM65cvj9XM65cvjYQ1a",
         "eth_mining":True,
         "eth_hashrate":"0x38a",
         "eth_gasPrice":['0x407d73d8a49eeb85d32cf465507dd71d507100c1'],
         "eth_accounts":["0x407d73d8a49eeb85d32cf465507dd71d507100c1"],
+        "getbalance":{"Balance": "1.01","Confirmed": "1.01"},
         "eth_blockNumber":"0x4b7",
         "eth_getBalance":"0x0234c8a3397aab58",
         "eth_getStorageAt":"0x00000000000000000000000000000000000000000000000000000000000004d2",
@@ -34,7 +36,7 @@ result = {
         "eth_call":"0x",
         "eth_estimateGas":"0x5208",
         "eth_getBlockByHash":{"number": "0x1b4", "hash": "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331",},
-        "eth_getBlockByNumber":"0x01",
+        "eth_getBlockByNumber":{"difficulty":"0x3ff800000","extraData":"0x476574682f76312e302e302f6c696e75782f676f312e342e32","gasLimit":"0x1388","gasUsed":"0x0","hash":"0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6","logsBloom":"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","miner":"0x05a56e2d52c817161883f50c441c3228cfe54d9f","mixHash":"0x969b900de27b6ac6a67742365dd65f55a0526c41fd18e1b16f1a1215c2e66f59","nonce":"0x539bd4979fef1ec4","number":"0x1","parentHash":"0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3","receiptsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","sha3Uncles":"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347","size":"0x219","stateRoot":"0xd67e4d450343046425ae4271474353857ab860dbc0a1dde64b41b5cd3a532bf3","timestamp":"0x55ba4224","totalDifficulty":"0x7ff800000","transactions":[],"transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","uncles":[]},
         "eth_getTransactionByHash":{},
         "eth_getTransactionByBlockHashAndIndex":"",
         "eth_getTransactionByBlockNumberAndIndex":"",
@@ -69,4 +71,5 @@ result = {
         "shh_uninstallFilter":"",
         "shh_getFilterChanges":"",
         "shh_getMessages":"",
+        "rpc_modules":{"eth":"1.0","net":"1.0","rpc":"1.0","web3":"1.0"},
 }

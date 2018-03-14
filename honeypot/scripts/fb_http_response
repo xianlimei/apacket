@@ -91,24 +91,29 @@ class Request(object):
     version = ''
     headers = {} 
     body = ''
+    separator = '\r\n'
     
     def __init__(self, payload):
         self.payload = payload
-        self.parseRequest()
+        try:
+            self.parseRequest()
+        except:
+            self.parseRequest('\n')
+            separator = '\n'
 
-    def parseRequest(self):
-        line = self.payload.split('\r\n', 1)
+    def parseRequest(self, separator="\r\n"):
+        line = self.payload.split(separator, 1)
         try:
             self.method, self.uri, self.version = line[0].split(' ')
         except:
             self.method, self.uri = line[0].split(' ')
         head = ''
-        if '\r\n\r\n' in self.payload:
-            head, body = self.payload.split('\r\n\r\n', 1)
+        if separator*2 in self.payload:
+            head, body = self.payload.split(separator*2, 1)
             self.body = body
         else:
             head = self.payload
-        heads = head.split('\r\n')
+        heads = head.split(separator)
         self.uri = self.uri.replace('//', '/')
 
         if len(heads) < 2:
@@ -278,12 +283,14 @@ class ResponseHttp(object):
         try:
 
             request = json.loads(self.request.body)
+            if isinstance(request, list):
+                request = request[0]
             result = jsonrpc.result.get(request.get('method'))
             self.body = request
             self.body['result'] = result
             self.body = json.dumps(self.body)
         except BaseException, e:
-            sys.stderr.write('%s\n' % str(e))
+            sys.stderr.write('jsonrpcResponse: %s\n' % str(e))
 
     def sipResponse(self):
         self.version = '%s' % self.request.version
