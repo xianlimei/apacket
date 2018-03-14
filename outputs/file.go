@@ -8,7 +8,7 @@ type FileOutputer struct {
 }
 
 func (this *FileOutputer) Output(msg []byte) {
-	if len(msg) == 0 {
+	if len(msg) < 5 {
 		return
 	}
 	logp.Info("pkt %s", msg)

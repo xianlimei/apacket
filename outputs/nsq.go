@@ -60,7 +60,7 @@ func (this *NSQOutputer) Init() error {
 }
 
 func (this *NSQOutputer) Output(msg []byte) {
-	if len(msg) == 0 {
+	if len(msg) < 5 {
 		return
 	}
 	logp.Info("pkt %s", msg)

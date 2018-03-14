@@ -93,7 +93,7 @@ func (this *SapacketOutputer) ConnectServer(addr string) (conn net.Conn, err err
 }
 
 func (this *SapacketOutputer) Output(msg []byte) {
-	if len(msg) == 0 {
+	if len(msg) < 5 {
 		return
 	}
 	logp.Info("pkt %s", msg)
