@@ -209,7 +209,13 @@ func (m *Memcached) parser(payload []byte) (response []byte) {
 }
 
 func (m *Memcached) sendLog(raddr, laddr, ptype string, payload []byte) {
-	pkt, err := core.NewApplayer(raddr, laddr, ptype, core.TransportTCP, payload, false, nil)
+	var proto uint16
+	if ptype == PtypeMemcachedUDP {
+		proto = core.TransportUDP
+	} else {
+		proto = core.TransportTCP
+	}
+	pkt, err := core.NewApplayer(raddr, laddr, ptype, proto, payload, false, nil)
 	if err != nil {
 		logp.Err("Memcached.sendLog:%v", err)
 		return
