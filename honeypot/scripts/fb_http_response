@@ -478,6 +478,21 @@ class ResponseHttp(object):
 		<body><h2>Access Error: Unauthorized</h2>
 		<p>Access to this document requires a User ID</p></body></html>'''
 
+    def a2billingResponse(self):
+        self.headers = {
+                'Date':self.date,
+                'Last-Modified':self.date,
+                }
+        h = [
+            'Server: Apache/2.2.22 (Debian)',
+            'ETag: "a1d4c-66-4f9d3af853140"',
+            'Accept-Ranges: bytes',
+            'Vary: Accept-Encoding',
+            'Content-Type: application/javascript',
+            ]
+        self.headers_raw.extend(h)
+        self.body = '''\n\n\nfunction MM_openBrWindow(theURL,winName,features) {\n\treturn window.open(theURL,winName,features);\n}'''
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -525,6 +540,8 @@ class ResponseHttp(object):
             setResponse = self.jsonrpcResponse
         elif 'cgi-bin/login.cgi' in uri:
                 setResponse = self.boaResponse
+        elif '/a2billing/common/javascript/misc.js' == uri:
+                setResponse = self.a2billingResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
