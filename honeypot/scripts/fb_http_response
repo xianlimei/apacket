@@ -493,6 +493,26 @@ class ResponseHttp(object):
         self.headers_raw.extend(h)
         self.body = '''\n\n\nfunction MM_openBrWindow(theURL,winName,features) {\n\treturn window.open(theURL,winName,features);\n}'''
 
+    def etcdResponse(self):
+        self.headers = {
+                'Date':self.date,
+                'Content-Type': 'application/json'
+                }
+        body = {
+                "name":"trackerb",
+                "id":"6e9e05c51164291d",
+                "state":"StateLeader",
+                "startTime":"2017-09-30T14:58:56.28043498+08:00",
+                "leaderInfo":{
+                    "leader":"6e9e05c51164291d",
+                    "uptime":"4058h23m16.279194103s",
+                    "startTime":"2017-09-30T14:58:57.080773283+08:00"
+                    },
+                "recvAppendRequestCnt":0,
+                "sendAppendRequestCnt":0
+                }
+        self.body=json.dumps(body)
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -542,6 +562,8 @@ class ResponseHttp(object):
                 setResponse = self.boaResponse
         elif '/a2billing/common/javascript/misc.js' == uri:
                 setResponse = self.a2billingResponse
+        elif '/v2/stats/self' == uri and port == '2379':
+                setResponse = self.etcdResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
