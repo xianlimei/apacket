@@ -527,7 +527,6 @@ class ResponseHttp(object):
     def hbaseResponse(self):
         self.headers = {
                 'Date':self.date,
-                'Content-Type': 'application/json'
                 }
         h = [
                 "Server: Jetty(6.1.26)",
