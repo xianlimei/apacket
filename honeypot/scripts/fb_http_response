@@ -190,7 +190,10 @@ class ResponseHttp(object):
         self.headers['Date'] = self.date
         self.headers_raw.append(auth)
         if self.request.body:
-            self.body = self.request.body
+            if self.request.body.startswith("cmd="):
+                self.body = "610cker"
+            else:
+                self.body = self.request.body
         return
 
 
