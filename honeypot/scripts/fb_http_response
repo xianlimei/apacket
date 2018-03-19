@@ -17,6 +17,7 @@ import jsonrpc
 import phpadmin
 import boa
 import belkin
+import hp_hbase
 
 http_server = (
 	#"Tengine",
@@ -523,6 +524,22 @@ class ResponseHttp(object):
             body = body_members
         self.body=json.dumps(body)
 
+    def hbaseResponse(self):
+        self.headers = {
+                'Date':self.date,
+                'Content-Type': 'application/json'
+                }
+        h = [
+                "Server: Jetty(6.1.26)",
+                "Cache-Control: no-cache"
+                "Content-Type: text/html; charset=utf-8",
+                "Pragma: no-cache",
+                "Cache-Control: no-cache",
+                ]
+        self.headers_raw.extend(h)
+        self.body = hp_hbase.body
+
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -574,6 +591,8 @@ class ResponseHttp(object):
                 setResponse = self.a2billingResponse
         elif '/v2/' in uri and port == '2379':
                 setResponse = self.etcdResponse
+        elif '/master-status' in uri and port == '16010':
+                setResponse = self.hbaseResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
