@@ -494,23 +494,30 @@ class ResponseHttp(object):
         self.body = '''\n\n\nfunction MM_openBrWindow(theURL,winName,features) {\n\treturn window.open(theURL,winName,features);\n}'''
 
     def etcdResponse(self):
+        _id = '6e9e05c51164291d'
         self.headers = {
                 'Date':self.date,
                 'Content-Type': 'application/json'
                 }
-        body = {
+        body_stats = {
                 "name":"trackerb",
-                "id":"6e9e05c51164291d",
+                "id":_id,
                 "state":"StateLeader",
                 "startTime":"2017-09-30T14:58:56.28043498+08:00",
                 "leaderInfo":{
-                    "leader":"6e9e05c51164291d",
+                    "leader":_id,
                     "uptime":"4058h23m16.279194103s",
                     "startTime":"2017-09-30T14:58:57.080773283+08:00"
                     },
                 "recvAppendRequestCnt":0,
                 "sendAppendRequestCnt":0
                 }
+        body_members = {"members":[{"id":_id,"name":"trackerb","peerURLs":["http://localhost:2380"],"clientURLs":["http://10.126.99.79:2379","http://10.126.79.49:2379","http://127.0.0.1:4002"]}]}
+        body = {}
+        if '/v2/stats/self' in self.request.uri:
+            body = body_stats
+        elif '/v2/members' in self.request.uri:
+            body = body_members
         self.body=json.dumps(body)
 
     def getResponse(self):
@@ -562,7 +569,7 @@ class ResponseHttp(object):
                 setResponse = self.boaResponse
         elif '/a2billing/common/javascript/misc.js' == uri:
                 setResponse = self.a2billingResponse
-        elif '/v2/stats/self' == uri and port == '2379':
+        elif '/v2/' in uri and port == '2379':
                 setResponse = self.etcdResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
