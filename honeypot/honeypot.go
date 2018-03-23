@@ -322,7 +322,11 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
-		pkt, err := core.NewApplayer(remoteAddr, localAddr, PtypeOther, core.TransportTCP, payloadBuf.Bytes(), tlsTag, nil)
+		otherPtype := PtypeOther
+		if identify {
+			otherPtype = ptype
+		}
+		pkt, err := core.NewApplayer(remoteAddr, localAddr, otherPtype, core.TransportTCP, payloadBuf.Bytes(), tlsTag, nil)
 		if err != nil {
 			return
 		}

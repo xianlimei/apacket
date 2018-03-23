@@ -165,8 +165,8 @@ class ResponseHttp(object):
         for k, v in self.headers.iteritems():
             headers.append('%s: %s' % (k, v))
         headers.extend(self.headers_raw)
-        if not self.body.endswith('\r\n'):
-            self.body = "%s\r\n" % self.body
+        #if not self.body.endswith('\r\n'):
+        #    self.body = "%s\r\n" % self.body
 
         if self.body and self.auto_add_item:
             content_len = len(self.body)
