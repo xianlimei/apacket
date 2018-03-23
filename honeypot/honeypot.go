@@ -17,6 +17,7 @@ import (
 const (
 	PAYLOAD_MAX_LEN = 524288 //512KB
 	PtypeOther      = "other"
+	SessionTimeout  = 10 //second
 )
 
 const (
@@ -249,7 +250,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	unk := unknown.NewUnknown()
 
 	for {
-		conn.SetDeadline(time.Now().Add(5 * time.Second))
+		conn.SetDeadline(time.Now().Add(SessionTimeout * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
 		l, err := conn.Read(buf)
 		if err != nil || l < 1 {
