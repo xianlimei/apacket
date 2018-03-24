@@ -7,6 +7,8 @@ import base64
 from os.path import basename
 from StringIO import StringIO
 
+resp_cisco_jabber = "<?xml version='1.0'?><stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' from='%s' version='1.0' id='ro7kfeld3ecro6v2yngoihvwx9vuxcco0k9fyut2' xmlns:ack='http://www.xmpp.org/extensions/xep-0198.html#ns'><stream:features xmlns:stream='http://etherx.jabber.org/streams'><starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'><required/></starttls><address xmlns='http://affinix.com/jabber/address'>104.192.108.9</address><auth xmlns='http://jabber.org/features/iq-auth'/></stream:features>"
+
 class Request(object):
 
 
@@ -31,8 +33,26 @@ class ResponseHttp(object):
     def __repr__(self):
         return self.resp
 
+    def ciscoJabberResponse(self):
+        if 'jabber:client' not in self.request.payload: #Cisco jabber
+             return
+        ops = self.request.payload.find("to=")
+        if ops == -1:
+            return
+        tmp = self.request.payload[ops+3:] 
+        ops = tmp.find(" ")
+        if ops == -1:
+            return
+        _from = tmp[:ops]
+        return resp_cisco_jabber % _from
+       
+
     def getResponse(self):
-        self.resp = '\x00'
+        res = self.ciscoJabberResponse()
+        if res:
+            self.resp = res
+        else:
+            self.resp = '\x00'
         return self.__repr__()
 
 def main(payload):
