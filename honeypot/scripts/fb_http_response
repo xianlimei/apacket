@@ -49,6 +49,7 @@ http_authenticate = (
 	'''WWW-Authenticate: Basic realm="HomeHub"''',
 	'''WWW-Authenticate: Basic realm="MOBOTIX Camera User"''',
 	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
+	'''WWW-Authenticate: Basic realm="Tomcat Manager Application"''',
         )
 
 http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"http://micros-hosting.com/EGateway/\">base64Binary</base64Binary>\
