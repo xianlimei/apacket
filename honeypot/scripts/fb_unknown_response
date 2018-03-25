@@ -52,7 +52,8 @@ class ResponseHttp(object):
         if res:
             self.resp = res
         else:
-            self.resp = '\x00'
+            #self.resp = '\x00'
+            self.resp = "\xFF\x02"+"index"+"\x00" 
         return self.__repr__()
 
 def main(payload):
