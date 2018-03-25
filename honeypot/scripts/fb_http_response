@@ -65,6 +65,7 @@ The current event is not START_ELEMENT but 2 \
 <version who=\"sg\">9.0(1)</version>\
 <error id=\"98\" param1=\"\" param2=\"\">VPN Server could not parse request.</error>\
 </config-auth>\
+<h1>RouterOS v6.27</h1>\
 </body></html>"
 
 http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
