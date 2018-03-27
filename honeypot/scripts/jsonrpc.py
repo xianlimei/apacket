@@ -17,6 +17,7 @@ result = {
         "eth_coinbase":"0x407d73d8a49eeb85d32cf465507dd71d507100c1",
         "dumpprivkey":"L3FdgAisCmV9XM65cvjYQ19XM65cvjYQ19XM65cvj9XM65cvjYQ1a",
         "eth_mining":True,
+        "miner_setEtherbase":True,
         "eth_hashrate":"0x38a",
         "eth_gasPrice":['0x407d73d8a49eeb85d32cf465507dd71d507100c1'],
         "eth_accounts":["0x407d73d8a49eeb85d32cf465507dd71d507100c1"],
