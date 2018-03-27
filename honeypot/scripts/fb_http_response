@@ -293,11 +293,11 @@ class ResponseHttp(object):
             if isinstance(request, list):
                 isList = True
                 request = request[0]
-            result = jsonrpc.result.get(request.get('method'))
+            result = jsonrpc.result.get(request.get('method', True))
+            self.body = {}
+            self.body['id'] = request.get('id')
+            self.body['jsonrpc'] = request.get('jsonrpc')
             if result:
-                self.body = {}
-                self.body['id'] = request.get('id')
-                self.body['jsonrpc'] = request.get('jsonrpc')
                 self.body['result'] = result
             else:
                 self.body = request
