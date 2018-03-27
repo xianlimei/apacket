@@ -289,11 +289,20 @@ class ResponseHttp(object):
         try:
 
             request = json.loads(self.request.body)
+            isList = False
             if isinstance(request, list):
+                isList = True
                 request = request[0]
             result = jsonrpc.result.get(request.get('method'))
-            self.body = request
-            self.body['result'] = result
+            if result:
+                self.body = {}
+                self.body['id'] = request.get('id')
+                self.body['jsonrpc'] = request.get('jsonrpc')
+                self.body['result'] = result
+            else:
+                self.body = request
+            if isList:
+                self.body = [self.body]
             self.body = json.dumps(self.body)
         except BaseException, e:
             sys.stderr.write('jsonrpcResponse: %s\n' % str(e))
