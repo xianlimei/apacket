@@ -1,11 +1,11 @@
 package unknown
 
 import (
-	"bytes"
-	"encoding/base64"
-	"fmt"
+	//"bytes"
+	//"encoding/base64"
+	//"fmt"
 	"github.com/Acey9/apacket/honeypot/core"
-	"os/exec"
+	//"os/exec"
 )
 
 const CmdUnknownResponse = "fb_unknown_response"
@@ -27,15 +27,17 @@ func (s *Unknown) Parser(remoteAddr, localAddr string, request []byte, ptype str
 }
 
 func (s *Unknown) DisguiserResponse(request []byte) (response []byte) {
-	var out bytes.Buffer
-	str := base64.StdEncoding.EncodeToString(request)
-	cmd := exec.Command(CmdUnknownResponse, str)
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	response = out.Bytes()
+	/*
+		var out bytes.Buffer
+		str := base64.StdEncoding.EncodeToString(request)
+		cmd := exec.Command(CmdUnknownResponse, str)
+		cmd.Stdout = &out
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		response = out.Bytes()
+	*/
 	return
 }
