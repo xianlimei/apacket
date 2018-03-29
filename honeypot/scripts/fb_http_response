@@ -18,6 +18,7 @@ import phpadmin
 import boa
 import belkin
 import hp_hbase
+import onvif
 
 http_server = (
 	#"Tengine",
@@ -58,7 +59,7 @@ http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"htt
 <title>Document Error: Unauthorized</title>\
 </head><body><h2> The Cross Web Server Access Error: Unauthorized Invalid attribute for element void:class The current event is not START_ELEMENT but 2 \
 </h2><p>Access to this document requires a User ID</p>CGI process file does not exist \
-<h1>RouterOS v6.36.4</h1>
+<h1>RouterOS v6.36.4</h1>\
 <form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
 <input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" style=\"width:100px;\" />\
 <input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" style=\"width:100px;\" />\
@@ -537,6 +538,18 @@ class ResponseHttp(object):
             body = body_members
         self.body=json.dumps(body)
 
+    def onvifResponse(self):
+        self.headers = {
+                'Date':self.date,
+                }
+        h = [
+                'Server: DNVRS-Webs',
+                'Cache-Control: no-cache',
+                'Content-Type: application/soap+xml',
+                'Connection: close'
+                ]
+        self.body = onvif.body
+
     def hbaseResponse(self):
         self.headers = {
                 'Date':self.date,
@@ -599,11 +612,13 @@ class ResponseHttp(object):
         elif 'cgi-bin/login.cgi' in uri:
                 setResponse = self.boaResponse
         elif '/a2billing/common/javascript/misc.js' == uri:
-                setResponse = self.a2billingResponse
+            setResponse = self.a2billingResponse
         elif '/v2/' in uri and port == '2379':
-                setResponse = self.etcdResponse
+            setResponse = self.etcdResponse
         elif '/master-status' in uri and port == '16010':
-                setResponse = self.hbaseResponse
+            setResponse = self.hbaseResponse
+        elif '/onvif/device_service' == uri:
+            setResponse = self.onvifResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
