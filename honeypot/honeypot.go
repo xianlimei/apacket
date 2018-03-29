@@ -249,6 +249,8 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 
 	unk := unknown.NewUnknown()
 
+	var pktCnt int
+
 	for {
 		conn.SetDeadline(time.Now().Add(SessionTimeout * time.Second))
 		buf := make([]byte, PAYLOAD_MAX_LEN)
@@ -286,6 +288,13 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		if payloadBuf.Len() > PAYLOAD_MAX_LEN {
 			break
 		}
+
+		if pktCnt > 20 {
+			break
+		}
+
+		pktCnt++
+		logp.Debug("pktCnt", "pktCnt:%d", pktCnt)
 
 		if isTLSConn {
 			tlsTag = true
