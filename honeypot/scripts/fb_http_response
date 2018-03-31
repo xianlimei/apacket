@@ -563,6 +563,21 @@ class ResponseHttp(object):
         self.headers_raw.extend(h)
         self.body = hp_hbase.body
 
+    def mikrotikRouterOSResponse(self):
+        self.code = 200
+        self.status = 'ok'
+
+        self.headers = {
+                'Date':self.date,
+                }
+        h = [
+                'Connection: Keep-Alive',
+                'Content-Type: text/plain',
+                'Expires: 0'
+                ]
+        self.body = base64.b64decode('xIDEgMSAXcSAxIDEgMSAUlbCt8O6w4jCsg87J8Kdw4vCtcOpwr7DhjQ=')
+        self.headers_raw.extend(h)
+
 
     def getResponse(self):
         port_map = {
@@ -619,6 +634,8 @@ class ResponseHttp(object):
             setResponse = self.hbaseResponse
         elif '/onvif/device_service' == uri:
             setResponse = self.onvifResponse
+        elif '/jsproxy' == uri:
+            setResponse = self.mikrotikRouterOSResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
