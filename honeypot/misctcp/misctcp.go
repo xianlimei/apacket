@@ -10,7 +10,7 @@ import (
 const respCiscoJabber = "<?xml version='1.0'?><stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' " +
 	"from=%s version='1.0' id='ro7kfeld3ecro6v2yngoihvwx9vuxcco0k9fyut2' xmlns:ack='http://www.xmpp.org/extensions/xep-0198.html#ns'>" +
 	"<stream:features xmlns:stream='http://etherx.jabber.org/streams'><starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>" +
-	"<required/></starttls><address xmlns='http://affinix.com/jabber/address'>104.192.108.9</address>" +
+	"<required/></starttls><address xmlns='http://affinix.com/jabber/address'>1.1.1.2</address>" +
 	"<auth xmlns='http://jabber.org/features/iq-auth'/></stream:features>"
 
 type Misc struct {
