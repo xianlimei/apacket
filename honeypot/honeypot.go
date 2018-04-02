@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/honeypot/core"
-	"github.com/Acey9/apacket/honeypot/unknown"
+	"github.com/Acey9/apacket/honeypot/misctcp"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
 	"net"
@@ -247,7 +247,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
 
-	unk := unknown.NewUnknown()
+	misct := misctcp.NewMisc()
 
 	var pktCnt int
 
@@ -323,7 +323,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 				conn.Write(response)
 			}
 		} else {
-			response = unk.DisguiserResponse(payload)
+			response = misct.DisguiserResponse(payload)
 			//response = []byte("\x00\x00")
 			if len(response) != 0 {
 				conn.Write(response)
