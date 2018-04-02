@@ -39,6 +39,6 @@ func (s *Unknown) DisguiserResponse(request []byte) (response []byte) {
 		}
 		response = out.Bytes()
 	*/
-	response = []byte("\x01\x00\x00\x00")
+	//response = []byte("\x01\x00\x00\x00")
 	return
 }
