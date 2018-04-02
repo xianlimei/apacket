@@ -19,6 +19,7 @@ import boa
 import belkin
 import hp_hbase
 import onvif
+import HP_iLO
 
 http_server = (
 	#"Tengine",
@@ -40,6 +41,7 @@ http_server = (
         "CouchDB/2.1.0 (Erlang OTP/17)",
         "miniupnpd/1.0 UPnP/1.0",
         "DasanNetwork Solution",
+        "HP-iLO-Server/1.30",
         )
 
 http_authenticate = ( 
@@ -578,6 +580,26 @@ class ResponseHttp(object):
         self.body = base64.b64decode('xIDEgMSAXcSAxIDEgMSAUlbCt8O6w4jCsg87J8Kdw4vCtcOpwr7DhjQ=')
         self.headers_raw.extend(h)
 
+    def ilOResponse(self):
+        self.code = 201
+        self.status = 'Created'
+
+        self.headers = {
+            "Server": "HP-iLO-Server/1.30",
+            "ETag": "W/\"37B94ECA\"",
+            "Link": "</rest/v1/AccountService/Accounts/3>; rel=self",
+            "Location": "https://127.0.0.1:8081/rest/v1/AccountService/Accounts/3",
+            "Cache-Control": "no-cache",
+            'Date':self.date,
+            "X-Frame-Options": "sameorigin",
+            "X_HP-CHRP-Service-Version": "1.0.3",
+            "Content-type": "application/json; charset=utf-8",
+        }
+        try:
+            req = json.loads(self.request.body)
+            self.body = json.dumps(HP_iLO.getResponse(req))
+        except:
+            pass
 
     def getResponse(self):
         port_map = {
@@ -636,6 +658,8 @@ class ResponseHttp(object):
             setResponse = self.onvifResponse
         elif '/jsproxy' == uri:
             setResponse = self.mikrotikRouterOSResponse
+        elif '/rest/v1/accountservice/accounts' == uri:
+            setResponse = self.ilOResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
