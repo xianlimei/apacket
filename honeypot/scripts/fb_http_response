@@ -508,10 +508,17 @@ class ResponseHttp(object):
             'ETag: "a1d4c-66-4f9d3af853140"',
             'Accept-Ranges: bytes',
             'Vary: Accept-Encoding',
-            'Content-Type: application/javascript',
             ]
-        self.headers_raw.extend(h)
-        self.body = '''\n\n\nfunction MM_openBrWindow(theURL,winName,features) {\n\treturn window.open(theURL,winName,features);\n}'''
+        if '/a2billing/common/javascript/misc.js' in self.request.uri:
+            h.append('Content-Type: application/javascript')
+            self.headers_raw.extend(h)
+            self.body = '''\n\n\nfunction MM_openBrWindow(theURL,winName,features) {\n\treturn window.open(theURL,winName,features);\n}'''
+        elif '/a2billing/customer/templates/default/css/popup.css' in self.request.uri:
+            h.append('Content-Type: text/css')
+            self.headers_raw.extend(h)
+            self.body = '''#page-wrap {\n\tmin-width: 0;\n\t}'''
+        else:
+            self.defaultResponse()
 
     def etcdResponse(self):
         _id = '6e9e05c51164291d'
@@ -648,7 +655,7 @@ class ResponseHttp(object):
             setResponse = self.jsonrpcResponse
         elif 'cgi-bin/login.cgi' in uri:
                 setResponse = self.boaResponse
-        elif '/a2billing/common/javascript/misc.js' == uri:
+        elif '/a2billing/' in uri:
             setResponse = self.a2billingResponse
         elif '/v2/' in uri and port == '2379':
             setResponse = self.etcdResponse
