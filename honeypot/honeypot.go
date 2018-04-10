@@ -199,12 +199,21 @@ func (hp *Honeypot) tlsRedirect(payload []byte, conn net.Conn) (response []byte)
 	if err != nil {
 		return
 	}
-	buf := make([]byte, PAYLOAD_MAX_LEN)
-	l, err = conn.Read(buf)
-	if err != nil {
-		return
+	payloadBuf := bytes.Buffer{}
+	for {
+
+		conn.SetDeadline(time.Now().Add(1 * time.Second))
+		buf := make([]byte, PAYLOAD_MAX_LEN)
+		l, err = conn.Read(buf)
+		if err != nil {
+			break
+		}
+		if l < 1 {
+			break
+		}
+		payloadBuf.Write(buf[:l])
 	}
-	response = buf[:l]
+	response = payloadBuf.Bytes()
 	return
 }
 
