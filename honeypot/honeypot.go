@@ -10,6 +10,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/misctcp"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
+	"io"
 	"net"
 	"time"
 )
@@ -220,8 +221,7 @@ func (hp *Honeypot) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) 
 }
 
 func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
-	var tlsProxyConn net.Conn
-	var tlsProxyLocalAddr, remoteAddr, localAddr string
+	var remoteAddr, localAddr string
 
 	var stageTls, tlsTag, identify bool
 	var firstPalyloadLen int
@@ -229,11 +229,8 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	var disguiser core.Disguiser
 
 	defer func() {
+		logp.Debug("debug", "conn close. tls:%v", isTLSConn)
 		conn.Close()
-		if tlsProxyConn != nil {
-			hp.session.DeleteSession(tlsProxyLocalAddr)
-			tlsProxyConn.Close()
-		}
 		if err := recover(); err != nil {
 			logp.Err("initHandler remote:%s local:%s info:%v", remoteAddr, localAddr, err)
 		}
@@ -266,6 +263,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		payload := buf[:l]
 		logp.Debug("payload", "payload:% 2x", payload)
 
+		payloadBuf.Write(payload)
 		//TODO ssl protocol identify
 		if !stageTls && !isTLSConn &&
 			l >= 6 && payload[0] == TypeHandshake &&
@@ -273,19 +271,9 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			payload[1] >= 0x00 && payload[1] <= 0x03 && //SSL/3.0 TLS/1.0/1.1/1.2
 			payload[5] == TypeClientHello {
 			stageTls = true
-			tlsProxyConn, tlsProxyLocalAddr = hp.getTLSProxyConn()
-			nf := &Netflow{remoteAddr, localAddr}
-			hp.session.AddSession(tlsProxyLocalAddr, nf)
-		}
-		if stageTls {
-			res := hp.tlsRedirect(payload, tlsProxyConn)
-			if len(res) != 0 {
-				conn.Write(res)
-			}
-			continue
+			break
 		}
 
-		payloadBuf.Write(payload)
 		if payloadBuf.Len() > PAYLOAD_MAX_LEN {
 			break
 		}
@@ -331,6 +319,24 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			}
 		}
 
+	}
+
+	if stageTls {
+		tlsProxyConn, tlsProxyLocalAddr := hp.getTLSProxyConn()
+		defer tlsProxyConn.Close()
+		logp.Debug("debug", "connected to tls service via %s", tlsProxyLocalAddr)
+		nf := &Netflow{remoteAddr, localAddr}
+		hp.session.AddSession(tlsProxyLocalAddr, nf)
+		_, err := tlsProxyConn.Write(payloadBuf.Bytes())
+		if err != nil {
+			return
+		}
+		for {
+			go io.Copy(tlsProxyConn, conn)
+			go io.Copy(conn, tlsProxyConn)
+			time.Sleep(SessionTimeout * time.Second) //TODO
+			break
+		}
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
 		otherPtype := PtypeOther
