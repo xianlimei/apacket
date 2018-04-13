@@ -42,6 +42,7 @@ http_server = (
         "miniupnpd/1.0 UPnP/1.0",
         "DasanNetwork Solution",
         "HP-iLO-Server/1.30",
+        "OS 1.0 UPnP/1.0 Realtek/V1.3",
         )
 
 http_authenticate = ( 
@@ -197,6 +198,7 @@ class ResponseHttp(object):
         self.headers['Server'] = server
         self.headers['Date'] = self.date
         self.headers_raw.append(auth)
+        self.headers_raw.append('Location: http://192.168.0.1:52869/picsdesc.xml')
         if self.request.body:
             if self.request.body.startswith("cmd="):
                 self.body = "610cker"
