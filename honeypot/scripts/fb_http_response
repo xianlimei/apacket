@@ -63,6 +63,9 @@ http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"htt
 </head><body><h2> The Cross Web Server Access </h2>\
 <p>Access to this document requires a User ID</p>CGI process file does not exist \
 <h1>RouterOS v6.36.4</h1>\
+<h1>HybridAuth 2.0.10 Installer</h1>\
+<h1>Installation completed</h1>\
+<h1>version 0.80.0 Copyright</h1>\
 <form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
 <input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" />\
 <input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" />\
