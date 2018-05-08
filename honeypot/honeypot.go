@@ -157,7 +157,8 @@ func (hp *Honeypot) Listen(network, address string) error {
 		srv, err := net.Listen(network, address)
 		if err != nil {
 			logp.Err("Listen: %v", err)
-			return err
+			time.Sleep(6 * time.Second)
+			continue
 		}
 
 		defer srv.Close()
@@ -180,14 +181,16 @@ func (hp *Honeypot) TLSListen(network, address string) error {
 		cer, err := tls.LoadX509KeyPair(config.Cfg.ServerCrt, config.Cfg.ServerKey)
 		if err != nil {
 			logp.Err("TLSListen.tls.config:%v", err)
-			return err
+			time.Sleep(6 * time.Second)
+			continue
 		}
 		config := &tls.Config{Certificates: []tls.Certificate{cer}}
 
 		srv, err := tls.Listen(network, address, config)
 		if err != nil {
 			logp.Err("TLSListen:%v", err)
-			return err
+			time.Sleep(6 * time.Second)
+			continue
 		}
 
 		defer srv.Close()
