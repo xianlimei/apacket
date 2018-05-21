@@ -43,6 +43,7 @@ http_server = (
         "DasanNetwork Solution",
         "HP-iLO-Server/1.30",
         "OS 1.0 UPnP/1.0 Realtek/V1.3",
+        "IceWarp/12.0.2.0 x64",
         )
 
 http_authenticate = ( 
