@@ -20,6 +20,7 @@ import belkin
 import hp_hbase
 import onvif
 import HP_iLO
+from http_default_body import http_body
 
 http_server = (
 	#"Tengine",
@@ -56,27 +57,6 @@ http_authenticate = (
 	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
 	'''WWW-Authenticate: Basic realm="Tomcat Manager Application"''',
         )
-
-http_body = "<?xml version=\"1.0\" encoding=\"utf-8\"?><base64Binary xmlns=\"http://micros-hosting.com/EGateway/\">base64Binary</base64Binary>\
-<html><head>\
-<title>RouterOS router configuration page</title>\
-<title>Document Error: Unauthorized</title>\
-</head><body><h2> The Cross Web Server Access </h2>\
-<p>Access to this document requires a User ID</p>CGI process file does not exist \
-<h1>RouterOS v6.36.4</h1>\
-<h1>HybridAuth 2.0.10 Installer</h1>\
-<h1>Installation completed</h1>\
-<h1>version 0.80.0 Copyright</h1>\
-<form name=\"form1\" method=\"post\" action=\"login.aspx\" onsubmit=\"javascript:return WebForm_OnSubmit();\" id=\"form1\">\
-<input name=\"UserName\" type=\"text\" id=\"UserName\" class=\"button1\" />\
-<input name=\"UserPass\" type=\"password\" id=\"UserPass\" class=\"button1\" />\
-<input type=\"submit\" name=\"Button1\" value=\"login\" onclick=\"login\" id=\"Button1\" class=\"button2\" />\
-</form>\
-<config-auth client=\"vpn\" type=\"complete\">\
-<version who=\"sg\">9.0(1)</version>\
-<error id=\"98\" param1=\"\" param2=\"\">VPN Server could not parse request.</error>\
-</config-auth>\
-</body></html>"
 
 http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
 <html xmlns=\"http://www.w3.org/1999/xhtml\"> \
