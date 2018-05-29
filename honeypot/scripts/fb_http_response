@@ -7,6 +7,7 @@ import random
 import time
 import re
 import base64
+import os
 
 from datetime import datetime
 from os.path import basename
@@ -21,6 +22,8 @@ import hp_hbase
 import onvif
 import HP_iLO
 from http_default_body import http_body
+
+PROJECT_HOME = os.path.split(os.path.realpath(__file__))[0]
 
 http_server = (
 	#"Tengine",
@@ -594,6 +597,17 @@ class ResponseHttp(object):
         except:
             pass
 
+    def faviconResponse(self):
+        self.code = 200
+        self.status = 'ok'
+        fd = open(PROJECT_HOME+'/favicon.ico', 'rb')
+        buf = fd.read()
+        fd.close()
+        self.headers = {
+                'Content-Type': 'image/x-icon'
+                }
+        self.body = buf
+
     def qRadarResponse(self):
         self.code = 200
         self.status = 'ok'
@@ -646,6 +660,8 @@ class ResponseHttp(object):
             setResponse = self.sipResponse
         elif '"jsonrpc":' in self.request.body:
             setResponse = self.jsonrpcResponse
+        elif '/favicon.ico' == uri:
+            setResponse = self.faviconResponse
         elif 'cgi-bin/login.cgi' in uri:
                 setResponse = self.boaResponse
         elif '/a2billing/' in uri:
