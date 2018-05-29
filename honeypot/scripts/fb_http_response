@@ -594,6 +594,12 @@ class ResponseHttp(object):
         except:
             pass
 
+    def qRadarResponse(self):
+        self.code = 200
+        self.status = 'ok'
+        body = {"exceptionMessageValue":"javax.servlet.ServletException: No valid forensics analysis solrDocIds parameter found."}
+        self.body = json.dumps(body)
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -616,6 +622,7 @@ class ResponseHttp(object):
                 r'^/dev\.htm$':self.belkinResponse,
                 r'^/proxy\.cgi\?chk&':self.belkinResponse,
                 r'^/cgi-bin/login_action\.cgi$':self.dasanResponse,
+                r'^/ForensicsAnalysisServlet/':self.qRadarResponse,
                 }
 
         host = self.request.headers.get('host')
