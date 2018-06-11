@@ -574,7 +574,7 @@ class ResponseHttp(object):
                 'Expires: 0'
                 ]
         #self.body = base64.b64decode('xIDEgMSAXcSAxIDEgMSAUlbCt8O6w4jCsg87J8Kdw4vCtcOpwr7DhjQ=')
-        self.body = base64.b64decode('xIDEgMSAGcSAxIDEgMSAWMOkNgPEgMOKwqYlwqNiWMOVK8KtfRMK')
+        self.body = base64.b64decode('xIDEgMSAGcSAxIDEgMSAWMOkNgPEgMOKwqYlwqNiWMOVK8KtfRM=')
         self.headers_raw.extend(h)
 
     def ilOResponse(self):
