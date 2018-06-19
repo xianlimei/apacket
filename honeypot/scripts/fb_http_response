@@ -186,6 +186,7 @@ class ResponseHttp(object):
 
         self.headers['Server'] = server
         self.headers['Date'] = self.date
+        self.headers['X-Powered-By'] = 'PHP/4.6.0'
         self.headers_raw.append(auth)
         self.headers_raw.append('Location: http://192.168.0.1:52869/picsdesc.xml')
         if self.request.body:
