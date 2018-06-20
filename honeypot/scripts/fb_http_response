@@ -426,7 +426,7 @@ class ResponseHttp(object):
             self.status = 'ok'
             self.body = json.dumps({'all_nodes':["nonode@nohost"],'cluster_nodes':["nonode@nohost"]})
         else:
-            self.body = json.dumps({'ok':'true'})
+            self.body = json.dumps({'ok':'true', 'version':'1.7.0'})
     
     def belkinResponse(self):
         self.headers = {
