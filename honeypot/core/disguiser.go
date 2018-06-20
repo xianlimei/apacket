@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
+	"os"
 	"time"
 )
 
@@ -42,6 +43,7 @@ type UDP struct {
 type Applayer struct {
 	Ts    time.Time   `json:"ts"`
 	Ptype string      `json:"ptype"`
+	Host  string      `json:"sensor,omitempty"`
 	Psha1 string      `json:"psha1,omitempty"`
 	Plen  uint        `json:"plen,omitempty"`
 	TLS   bool        `json:"tls,omitempty"`
@@ -74,9 +76,17 @@ func NewApplayer(remoteAddr, localAddr, ptype string, proto uint16, payload []by
 	tcp := &TCP{}
 	udp := &UDP{}
 
+	var hostname string
+
+	host, err := os.Hostname()
+	if err == nil {
+		hostname = host
+	}
+
 	applayer = &Applayer{
 		Ts:    time.Now(),
 		Ptype: ptype,
+		Host:  hostname,
 		TLS:   tls,
 		Appl:  appl,
 	}

@@ -30,7 +30,7 @@ type Packet struct {
 	IPv         uint8     `json:"ipv"`
 	PktType     PktType   `json:"-"`
 	Ptype       string    `json:"ptype,omitempty"`
-	Host        string    `json:"host,omitempty"`
+	Host        string    `json:"sensor,omitempty"`
 	Ip4         *IPv4     `json:"ip4,omitempty"`
 	Ip6         *IPv6     `json:"ip6,omitempty"`
 	Tcp         *TCP      `json:"tcp,omitempty"`
