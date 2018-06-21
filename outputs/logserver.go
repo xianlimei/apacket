@@ -28,6 +28,7 @@ func NewSapacketOutputer(serverAddr, token string) (*SapacketOutputer, error) {
 		return nil, err
 	}
 	go so.Start()
+	go so.Heartbeat()
 	return so, nil
 }
 
@@ -90,6 +91,24 @@ func (this *SapacketOutputer) ConnectServer(addr string) (conn net.Conn, err err
 	}
 
 	return conn, nil
+}
+
+func (this *SapacketOutputer) Heartbeat() {
+	pkt, _ := packet.Pack(packet.HEARTBEAT, []byte("\x00"))
+	for {
+		this.heartbeat(pkt)
+	}
+}
+
+func (this *SapacketOutputer) heartbeat(pkt []byte) {
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	select {
+	case <-ticker.C:
+		logp.Debug("SapacketOutputer", "heartbeat send.")
+		this.msgQueue <- pkt
+	}
 }
 
 func (this *SapacketOutputer) Output(msg []byte) {
