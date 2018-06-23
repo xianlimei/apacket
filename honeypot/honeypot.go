@@ -270,7 +270,7 @@ func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr string) {
 		return
 	}
 
-	res = res[i+6:]
+	res = res[i+4:]
 	i = strings.Index(res, " ")
 	if i == -1 {
 		return
