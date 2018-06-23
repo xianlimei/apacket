@@ -7,7 +7,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
 	"math/rand"
-	"net"
+	//"net"
 	"os/exec"
 	"strings"
 	"time"
@@ -204,7 +204,7 @@ func (http *HTTP) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype
 }
 
 func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *core.Applayer) {
-	var reqAddr string
+	//var reqAddr string
 	httpMSG := &HTTPMsg{Payload: request}
 	httpMSG.parse()
 
@@ -212,46 +212,47 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	if err != nil {
 		return
 	}
+	/*
+			hostPort, ok := httpMSG.Headers["host"]
+			if !ok {
+				return
+			}
 
-	hostPort, ok := httpMSG.Headers["host"]
-	if !ok {
-		return
-	}
+			host, port, ipv, err := core.GetIPPort(hostPort)
+			if err != nil {
+				return
+			}
 
-	host, port, ipv, err := core.GetIPPort(hostPort)
-	if err != nil {
-		return
-	}
+			if port == 0 {
+				return
+			}
 
-	if port == 0 {
-		return
-	}
+			if ipv == core.IPv4 {
+				reqAddr = response.IP4.Dip
+			} else if ipv == core.IPv6 {
+				reqAddr = response.IP6.Dip
+			} else {
+				return
+			}
 
-	if ipv == core.IPv4 {
-		reqAddr = response.IP4.Dip
-	} else if ipv == core.IPv6 {
-		reqAddr = response.IP6.Dip
-	} else {
-		return
-	}
-
-	if reqAddr == host || core.IntranetIP(host) {
-		response.TCP.Dport = port
-	} else {
-		//May need to modify 24 to 32
-		_, reqAddrNet, err := net.ParseCIDR(reqAddr + "/24")
-		if err != nil {
-			return
-		}
-		_, hostNet, err := net.ParseCIDR(host + "/24")
-		if err != nil {
-			return
-		}
-		if reqAddrNet.String() == hostNet.String() {
+		if reqAddr == host || core.IntranetIP(host) {
 			response.TCP.Dport = port
-		}
+		} else {
+			//May need to modify 24 to 32
+			_, reqAddrNet, err := net.ParseCIDR(reqAddr + "/24")
+			if err != nil {
+				return
+			}
+			_, hostNet, err := net.ParseCIDR(host + "/24")
+			if err != nil {
+				return
+			}
+			if reqAddrNet.String() == hostNet.String() {
+				response.TCP.Dport = port
+			}
 
-	}
+		}
+	*/
 	return
 }
 

@@ -12,6 +12,8 @@ import (
 	"github.com/Acey9/apacket/outputs"
 	"io"
 	"net"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -233,6 +235,53 @@ func (hp *Honeypot) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) 
 	return
 }
 
+func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr string) {
+	var out bytes.Buffer
+
+	sip, sport, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		return
+	}
+	//conntrack := fmt.Sprintf("conntrack -L -p %s -s %s --sport %d", proto, sip, sport)
+	cmd := exec.Command("conntrack", "-L", "-p", proto, "-s", sip, "--sport", sport)
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+		logp.Err("%v", err)
+		return
+	}
+
+	res := out.String()
+	i := strings.Index(res, "dport=")
+	if i == -1 {
+		return
+	}
+
+	dres := res[i+6:]
+	i = strings.Index(dres, " ")
+	if i == -1 {
+		return
+	}
+
+	dport := dres[:i]
+
+	i = strings.Index(res, "dst=")
+	if i == -1 {
+		return
+	}
+
+	res = res[i+6:]
+	i = strings.Index(res, " ")
+	if i == -1 {
+		return
+	}
+
+	addr := res[:i]
+
+	localAddr = net.JoinHostPort(addr, dport)
+	return
+}
+
 func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	var remoteAddr, localAddr string
 
@@ -257,6 +306,10 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
+	realLocal := hp.realLocalAddr("tcp", remoteAddr)
+	if realLocal != "" {
+		localAddr = realLocal
+	}
 
 	misct := misctcp.NewMisc()
 
