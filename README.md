@@ -4,6 +4,10 @@ Capture network packets
 
 It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
 
+# Requirements
+* System tools
+  * conntrack #Netfilter's connection tracking userspace tools
+
 # Features
 
 * Capture TCP/SYN and backscatter packet only.
