@@ -2,10 +2,9 @@ package redis
 
 import (
 	"bytes"
-	"encoding/base64"
+	"encoding/hex"
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
-	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -23,17 +22,20 @@ const (
 )
 
 type Redis struct {
+	statusInfo []byte
 }
 
 func NewRedis() *Redis {
-	redis := &Redis{}
+	src := []byte(INFO)
+	dst := make([]byte, hex.DecodedLen(len(src)))
+	n, _ := hex.Decode(dst, src)
+	redis := &Redis{
+		statusInfo: dst[:n],
+	}
 	return redis
 }
 
-func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
-
-	ptype = PtypeRedis
-
+func (s *Redis) cmdParser(request []byte) (cmd string) {
 	dataType := request[0]
 	if dataType != 0x2a { //*
 		return
@@ -65,11 +67,25 @@ func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype s
 	if err != nil {
 		return
 	}
-	cmd := string(request[i+2 : uint64(i+2)+arg1Len])
+	cmd = string(request[i+2 : uint64(i+2)+arg1Len])
 	if request[uint64(i+2)+arg1Len] != 0x0d && request[uint64(i+3)+arg1Len] != 0x0a {
 		return
 	}
 	cmd = strings.ToUpper(cmd)
+	logp.Debug("redis", "redis.cmd:%s", cmd)
+	return
+}
+
+func (s *Redis) Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error) {
+
+	ptype = PtypeRedis
+
+	cmd := s.cmdParser(request)
+
+	if cmd == "" {
+		return
+	}
+
 	_, ok := allowCMDMap[cmd]
 	if ok {
 		identify = true
@@ -89,15 +105,21 @@ func (s *Redis) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 }
 
 func (s *Redis) DisguiserResponse(request []byte) (response []byte) {
-	var out bytes.Buffer
-	str := base64.StdEncoding.EncodeToString(request)
-	cmd := exec.Command(CmdRedisResponse, str)
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		logp.Err("Redis.DisguiserResponse.cmd:%v", err)
+	cmd := s.cmdParser(request)
+	if cmd == "" {
 		return
 	}
-	response = out.Bytes()
+
+	if cmd == "INFO" {
+		response = s.statusInfo
+		return
+	}
+
+	res, ok := cmdResponse[cmd]
+	if !ok {
+		return
+	}
+
+	response = []byte(res)
 	return
 }
