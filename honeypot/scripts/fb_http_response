@@ -188,6 +188,13 @@ class ResponseHttp(object):
         self.headers['Server'] = server
         self.headers['Date'] = self.date
         self.headers['X-Powered-By'] = 'PHP/4.6.0'
+        self.headers['X-Cache'] = 'MISS from Hello'
+        self.headers['X-Cache-Lookup'] = 'MISS from Hello:8080'
+        self.headers['X-Drupal-Cache'] = 'HIT'
+        self.headers['X-Drupal-Dynamic-Cache'] = 'MISS'
+        self.headers['X-Generator'] = 'Drupal 8 (https://www.drupal.org)'
+        self.headers['X-Content-Powered-By'] = 'K2 v2.8.0 (by JoomlaWor'
+
         self.headers_raw.append(auth)
         self.headers_raw.append('Location: http://192.168.0.1:52869/picsdesc.xml')
         if self.request.body:
@@ -408,7 +415,7 @@ class ResponseHttp(object):
     def couchdbResponse(self):
         uri = self.request.uri.lower()
         h = [
-                'Server:CouchDB/2.1.0 (Erlang OTP/17)',
+                'Server:CouchDB/1.6.1 (Erlang OTP/17)',
                 'Content-Type:application/json',
                 ]
         self.headers = {
@@ -427,7 +434,7 @@ class ResponseHttp(object):
             self.status = 'ok'
             self.body = json.dumps({'all_nodes':["nonode@nohost"],'cluster_nodes':["nonode@nohost"]})
         else:
-            self.body = json.dumps({'ok':'true', 'version':'1.7.0'})
+            self.body = json.dumps({'ok':'true', 'version':'1.6.1'})
     
     def belkinResponse(self):
         self.headers = {
