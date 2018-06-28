@@ -51,6 +51,7 @@ http_server = (
         "uc-httpd/1.0.0",
         "uc-httpd 1.0.0",
         "OrientDB Server v.2.2.22 (build fb2b7d321ea8a5a5b18a82237049804aace9e3de)",
+        "Microsoft-IIS/6.0",
         )
 
 http_authenticate = ( 
