@@ -29,4 +29,4 @@ make install
 sapacket -h
 ```
 
-![https://github.com/Acey9/apacket/raw/master/doc/images/apacket.png](docs/images/rps.png)
+![apacket](https://github.com/Acey9/apacket/raw/master/doc/images/apacket.png)
