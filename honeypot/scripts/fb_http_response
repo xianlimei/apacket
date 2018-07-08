@@ -21,6 +21,7 @@ import belkin
 import hp_hbase
 import onvif
 import HP_iLO
+import docker
 from http_default_body import http_body
 
 PROJECT_HOME = os.path.split(os.path.realpath(__file__))[0]
@@ -52,6 +53,7 @@ http_server = (
         "uc-httpd 1.0.0",
         "OrientDB Server v.2.2.22 (build fb2b7d321ea8a5a5b18a82237049804aace9e3de)",
         "Microsoft-IIS/6.0",
+        "Docker/17.05.0-ce (linux)",
         )
 
 http_authenticate = ( 
@@ -83,6 +85,15 @@ http_code = [
         500,
         401,
         ]
+
+HEADERS = {
+            'Connection':'keep-alive',
+            'Content-Type':'text/html; charset=UTF-8',
+            'Pragma': 'no-cache',
+            'Cache-Control':'no-cache',
+            'Api-Version': '1.29',
+            }
+
 
 class Request(object):
 
@@ -143,14 +154,9 @@ class ResponseHttp(object):
 
 
     headers_raw = []
-    headers = {
-            'Connection':'keep-alive',
-            'Content-Type':'text/html; charset=UTF-8',
-            'Pragma': 'no-cache',
-            'Cache-Control':'no-cache',
-            }
-
+    headers = HEADERS
     body = http_body
+    resp = ""
 
     def __init__(self, request, auto_add_item=True):
         self.request = request
@@ -159,6 +165,8 @@ class ResponseHttp(object):
         self.auto_add_item = auto_add_item
 
     def __repr__(self):
+        if self.resp:
+            return self.resp
         response_line = '%s %s %s' % (self.version, self.code, self.status)
         headers = [] 
         for k, v in self.headers.iteritems():
@@ -627,6 +635,13 @@ class ResponseHttp(object):
         body = {"exceptionMessageValue":"javax.servlet.ServletException: No valid forensics analysis solrDocIds parameter found."}
         self.body = json.dumps(body)
 
+    def dockerResponse(self):
+        uri = self.request.uri
+        if '/containers/json' in uri:
+            self.resp = docker.containers()
+        else:
+            self.resp = docker.version()
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -669,6 +684,8 @@ class ResponseHttp(object):
             setResponse = self.mctpResponse
         elif 'rtsp/' in version:
             setResponse = self.rtspResponse
+        elif port == '2375' and ('/version' in uri or '/containers/json' in uri):
+            setResponse = self.dockerResponse
         elif 'sip/' in version:
             setResponse = self.sipResponse
         elif '"jsonrpc":' in self.request.body:
