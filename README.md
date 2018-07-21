@@ -1,6 +1,6 @@
 # APacket
 
-Capture network packets
+Capture Malicious Packets,Honeypot
 
 It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
 
@@ -10,6 +10,7 @@ It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big
 
 # Features
 
+* Low Interaction Honeypot
 * Capture TCP/SYN and backscatter packet only.
 * Capture TCP payload，reference [blackhole](https://github.com/dudeintheshell/blackhole).
 * Capture all packets.
