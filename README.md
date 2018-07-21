@@ -21,7 +21,7 @@ It is built on the shoulders of [Beats](https://github.com/elastic/beats) and [b
 go get github.com/Acey9/apacket
 cd $GOPATH/src/github.com/Acey9/apacket
 make install
-apacket -h
+apacket -i eth1 -bs -f "not tcp port 22 and not arp" -r 102400 -k 10 -p ./apacket.logs -n apacket.log  -listen 0.0.0.0:54321 -tlslisten 0.0.0.0:54322 -crt ./localhost.crt -key ./ocalhost.key smtp memcached
 
 #install log server
 go get github.com/Acey9/sapacket
