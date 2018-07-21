@@ -1,6 +1,6 @@
 # APacket
 
-Capture Malicious payload,Honeypot
+Capture Malicious payload
 
 It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
 
