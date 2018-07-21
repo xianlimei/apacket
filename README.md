@@ -2,7 +2,7 @@
 
 Capture Malicious payload
 
-It is built on the shoulders of [Beats](https://github.com/elastic/beats). A big thanks.
+It is built on the shoulders of [Beats](https://github.com/elastic/beats) and [blackhole](https://github.com/dudeintheshell/blackhole). A big thanks.
 
 # Requirements
 * System tools
