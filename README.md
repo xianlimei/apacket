@@ -1,6 +1,6 @@
 # APacket
 
-Capture Malicious payload
+Capture malicious payload
 
 It is built on the shoulders of [Beats](https://github.com/elastic/beats) and [blackhole](https://github.com/dudeintheshell/blackhole). A big thanks.
 
