@@ -10,7 +10,6 @@ import (
 	"github.com/Acey9/apacket/honeypot/misctcp"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
-	"io"
 	"net"
 	"os/exec"
 	"strings"
@@ -37,10 +36,14 @@ type Honeypot struct {
 	//sha1Filter *outputs.ShaOneFilter
 }
 
+var readTimeout time.Duration
+
 func NewHoneypot() *Honeypot {
 
 	var o outputs.Outputer
 	var err error
+
+	readTimeout = time.Duration(6) * time.Second
 
 	if config.Cfg.LogServer != "" {
 		o, err = outputs.NewSapacketOutputer(config.Cfg.LogServer, config.Cfg.Token)
@@ -327,7 +330,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			firstPalyloadLen = l
 		}
 		payload := buf[:l]
-		logp.Debug("payload", "payload:% 2x", payload)
+		logp.Debug("payload", "receive payload:% 2x", payload)
 
 		payloadBuf.Write(payload)
 		//TODO ssl protocol identify
@@ -397,12 +400,8 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		if err != nil {
 			return
 		}
-		for {
-			go io.Copy(tlsProxyConn, conn)
-			go io.Copy(conn, tlsProxyConn)
-			time.Sleep(SessionTimeout * time.Second) //TODO
-			break
-		}
+		go PipeThenClose(tlsProxyConn, conn)
+		PipeThenClose(conn, tlsProxyConn)
 	}
 	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
 		otherPtype := PtypeOther
@@ -454,6 +453,6 @@ func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAdd
 		hp.outputer.Output(out)
 	}
 	response = disguiser.DisguiserResponse(payload)
-	logp.Debug("response", "hp.DisguiserResponse:% 2x", response)
+	//logp.Debug("response", "hp.DisguiserResponse:% 2x", response)
 	return
 }
