@@ -50,11 +50,27 @@ func (s *Misc) ciscoJabber(request []byte) (response []byte) {
 	return
 }
 
+func (s *Misc) weblogicRCE(request []byte) (response []byte) {
+	//CVE-2018-2893
+	i := bytes.Index(request, []byte("t3 "))
+	if i != 0 {
+		return
+	}
+
+	j := bytes.Index(request, []byte("\nAS:"))
+	if j == -1 {
+		return
+	}
+	response = []byte("HELO:10.3.6.0.false\nAS:2048\nHL:19\n")
+	return
+}
+
 func (s *Misc) DisguiserResponse(request []byte) (response []byte) {
 	i := bytes.Index(request, []byte("http://etherx.jabber.org/streams"))
 	if i != -1 {
 		response = s.ciscoJabber(request)
 		return
 	}
+	response = s.weblogicRCE(request)
 	return
 }

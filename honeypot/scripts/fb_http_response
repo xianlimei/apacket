@@ -22,6 +22,7 @@ import hp_hbase
 import onvif
 import HP_iLO
 import docker
+import avtech
 from http_default_body import http_body
 
 PROJECT_HOME = os.path.split(os.path.realpath(__file__))[0]
@@ -642,6 +643,29 @@ class ResponseHttp(object):
         else:
             self.resp = docker.version()
 
+    def avtechResponse(self):
+        '''
+            #Advisory ID: CORE-2013-0726
+            #https://www.coresecurity.com/advisories/avtech-dvr-multiple-vulnerabilities
+        '''
+        self.code = 200
+        self.status = 'ok'
+        self.headers = {
+            'nServer': 'Linux/2.x UPnP/1.0 Avtech/1.0',
+            'Expires': 0,
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+            'Connection': 'Keep-Alive',
+            'Content-Type': 'text/html',
+            'Set-Cookie': 'SSID=YWRtaW46MTIzNDVzYWph; path=/',
+            'Date':self.date,
+            }  
+        uri = self.request.uri.lower()
+        self.body = '0\nOK\n'
+        #self.body = self.body + avtech.supervisor_cloud_setup
+        if '//cgi-bin/supervisor/CloudSetup.cgi'.lower() in uri:
+            self.body = self.body + avtech.supervisor_cloud_setup
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -706,6 +730,8 @@ class ResponseHttp(object):
             setResponse = self.mikrotikRouterOSResponse
         elif '/rest/v1/accountservice/accounts' == uri:
             setResponse = self.ilOResponse
+        elif '/cgi-bin/nobody/VerifyCode.cgi?'.lower() in uri or '/cgi-bin/user/Config.cgi?'.lower() in uri or '/cgi-bin/supervisor/CloudSetup.cgi?'.lower() in uri or '/cgi-bin/supervisor/adcommand.cgi'.lower() in uri:
+            setResponse = self.avtechResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
