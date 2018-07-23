@@ -30,8 +30,12 @@ func (s *Misc) Parser(remoteAddr, localAddr string, request []byte, ptype string
 }
 
 func (s *Misc) ciscoJabber(request []byte) (response []byte) {
+	i := bytes.Index(request, []byte("http://etherx.jabber.org/streams"))
+	if i != -1 {
+		return
+	}
 	reqLen := len(request)
-	i := bytes.Index(request, []byte("to="))
+	i = bytes.Index(request, []byte("to="))
 	if i == -1 {
 		return
 	}
@@ -50,7 +54,7 @@ func (s *Misc) ciscoJabber(request []byte) (response []byte) {
 	return
 }
 
-func (s *Misc) weblogicRCE(request []byte) (response []byte) {
+func (s *Misc) weblogicCVE20182893(request []byte) (response []byte) {
 	//CVE-2018-2893
 	i := bytes.Index(request, []byte("t3 "))
 	if i != 0 {
@@ -66,11 +70,10 @@ func (s *Misc) weblogicRCE(request []byte) (response []byte) {
 }
 
 func (s *Misc) DisguiserResponse(request []byte) (response []byte) {
-	i := bytes.Index(request, []byte("http://etherx.jabber.org/streams"))
-	if i != -1 {
-		response = s.ciscoJabber(request)
+	response = s.weblogicCVE20182893(request)
+	if len(response) != 0 {
 		return
 	}
-	response = s.weblogicRCE(request)
+	response = s.ciscoJabber(request)
 	return
 }
