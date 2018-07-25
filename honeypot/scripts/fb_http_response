@@ -666,6 +666,9 @@ class ResponseHttp(object):
         if '//cgi-bin/supervisor/CloudSetup.cgi'.lower() in uri:
             self.body = self.body + avtech.supervisor_cloud_setup
 
+    def omeMaticZentraleCCU2rce(self):
+        self.body = "VERSION=2.0.1" 
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -732,6 +735,8 @@ class ResponseHttp(object):
             setResponse = self.ilOResponse
         elif '/cgi-bin/nobody/VerifyCode.cgi?'.lower() in uri or '/cgi-bin/user/Config.cgi?'.lower() in uri or '/cgi-bin/supervisor/CloudSetup.cgi?'.lower() in uri or '/cgi-bin/supervisor/adcommand.cgi'.lower() in uri:
             setResponse = self.avtechResponse
+        elif '/api/backup/version.cgi' == uri:
+            setResponse = self.omeMaticZentraleCCU2rce
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
