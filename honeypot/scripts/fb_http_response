@@ -666,8 +666,30 @@ class ResponseHttp(object):
         if '//cgi-bin/supervisor/CloudSetup.cgi'.lower() in uri:
             self.body = self.body + avtech.supervisor_cloud_setup
 
-    def omeMaticZentraleCCU2rce(self):
+    def omeMaticZentraleCCU2rceResponse(self):
         self.body = "VERSION=2.0.1" 
+
+    def hadoopResponse(self):
+        self.code = 202
+        self.status = 'Accepted'
+
+        self.headers = {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Content-Type': 'application/json',
+            'Server': 'Jetty(6.1.26.hwx)',
+            }
+
+        if self.request.uri == '/ws/v1/cluster/apps/new-application':
+            self.code = 200
+            self.status = 'OK'
+            ts = '%06f' % time.time()
+            ts = ts.replace('.', '_')
+            _id = 'application_%s' % (ts)
+            app = {"application-id":_id,"maximum-resource-capability":{"memory":13545,"vCores":8}}
+            self.body = json.dumps(app)
+        else:
+            self.body = '\r\n'
 
     def getResponse(self):
         port_map = {
@@ -736,7 +758,9 @@ class ResponseHttp(object):
         elif '/cgi-bin/nobody/VerifyCode.cgi?'.lower() in uri or '/cgi-bin/user/Config.cgi?'.lower() in uri or '/cgi-bin/supervisor/CloudSetup.cgi?'.lower() in uri or '/cgi-bin/supervisor/adcommand.cgi'.lower() in uri:
             setResponse = self.avtechResponse
         elif '/api/backup/version.cgi' == uri:
-            setResponse = self.omeMaticZentraleCCU2rce
+            setResponse = self.omeMaticZentraleCCU2rceResponse
+        elif '/ws/v1/cluster/apps' in uri and self.request.method == 'POST':
+            setResponse = self.hadoopResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
         else:
