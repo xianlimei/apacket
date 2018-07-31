@@ -110,6 +110,9 @@ func (d *Decoder) Process(data []byte, ci *gopacket.CaptureInfo) (*Packet, error
 			pkt.Tcp, pkt.PktType = NewTCP(tcp)
 			flow.Sport = uint16(tcp.SrcPort)
 			flow.Dport = uint16(tcp.DstPort)
+			if pkt.PktType == PktTypeTCPACK {
+				return nil, nil
+			}
 			return pkt, nil
 		}
 	}
