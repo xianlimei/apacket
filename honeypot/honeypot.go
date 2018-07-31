@@ -403,10 +403,13 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		go PipeThenClose(tlsProxyConn, conn)
 		PipeThenClose(conn, tlsProxyConn)
 	}
-	if payloadBuf.Len() > 0 && payloadBuf.Len() != firstPalyloadLen {
+	if payloadBuf.Len() > 0 {
 		otherPtype := PtypeOther
 		if identify {
 			otherPtype = ptype
+			if payloadBuf.Len() == firstPalyloadLen {
+				return
+			}
 		}
 		pkt, err := core.NewApplayer(remoteAddr, localAddr, otherPtype, core.TransportTCP, payloadBuf.Bytes(), tlsTag, nil)
 		if err != nil {
