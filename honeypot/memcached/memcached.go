@@ -84,6 +84,7 @@ func (m *Memcached) handlerUDP(conn *net.UDPConn) {
 		}
 	}()
 
+	sleep := time.Millisecond * time.Duration(1000)
 	for {
 		payload := make([]byte, 4096)
 		plen, remoteAddr, err := conn.ReadFromUDP(payload)
@@ -105,6 +106,7 @@ func (m *Memcached) handlerUDP(conn *net.UDPConn) {
 				break
 			}
 		}
+		time.Sleep(sleep)
 	}
 }
 
