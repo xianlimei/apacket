@@ -154,6 +154,8 @@ func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 			break
 		}
 		logp.Debug("handlerUDP", "plen:%d, remoteaddr:%s, WirteToUdp:% 2x", plen, remoteAddr.String(), response)
+		sleep := time.Millisecond * time.Duration(500)
+		time.Sleep(sleep)
 	}
 }
 
