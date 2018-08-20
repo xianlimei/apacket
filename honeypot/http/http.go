@@ -258,6 +258,12 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 
 func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
 	var out bytes.Buffer
+
+	//disable geth service
+	i := bytes.Index(request, []byte("\"jsonrpc\""))
+	if i != -1 {
+		return
+	}
 	str := base64.StdEncoding.EncodeToString(request)
 	cmd := exec.Command(CmdHttpResponse, str)
 	cmd.Stdout = &out
