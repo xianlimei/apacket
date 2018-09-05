@@ -8,6 +8,7 @@ import time
 import re
 import base64
 import os
+import urllib2
 
 from datetime import datetime
 from os.path import basename
@@ -691,6 +692,27 @@ class ResponseHttp(object):
         else:
             self.body = '\r\n'
 
+    #CVE-2018-11776
+    def strutsPWN(self):
+        uri =  self.request.uri
+        uri = urllib2.unquote(uri)
+        idx = uri.find('/${{')
+        if idx == -1:
+            return
+        number = 0
+        try:
+            uri = uri[idx+4:]
+            idx = uri.find("}}")
+            data =  uri[:idx]
+            m, n = data.split('*')
+            number = int(m) * int(n)
+        except:
+            return
+        h = [
+                'Location: %s' % number
+                ]
+        self.headers_raw.extend(h)
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -763,6 +785,8 @@ class ResponseHttp(object):
             setResponse = self.hadoopResponse
         elif port_map.get(port):
             setResponse = port_map.get(port)
+        elif '/$%7b%7b' in uri and '%7d%7d/' in uri:
+            setResponse = self.strutsPWN
         else:
             for reg, func in url_map.iteritems():
                 regex = re.compile(reg, re.I)
