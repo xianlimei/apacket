@@ -56,6 +56,7 @@ http_server = (
         "OrientDB Server v.2.2.22 (build fb2b7d321ea8a5a5b18a82237049804aace9e3de)",
         "Microsoft-IIS/6.0",
         "Docker/17.05.0-ce (linux)",
+        "Jetty(9.4.z-SNAPSHOT)",
         )
 
 http_authenticate = ( 
@@ -205,6 +206,8 @@ class ResponseHttp(object):
         self.headers['X-Drupal-Dynamic-Cache'] = 'MISS'
         self.headers['X-Generator'] = 'Drupal 8 (https://www.drupal.org)'
         self.headers['X-Content-Powered-By'] = 'K2 v2.8.0 (by JoomlaWor'
+        self.headers['X-Jenkins'] = '2.121.3'
+        self.headers['X-Jenkins-Session'] = 'f72d6619'
 
         self.headers_raw.append(auth)
         self.headers_raw.append('Location: http://192.168.0.1:52869/picsdesc.xml')
