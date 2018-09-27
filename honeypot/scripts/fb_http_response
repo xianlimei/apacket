@@ -31,6 +31,7 @@ PROJECT_HOME = os.path.split(os.path.realpath(__file__))[0]
 http_server = (
 	#"Tengine",
 	#"nginx/1.10.0",
+        "micro_httpd",
 	"Apache/2.2.21",
 	"gSOAP/2.7",
 	"GoAhead-Webs",
@@ -68,6 +69,7 @@ http_authenticate = (
 	'''WWW-Authenticate: Basic realm="MOBOTIX Camera User"''',
 	'''Authorization: Basic aHR0cHdhdGNoOmY=''',
 	'''WWW-Authenticate: Basic realm="Tomcat Manager Application"''',
+        '''WWW-Authenticate: Basic realm="Broadband Router"''',
         )
 
 http_login_body = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \
