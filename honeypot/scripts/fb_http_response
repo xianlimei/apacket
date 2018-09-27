@@ -715,6 +715,16 @@ class ResponseHttp(object):
                 'Location: %s' % number
                 ]
         self.headers_raw.extend(h)
+    
+    def brcmResponse(self):
+        self.headers = {
+                'Server': 'LINUX/2.4 UPnP/1.0 BRCM400/1.0',
+                'CACHE-CONTROL': 'max-age=75',
+                'EXT': '',
+                'LOCATION': 'http://192.168.2.1:5431/igdevicedesc.xml',
+                'ST': 'upnp:rootdevice',
+                'USN': 'uuid:upnp-InternetGatewayDevice-1_0-00045a0f06aa::upnp:rootdevice'
+                }
 
     def getResponse(self):
         port_map = {
@@ -722,6 +732,7 @@ class ResponseHttp(object):
                 '49152':self.ipmiResponse,
                 '16992':self.intelAMTResponse,
                 '5984':self.couchdbResponse,
+                '5431':self.brcmResponse,
                 }
 
         url_map = {
