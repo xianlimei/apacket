@@ -728,6 +728,69 @@ class ResponseHttp(object):
                 'USN': 'uuid:upnp-InternetGatewayDevice-1_0-00045a0f06aa::upnp:rootdevice'
                 }
 
+    def orientdbResponse(self):
+        self.code = 200
+        self.status = 'ok'
+        self.headers = {
+                'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache',
+                'Server': 'OrientDB Server v.2.2.29 (build 9914189f972103907c24377a1567897e68642920)',
+                'Connection': 'Keep-Alive',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, GET, DELETE, HEAD, OPTIONS, PATCH, CONNECT, TRACE',
+                'Content-Transfer-Encoding': 'binary',
+                'Set-Cookie': 'OSESSIONID=OS1537962471048-6708162790969918236; Path=/; HttpOnly'
+                }
+        if self.request.uri == '/' or self.request.uri == '//':
+            self.headers['Content-Type'] = 'text/html; charset=utf-8'
+            self.body = '''
+                <!--
+                    ~ /*
+                    ~  *  Copyright 2014 Orient Technologies LTD (info(at)orientechnologies.com)
+                    ~  *
+                    ~  *  Licensed under the Apache License, Version 2.0 (the "License");
+                    ~  *  you may not use this file except in compliance with the License.
+                    ~  *  You may obtain a copy of the License at
+                    ~  *
+                    ~  *       http://www.apache.org/licenses/LICENSE-2.0
+                    ~  *
+                    ~  *  Unless required by applicable law or agreed to in writing, software
+                    ~  *  distributed under the License is distributed on an "AS IS" BASIS,
+                    ~  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                    ~  *  See the License for the specific language governing permissions and
+                    ~  *  limitations under the License.
+                    ~  *
+                    ~  * For more information: http://www.orientechnologies.com
+                        ~  */
+                    -->
+
+                    <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+                    <html>
+                    <head>
+                    <title>Redirecting to OrientDB Studio...</title>
+                    <meta name="title" content="Document | DBMS | Database | Java | Studio" />
+                    <meta name="description" content="OrientDB Studio" />
+                    <meta http-equiv="refresh" content="0;URL=/studio/index.html">
+                    <style type="text/css">
+                    body {
+                        font-size: 9pt;
+                        font-family: Arial;
+                    }
+                    </style>
+                    </head>
+                    <body>Redirecting to OrientDB Studio...
+                    </body>
+                    </html>
+                '''
+        elif '/listDatabases' in self.request.uri:
+            self.headers['Content-Type'] = 'application/json; charset=utf-8'
+            self.body = json.dumps({"@type":"d","@version":0,"databases":["GratefulDeadConcerts","production","Radore"]})
+        elif '/command' in self.request.uri:
+            self.headers['Content-Type'] = 'application/json; charset=utf-8'
+            b = {"result":[{"@type":"d","@version":0,"value":"rO0ABXNyADljb20ub3JpZW50ZWNobm9sb2dpZXMub3JpZW50LmNvcmUubWV0YWRhdGEuc2VjdXJpdHkuT1JvbGUAAAAAAAAAAQIAA0wABG1vZGV0AE9MY29tL29yaWVudGVjaG5vbG9naWVzL29yaWVudC9jb3JlL21ldGFkYXRhL3NlY3VyaXR5L09TZWN1cml0eVJvbGUkQUxMT1dfTU9ERVM7TAAKcGFyZW50Um9sZXQAO0xjb20vb3JpZW50ZWNobm9sb2dpZXMvb3JpZW50L2NvcmUvbWV0YWRhdGEvc2VjdXJpdHkvT1JvbGU7TAAFcnVsZXN0AA9MamF2YS91dGlsL01hcDt4cgA9Y29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9JZGVudGl0ea4eVS3CagTpAgAAeHIAN2NvbS5vcmllbnRlY2hub2xvZ2llcy5vcmllbnQuY29yZS50eXBlLk9Eb2N1bWVudFdyYXBwZXKTIMvqd2cQawIAAUwACGRvY3VtZW50dAA5TGNvbS9vcmllbnRlY2hub2xvZ2llcy9vcmllbnQvY29yZS9yZWNvcmQvaW1wbC9PRG9jdW1lbnQ7eHBzcgA3Y29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLnJlY29yZC5pbXBsLk9Eb2N1bWVudAAAAAAAAAABDAAAeHIAOGNvbS5vcmllbnRlY2hub2xvZ2llcy5vcmllbnQuY29yZS5yZWNvcmQuT1JlY29yZEFic3RyYWN0FmOBv/w2q/ACAAhaAA9fY29udGVudENoYW5nZWRaAAZfZGlydHlJAA5fcmVjb3JkVmVyc2lvbkkABV9zaXplTAANX2RpcnR5TWFuYWdlcnQAPUxjb20vb3JpZW50ZWNobm9sb2dpZXMvb3JpZW50L2NvcmUvcmVjb3JkL2ltcGwvT0RpcnR5TWFuYWdlcjtMAAlfcmVjb3JkSWR0ADBMY29tL29yaWVudGVjaG5vbG9naWVzL29yaWVudC9jb3JlL2lkL09SZWNvcmRJZDtbAAdfc291cmNldAACW0JMAAdfc3RhdHVzdABDTGNvbS9vcmllbnRlY2hub2xvZ2llcy9vcmllbnQvY29yZS9kYi9yZWNvcmQvT1JlY29yZEVsZW1lbnQkU1RBVFVTO3hwegAAAVz/////AAAACgAEAAAAAAAAAAIAHspzAAABQQAKT1JvbGUIbW9kZQAAADoRGmluaGVyaXRlZFJvbGUAAAAAAApydWxlcwAAADsMCG5hbWUAAAE6BwAAFAcyZGF0YWJhc2UuY2x1c3Rlci5pbnRlcm5hbAAAATARBxBkYXRhYmFzZQAAATERByJkYXRhYmFzZS5mdW5jdGlvbgAAATIRBx5kYXRhYmFzZS5zY2hlbWEAAAEzEQcoZGF0YWJhc2UuY2xhc3Mub3VzZXIAAAE0EQcuZGF0YWJhc2Uuc3lzdGVtY2x1c3RlcnMAAAE1EQcgZGF0YWJhc2UuY2x1c3RlcgAAATYRByBkYXRhYmFzZS5jb21tYW5kAAABNxEHHGRhdGFiYXNlLmNsYXNzAAABOBEHKGRhdGFiYXNlLmhvb2sucmVjb3JkAAABORECAh8CDx8fHx8fDHdyaXRlcgB0AAtvbmV0X3Nlcl92MHh+cgBNY29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9TZWN1cml0eVJvbGUkQUxMT1dfTU9ERVMAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAxERU5ZX0FMTF9CVVRwc3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAADHcIAAAAEAAAAAhzcgBLY29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9SdWxlJFJlc291cmNlR2VuZXJpYyQzvu6CmSRPG/oCAAB4cgBJY29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9SdWxlJFJlc291cmNlR2VuZXJpYwAAAAAAAAABAgACTAAKbGVnYWN5TmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO0wABG5hbWVxAH4AGHhwdAAQZGF0YWJhc2UuY2x1c3RlcnQAB0NMVVNURVJzcgA5Y29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9SdWxlAAAAAAAAAAECAANMAAZhY2Nlc3N0ABBMamF2YS9sYW5nL0J5dGU7TAAPcmVzb3VyY2VHZW5lcmljdABLTGNvbS9vcmllbnRlY2hub2xvZ2llcy9vcmllbnQvY29yZS9tZXRhZGF0YS9zZWN1cml0eS9PUnVsZSRSZXNvdXJjZUdlbmVyaWM7TAARc3BlY2lmaWNSZXNvdXJjZXNxAH4AA3hwc3IADmphdmEubGFuZy5CeXRlnE5ghO5Q9RwCAAFCAAV2YWx1ZXhyABBqYXZhLmxhbmcuTnVtYmVyhqyVHQuU4IsCAAB4cB9xAH4AGXNxAH4AFD9AAAAAAAAMdwgAAAAQAAAAAXQACGludGVybmFsc3EAfgAgAnhzcgBLY29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9SdWxlJFJlc291cmNlR2VuZXJpYyQyP+ehIoRkKjECAAB4cQB+ABd0AA5kYXRhYmFzZS5jbGFzc3QABUNMQVNTc3EAfgAccQB+ACJxAH4AJ3NxAH4AFD9AAAAAAAAMdwgAAAAQAAAAAXQABW91c2Vyc3EAfgAgD3hzcgBLY29tLm9yaWVudGVjaG5vbG9naWVzLm9yaWVudC5jb3JlLm1ldGFkYXRhLnNlY3VyaXR5Lk9SdWxlJFJlc291cmNlR2VuZXJpYyQ3f3cckr7UITICAAB4cQB+ABd0ABBkYXRhYmFzZS5jb21tYW5kdAAHQ09NTUFORHNxAH4AHHEAfgAicQB+AC9zcQB+ABQ/QAAAAAAAAHcIAAAAEAAAAAB4c3IATGNvbS5vcmllbnRlY2hub2xvZ2llcy5vcmllbnQuY29yZS5tZXRhZGF0YS5zZWN1cml0eS5PUnVsZSRSZXNvdXJjZUdlbmVyaWMkMTCQmBKgb95v1wIAAHhxAH4AF3QAF2RhdGFiYXNlLnN5c3RlbWNsdXN0ZXJzdAAOU1lTVEVNX0NMVVNURVJzcQB+ABxxAH4AInEAfgA1c3EAfgAUP0AAAAAAAAB3CAAAABAAAAAAeHNyAEtjb20ub3JpZW50ZWNobm9sb2dpZXMub3JpZW50LmNvcmUubWV0YWRhdGEuc2VjdXJpdHkuT1J1bGUkUmVzb3VyY2VHZW5lcmljJDXx9m0+1cZMFgIAAHhxAH4AF3QACGRhdGFiYXNldAAIREFUQUJBU0VzcQB+ABxxAH4AJXEAfgA7c3EAfgAUP0AAAAAAAAB3CAAAABAAAAAAeHNyAEtjb20ub3JpZW50ZWNobm9sb2dpZXMub3JpZW50LmNvcmUubWV0YWRhdGEuc2VjdXJpdHkuT1J1bGUkUmVzb3VyY2VHZW5lcmljJDY67a3vuFy2bAIAAHhxAH4AF3QAD2RhdGFiYXNlLnNjaGVtYXQABlNDSEVNQXNxAH4AHHEAfgAlcQB+AEFzcQB+ABQ/QAAAAAAAAHcIAAAAEAAAAAB4c3IAS2NvbS5vcmllbnRlY2hub2xvZ2llcy5vcmllbnQuY29yZS5tZXRhZGF0YS5zZWN1cml0eS5PUnVsZSRSZXNvdXJjZUdlbmVyaWMkOQDbgztEmBptAgAAeHEAfgAXdAAUZGF0YWJhc2UuaG9vay5yZWNvcmR0AAtSRUNPUkRfSE9PS3NxAH4AHHEAfgAicQB+AEdzcQB+ABQ/QAAAAAAAAHcIAAAAEAAAAAB4c3IAS2NvbS5vcmllbnRlY2hub2xvZ2llcy5vcmllbnQuY29yZS5tZXRhZGF0YS5zZWN1cml0eS5PUnVsZSRSZXNvdXJjZUdlbmVyaWMkMTD/WE1ugCI8AgAAeHEAfgAXdAARZGF0YWJhc2UuZnVuY3Rpb250AAhGVU5DVElPTnNxAH4AHHEAfgAicQB+AE1zcQB+ABQ/QAAAAAAAAHcIAAAAEAAAAAB4eA==","@fieldTypes":"value=u"}]}
+            self.body = json.dumps(b)
+
     def getResponse(self):
         port_map = {
                 '9200':self.esResponse,
@@ -735,6 +798,7 @@ class ResponseHttp(object):
                 '16992':self.intelAMTResponse,
                 '5984':self.couchdbResponse,
                 '5431':self.brcmResponse,
+                '2480':self.orientdbResponse,
                 }
 
         url_map = {
