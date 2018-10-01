@@ -727,6 +727,119 @@ class ResponseHttp(object):
                 'ST': 'upnp:rootdevice',
                 'USN': 'uuid:upnp-InternetGatewayDevice-1_0-00045a0f06aa::upnp:rootdevice'
                 }
+        if '/dyndev/' in self.request.uri:
+            self.dyndevResponse()
+
+    def dyndevResponse(self):
+        self.code = 200
+        self.status = 'ok'
+        self.headers = {
+                'SERVER': 'LINUX/2.4 UPnP/1.0 BRCM400/1.0',
+                'CONTENT-TYPE': 'application/octet-stream',
+                'Cache-Control': 'max-age=1',
+                'PRAGMA': 'no-cache',
+                'Connection': 'Close',
+                }
+        self.body = '''<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+<specVersion>
+<major>1</major>
+<minor>0</minor>
+</specVersion>
+<URLBase>http://192.168.1.1:5431/</URLBase>
+<device>
+<deviceType>urn:schemas-upnp-org:device:InternetGatewayDevice:1</deviceType>
+<presentationURL>http://192.168.1.1:80/</presentationURL>
+<friendlyName>ONU Router</friendlyName>
+<manufacturer>ZTE</manufacturer>
+<manufacturerURL>http://www.com/</manufacturerURL>
+<modelDescription>(null)</modelDescription>
+<modelName>E8-C</modelName>
+<modelNumber>1.0</modelNumber>
+<modelURL>http://www.com/</modelURL>
+<UDN>uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100000</UDN>
+<serviceList>
+<service>
+<serviceType>urn:schemas-upnp-org:service:Layer3Forwarding:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:Layer3Forwarding.1</serviceId>
+<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100000/Layer3Forwarding:1</controlURL>
+<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100000/Layer3Forwarding:1</eventSubURL>
+<SCPDURL>/dynsvc/Layer3Forwarding:1.xml</SCPDURL>
+</service>
+</serviceList>
+<deviceList>
+<device>
+<deviceType>urn:schemas-upnp-org:device:WANDevice:1</deviceType>
+<friendlyName>WANDevice.1</friendlyName>
+<manufacturer>ZTE</manufacturer>
+<manufacturerURL>http://www.com/</manufacturerURL>
+<modelDescription>(null)</modelDescription>
+<modelName>E8-C</modelName>
+<modelNumber>1.0</modelNumber>
+<modelURL>http://www.com/</modelURL>
+<UDN>uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100001</UDN>
+<serviceList>
+<service>
+<serviceType>urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:WANCommonInterfaceConfig.1</serviceId>
+<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100001/WANCommonInterfaceConfig:1</controlURL>
+<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100001/WANCommonInterfaceConfig:1</eventSubURL>
+<SCPDURL>/dynsvc/WANCommonInterfaceConfig:1.xml</SCPDURL>
+</service>
+</serviceList>
+<deviceList>
+<device>
+<deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>
+<friendlyName>WanConnectionDevice.5</friendlyName>
+<manufacturer>ZTE</manufacturer>
+<manufacturerURL>http://www.com/</manufacturerURL>
+<modelDescription>(null)</modelDescription>
+<modelName>E8-C</modelName>
+<modelNumber>1.0</modelNumber>
+<modelURL>http://www.com/</modelURL>
+<UDN>uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002</UDN>
+<serviceList>
+<service>
+<serviceType>urn:schemas-upnp-org:service:WANPPPConnection:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:WANPPPConnection.2</serviceId>
+<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</controlURL>
+<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</eventSubURL>
+<SCPDURL>/dynsvc/WANPPPConnection:1.xml</SCPDURL>
+</service>
+<service>
+<serviceType>urn:schemas-upnp-org:service:WANPPPConnection:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:WANPPPConnection.1</serviceId>
+<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</controlURL>
+<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</eventSubURL>
+<SCPDURL>/dynsvc/WANPPPConnection:1.xml</SCPDURL>
+</service>
+</serviceList>
+</device>
+<device>
+<deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>
+<friendlyName>WanConnectionDevice.2</friendlyName>
+<manufacturer>ZTE</manufacturer>
+<manufacturerURL>http://www.com/</manufacturerURL>
+<modelDescription>(null)</modelDescription>
+<modelName>E8-C</modelName>
+<modelNumber>1.0</modelNumber>
+<modelURL>http://www.com/</modelURL>
+<UDN>uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003</UDN>
+<serviceList>
+<service>
+<serviceType>urn:schemas-upnp-org:service:WANPPPConnection:1</serviceType>
+<serviceId>urn:upnp-org:serviceId:WANPPPConnection.1</serviceId>
+<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003/WANPPPConnection:1</controlURL>
+<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003/WANPPPConnection:1</eventSubURL>
+<SCPDURL>/dynsvc/WANPPPConnection:1.xml</SCPDURL>
+</service>
+</serviceList>
+</device>
+</deviceList>
+</device>
+</deviceList>
+</device>
+</root>'''
 
     def orientdbResponse(self):
         self.code = 200
