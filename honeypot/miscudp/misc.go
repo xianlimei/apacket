@@ -25,6 +25,10 @@ func (m *Misc) Parser(remoteAddr, localAddr string, request []byte, ptype string
 func (m *Misc) DisguiserResponse(request []byte) (response []byte) {
 	netis := &Netis{request: request}
 	response = netis.Response()
+	if len(response) == 0 {
+		ssdp := &SSDP{request: request}
+		response = ssdp.Response()
+	}
 	sleep := time.Millisecond * time.Duration(100)
 	time.Sleep(sleep)
 	return
