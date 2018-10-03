@@ -839,6 +839,7 @@ class ResponseHttp(object):
 </device>
 </deviceList>
 </device>
+<NewConnectionType>.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X</NewConnectionType>
 </root>'''
 
     def orientdbResponse(self):
