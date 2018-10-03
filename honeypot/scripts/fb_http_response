@@ -844,6 +844,9 @@ class ResponseHttp(object):
         rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
         if rematch:
             self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
+        elif 'GetConnectionTypeInfo' in self.request.payload:
+            self.body = '''<?xml version="1.0"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetConnectionTypeInfo xmlns:u="urn:schemas-upnp-org:service:WANPPPConnection:1"></u:GetConnectionTypeInfo><NewConnectionType>.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X</NewConnectionType></s:Body></s:Envelope>'''
         else:
             self.body = self.body % ""
 
