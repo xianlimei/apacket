@@ -743,6 +743,7 @@ class ResponseHttp(object):
         self.body = '''<?xml version="1.0"?>
 <root xmlns="urn:schemas-upnp-org:device-1-0">
 <specVersion>
+%s
 <major>1</major>
 <minor>0</minor>
 </specVersion>
@@ -839,8 +840,12 @@ class ResponseHttp(object):
 </device>
 </deviceList>
 </device>
-<NewConnectionType>.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X</NewConnectionType>
 </root>'''
+        rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
+        if rematch:
+            self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
+        else:
+            self.body = self.body % ""
 
     def orientdbResponse(self):
         self.code = 200
