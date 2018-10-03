@@ -727,7 +727,7 @@ class ResponseHttp(object):
                 'ST': 'upnp:rootdevice',
                 'USN': 'uuid:upnp-InternetGatewayDevice-1_0-00045a0f06aa::upnp:rootdevice'
                 }
-        if '/uuid/' in self.request.uri:
+        if '/uuid' in self.request.uri:
             self.dyndevResponse()
 
     def dyndevResponse(self):
