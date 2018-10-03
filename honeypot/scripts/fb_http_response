@@ -843,7 +843,7 @@ class ResponseHttp(object):
         rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
         if rematch or 'GetConnectionTypeInfo' in self.request.payload:
             #self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
-            self.body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m="urn:schemas-upnp-org:service:WANIPConnection:1"><NewConnectionType>.7FFF7B60.10009190.00000001.10009190.00413940.00000000.7FFF7BD8.7FFF7C28.7FFF7BED.00000000</NewConnectionType><NewPossibleConnectionTypes>Unconfigured,IP_Routed,IP_Bridged</NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>'''
+            self.body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m="urn:schemas-upnp-org:service:WANIPConnection:1"><NewConnectionType>.7FFF7B60.10009190.00000001.10009190.00413940.00000000.7FFF7BD8.7FFF7C28.7FFF7BED.00000000</NewConnectionType><NewPossibleConnectionTypes>Unconfigured,IP_Routed,IP_Bridged</NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>\r\n'''
 
     def orientdbResponse(self):
         self.code = 200
