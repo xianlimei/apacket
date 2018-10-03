@@ -743,7 +743,7 @@ class ResponseHttp(object):
         self.body = '''<?xml version="1.0"?>
 <root xmlns="urn:schemas-upnp-org:device-1-0">
 <specVersion>
-%s
+<NewConnectionType>.7fff7b60.10009190.7fff7bd8.7fff7c28.7fff7bed.7fff7bd8.10009190.1000056c</NewConnectionType>
 <major>1</major>
 <minor>0</minor>
 </specVersion>
@@ -841,14 +841,11 @@ class ResponseHttp(object):
 </deviceList>
 </device>
 </root>'''
-        rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
-        if rematch:
-            self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
-        elif 'GetConnectionTypeInfo' in self.request.payload:
-            self.body = '''<?xml version="1.0"?>
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetConnectionTypeInfo xmlns:u="urn:schemas-upnp-org:service:WANPPPConnection:1"></u:GetConnectionTypeInfo><NewConnectionType>.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X.%08X</NewConnectionType></s:Body></s:Envelope>'''
-        else:
-            self.body = self.body % ""
+        #rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
+        #if rematch:
+        #    self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
+        #else:
+        #    self.body = self.body % ""
 
     def orientdbResponse(self):
         self.code = 200
