@@ -840,12 +840,12 @@ class ResponseHttp(object):
 </deviceList>
 </device>
 </root>'''
-        rematch = re.search(r'(?:NewConnectionType>)(.*?)(?:<\/NewConnectionType)', self.request.payload)
-        if rematch:
-            self.body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><X></X><X>XX</X><m:SetConnectionTypeResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"><NewConnectionType>.00000109.2AB49FA0.00000000.00430250.00413EF0.00000000.03000000.00000001.00000001.00000002</NewConnectionType><NewPossibleConnectionTypes>Unconfigured,IP_Routed,IP_Bridged,XXX,XX</NewPossibleConnectionTypes></m:SetConnectionTypeResponse></s:Body></s:Envelope>'''
-        elif 'GetConnectionTypeInfo' in self.request.payload:
-            #self.body = self.body % ("<NewConnectionType>%s</NewConnectionType>" % rematch.group(1))
-            self.body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><X></X><X>XXX</X><m:GetConnectionTypeInfoResponse xmlns:m="urn:schemas-upnp-org:service:WANIPConnection:1"><NewConnectionType>.00000109.2AB49FA0.00000000.00430250.00413EF0.00000000.03000000.00000001.00000001.00000002</NewConnectionType><NewPossibleConnectionTypes>Unconfigured,IP_Routed,IP_Bridged,XXX,XX</NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>\r\n'''
+        set_body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:SetConnectionTypeResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"></m:SetConnectionTypeResponse></s:Body></s:Envelope>'''
+        get_body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"><NewConnectionType>%(fmtstring)s</NewConnectionType><NewPossibleConnectionTypes></NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>'''
+        self.body = set_body
+        if 'GetConnectionTypeInfo' in self.request.payload:
+            res = {'fmtstring':'.00000169.2ABE8A60.00000000.00430850.004145EC.00000000.03000000.00000001.00000003.00000005'}
+            self.body = get_body % res
 
     def orientdbResponse(self):
         self.code = 200
