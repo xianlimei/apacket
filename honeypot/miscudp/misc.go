@@ -22,7 +22,7 @@ func (m *Misc) Parser(remoteAddr, localAddr string, request []byte, ptype string
 	return
 }
 
-func (m *Misc) DisguiserResponse(request []byte) (response []byte) {
+func (m *Misc) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	netis := &Netis{request: request}
 	response = netis.Response()
 	if len(response) == 0 {

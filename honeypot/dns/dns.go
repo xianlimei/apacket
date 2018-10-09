@@ -78,7 +78,7 @@ func (dns *DNS) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 	return
 }
 
-func (dns *DNS) DisguiserResponse(request []byte) (response []byte) {
+func (dns *DNS) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	packet := gopacket.NewPacket(request, layers.LayerTypeDNS, gopacket.NoCopy)
 	dnsLayer := packet.Layer(layers.LayerTypeDNS)
 	if dnsLayer == nil {

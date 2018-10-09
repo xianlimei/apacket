@@ -69,7 +69,7 @@ func (s *Misc) weblogicCVE20182893(request []byte) (response []byte) {
 	return
 }
 
-func (s *Misc) DisguiserResponse(request []byte) (response []byte) {
+func (s *Misc) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	response = s.weblogicCVE20182893(request)
 	if len(response) != 0 {
 		return

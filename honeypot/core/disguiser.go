@@ -12,7 +12,7 @@ import (
 
 type Disguiser interface {
 	Fingerprint(request []byte, tlsTag bool) (identify bool, ptype string, err error)
-	DisguiserResponse(request []byte) (response []byte)
+	DisguiserResponse(request []byte, remoteAddr string) (response []byte)
 	Parser(remoteAddr, localAddr string, request []byte, ptype string, tls bool) (response *Applayer)
 }
 

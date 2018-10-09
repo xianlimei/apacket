@@ -7,7 +7,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
 	"math/rand"
-	//"net"
+	"net"
 	"os/exec"
 	"strings"
 	"time"
@@ -127,6 +127,7 @@ var protocolMap = map[string]bool{
 }
 
 type HTTP struct {
+	session *Session
 }
 
 type HTTPMsg struct {
@@ -146,7 +147,9 @@ type HTTPMsg struct {
 }
 
 func NewHTTP() *HTTP {
-	http := &HTTP{}
+	//TODO delete session
+	session := NewSesson()
+	http := &HTTP{session: session}
 	return http
 }
 
@@ -256,8 +259,70 @@ func (http *HTTP) Parser(remoteAddr, localAddr string, request []byte, ptype str
 	return
 }
 
-func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
+func (http *HTTP) addbcmUPNPSession(request []byte, remoteAddr string) (err error) {
+	i := bytes.Index(request, []byte("#SetConnectionType"))
+	if i == -1 {
+		return
+	}
+	i = bytes.Index(request, []byte("<NewConnectionType>"))
+	if i == -1 {
+		return
+	}
+	payload := request[i+len("<NewConnectionType>"):]
+
+	i = bytes.Index(payload, []byte("</NewConnectionType>"))
+	if i == -1 {
+		logp.Debug("http", "2")
+		return
+	}
+	payload = payload[:i]
+
+	rip, rport, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		logp.Err("%v", err)
+		return
+	}
+	logp.Debug("http", "rip:%s, rport:%s, payload:%s", rip, rport, string(payload))
+
+	http.session.AddSession(rip, string(payload))
+	return
+}
+
+func (http *HTTP) reStructBcmpResponse(request, resp []byte, remoteAddr string) (response []byte) {
+	response = resp
+	i := bytes.Index(request, []byte("#GetConnectionTypeInfo"))
+	if i == -1 {
+		return
+	}
+
+	rip, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		logp.Err("%v", err)
+		return
+	}
+	res := http.session.QuerySession(rip)
+	if res == nil {
+		return
+	}
+	v, ok := fmtstrMap[res.Str]
+	if !ok {
+		return
+	}
+	logp.Debug("http", "fmtstr:%s\tvaule:%s", res.Str, v)
+	response = []byte(strings.Replace(
+		string(resp),
+		"00000169.2ABE8A60.00000000.00430850.004145EC.00000000.03000000.00000001.00000003.00000005",
+		v,
+		1,
+	))
+	return
+}
+
+func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	var out bytes.Buffer
+
+	//TODO delete
+	http.addbcmUPNPSession(request, remoteAddr)
 
 	//disable geth service
 	i := bytes.Index(request, []byte("\"jsonrpc\""))
@@ -272,7 +337,9 @@ func (http *HTTP) DisguiserResponse(request []byte) (response []byte) {
 		logp.Err("http.DisguiserResponse.cmd:%v", err)
 		return
 	}
-	response = out.Bytes()
+	//TODO delete
+	//response = out.Bytes()
+	response = http.reStructBcmpResponse(request, out.Bytes(), remoteAddr)
 	/*
 		server := fmt.Sprintf("Server: %s\r\n", http.getServer())
 

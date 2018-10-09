@@ -104,7 +104,7 @@ func (s *Redis) Parser(remoteAddr, localAddr string, request []byte, ptype strin
 	return
 }
 
-func (s *Redis) DisguiserResponse(request []byte) (response []byte) {
+func (s *Redis) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	response = []byte("+OK\r\n")
 	cmd := s.cmdParser(request)
 	if cmd == "" {

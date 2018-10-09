@@ -383,7 +383,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 				conn.Write(response)
 			}
 		} else {
-			response = misct.DisguiserResponse(payload)
+			response = misct.DisguiserResponse(payload, remoteAddr)
 			//response = []byte("\x00\x00")
 			if len(response) != 0 {
 				conn.Write(response)
@@ -457,7 +457,7 @@ func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAdd
 	if err == nil {
 		hp.outputer.Output(out)
 	}
-	response = disguiser.DisguiserResponse(payload)
+	response = disguiser.DisguiserResponse(payload, remoteAddr)
 	//logp.Debug("response", "hp.DisguiserResponse:% 2x", response)
 	return
 }
