@@ -289,7 +289,7 @@ func (http *HTTP) addbcmUPNPSession(request []byte, remoteAddr string) (err erro
 	return
 }
 
-func (http *HTTP) reStructBcmpResponse(request []byte, remoteAddr string) (response []byte) {
+func (http *HTTP) restructBcmpResponse(request []byte, remoteAddr string) (response []byte) {
 	i := bytes.Index(request, []byte("#GetConnectionTypeInfo"))
 	if i == -1 {
 		return
@@ -349,7 +349,7 @@ func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response
 
 	//TODO delete
 	http.addbcmUPNPSession(request, remoteAddr)
-	response = http.reStructBcmpResponse(request, remoteAddr)
+	response = http.restructBcmpResponse(request, remoteAddr)
 	if len(response) != 0 {
 		return
 	}
