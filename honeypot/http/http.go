@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -288,8 +289,7 @@ func (http *HTTP) addbcmUPNPSession(request []byte, remoteAddr string) (err erro
 	return
 }
 
-func (http *HTTP) reStructBcmpResponse(request, resp []byte, remoteAddr string) (response []byte) {
-	response = resp
+func (http *HTTP) reStructBcmpResponse(request []byte, remoteAddr string) (response []byte) {
 	i := bytes.Index(request, []byte("#GetConnectionTypeInfo"))
 	if i == -1 {
 		return
@@ -309,12 +309,38 @@ func (http *HTTP) reStructBcmpResponse(request, resp []byte, remoteAddr string) 
 		return
 	}
 	logp.Debug("http", "fmtstr:%s\tvaule:%s", res.Str, v)
-	response = []byte(strings.Replace(
-		string(resp),
-		"00000169.2ABE8A60.00000000.00430850.004145EC.00000000.03000000.00000001.00000003.00000005",
-		v,
-		1,
-	))
+
+	body := bytes.Buffer{}
+	body.WriteString("<?xml version=\"1.0\"?>\r\n")
+	body.WriteString("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" ")
+	body.WriteString("s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m=\"urn:schemas-upnp-org:service:WANPPPConnection:1\"><NewConnectionType>")
+	body.WriteString(v)
+	body.WriteString("</NewConnectionType><NewPossibleConnectionTypes></NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>")
+
+	ts := time.Now()
+
+	resp := bytes.Buffer{}
+	resp.WriteString("HTTP/1.1 200 OK\r\n")
+
+	resp.WriteString("DATE: ")
+	resp.WriteString(ts.String())
+	resp.WriteString("\r\n")
+
+	resp.WriteString("Connection: Keep-Alive\r\n")
+	resp.WriteString("Server: LINUX/2.4 UPnP/1.0 BRCM400/1.0\r\n")
+
+	resp.WriteString("Content-Length: ")
+	resp.WriteString(strconv.Itoa(len(body.String())))
+	resp.WriteString("\r\n")
+
+	resp.WriteString("Content-Type: text/xml; charset=\"utf-8\"\r\n")
+	resp.WriteString("EXT: \r\n")
+	resp.WriteString("\r\n")
+
+	resp.WriteString(body.String())
+
+	response = resp.Bytes()
+
 	return
 }
 
@@ -323,6 +349,10 @@ func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response
 
 	//TODO delete
 	http.addbcmUPNPSession(request, remoteAddr)
+	response = http.reStructBcmpResponse(request, remoteAddr)
+	if len(response) != 0 {
+		return
+	}
 
 	//disable geth service
 	i := bytes.Index(request, []byte("\"jsonrpc\""))
@@ -338,8 +368,7 @@ func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response
 		return
 	}
 	//TODO delete
-	//response = out.Bytes()
-	response = http.reStructBcmpResponse(request, out.Bytes(), remoteAddr)
+	response = out.Bytes()
 	/*
 		server := fmt.Sprintf("Server: %s\r\n", http.getServer())
 
