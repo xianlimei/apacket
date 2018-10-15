@@ -382,6 +382,10 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 			if len(response) != 0 {
 				conn.Write(response)
 			}
+
+			//TODO delete
+			go hp.reShellConn(payload, localAddr, ptype)
+
 		} else {
 			response = misct.DisguiserResponse(payload, remoteAddr)
 			//response = []byte("\x00\x00")
