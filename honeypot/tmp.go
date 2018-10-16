@@ -85,7 +85,7 @@ func (hp *Honeypot) read(raddr string) {
 			break
 		}
 		payloadBuf.Write(buf[:l])
-		if payloadBuf.Len() > 40960 {
+		if payloadBuf.Len() > 40960000 {
 			break
 		}
 	}
