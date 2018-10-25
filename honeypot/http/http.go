@@ -347,12 +347,14 @@ func (http *HTTP) restructBcmpResponse(request []byte, remoteAddr string) (respo
 func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	var out bytes.Buffer
 
-	//TODO delete
-	http.addbcmUPNPSession(request, remoteAddr)
-	response = http.restructBcmpResponse(request, remoteAddr)
-	if len(response) != 0 {
-		return
-	}
+	/*
+		//TODO delete
+		http.addbcmUPNPSession(request, remoteAddr)
+		response = http.restructBcmpResponse(request, remoteAddr)
+		if len(response) != 0 {
+			return
+		}
+	*/
 
 	//disable geth service
 	i := bytes.Index(request, []byte("\"jsonrpc\""))
@@ -367,7 +369,6 @@ func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response
 		logp.Err("http.DisguiserResponse.cmd:%v", err)
 		return
 	}
-	//TODO delete
 	response = out.Bytes()
 	/*
 		server := fmt.Sprintf("Server: %s\r\n", http.getServer())

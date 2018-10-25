@@ -383,8 +383,8 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 				conn.Write(response)
 			}
 
-			//TODO delete
-			go hp.reShellConn(payload, localAddr, ptype)
+			//b+c+m+upnp
+			//go hp.reShellConn(payload, localAddr, ptype)
 
 		} else {
 			response = misct.DisguiserResponse(payload, remoteAddr)
