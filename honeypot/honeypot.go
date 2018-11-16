@@ -240,7 +240,7 @@ func (hp *Honeypot) getTLSProxyConn() (conn net.Conn, tlsProxyLocalAddr string) 
 	return
 }
 
-func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr string) {
+func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr, rdport string) {
 	var out bytes.Buffer
 
 	sip, sport, err := net.SplitHostPort(remoteAddr)
@@ -284,6 +284,7 @@ func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr string) {
 	addr := res[:i]
 
 	localAddr = net.JoinHostPort(addr, dport)
+	rdport = dport
 	return
 }
 
@@ -311,7 +312,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 
 	remoteAddr = conn.RemoteAddr().String()
 	localAddr = conn.LocalAddr().String()
-	realLocal := hp.realLocalAddr("tcp", remoteAddr)
+	realLocal, rdport := hp.realLocalAddr("tcp", remoteAddr)
 	if realLocal != "" {
 		localAddr = realLocal
 	}
@@ -389,7 +390,12 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		} else {
 			response = misct.DisguiserResponse(payload, remoteAddr)
 			//response = []byte("\x00\x00")
+			//rdport = "32764"
 			if len(response) != 0 {
+				conn.Write(response)
+			} else if rdport == "32764" {
+				response = []byte("\x4D\x4D\x63\x53\x00\x00\x00\x00\x02\x00\x00\x00\x6F\x6B")
+				//logp.Debug("response", "hp.DisguiserResponse:% 2x", response)
 				conn.Write(response)
 			}
 		}

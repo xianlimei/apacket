@@ -2,6 +2,7 @@ package misctcp
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"github.com/Acey9/apacket/honeypot/core"
 	"unicode"
@@ -69,11 +70,48 @@ func (s *Misc) weblogicCVE20182893(request []byte) (response []byte) {
 	return
 }
 
+func (s *Misc) linksysBackdoor(request []byte) (response []byte) {
+	//https://thehackernews.com/2014/01/hacking-wireless-dsl-routers-via.html
+	i := bytes.Index(request, []byte("\x4D\x4D\x63\x53")) //MMcS
+	if i != 0 {
+		return
+	}
+	if len(request) < 12 {
+		return
+	}
+	cmd := binary.LittleEndian.Uint32(request[4:8])
+	if cmd < 1 || cmd > 13 {
+		return
+	}
+
+	buf := bytes.Buffer{}
+	buf.WriteString("\x4D\x4D\x63\x53\x00\x00\x00\x00")
+
+	var msg string
+	msg = "ok"
+
+	if cmd == 1 {
+		msg = "user=root\x00|\x01password=123456"
+	}
+
+	len_buf := new(bytes.Buffer)
+	binary.Write(len_buf, binary.LittleEndian, uint32(len(msg)))
+	buf.Write(len_buf.Bytes())
+	buf.WriteString(msg)
+	response = buf.Bytes()
+
+	return
+}
+
 func (s *Misc) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	response = s.weblogicCVE20182893(request)
 	if len(response) != 0 {
 		return
 	}
 	response = s.ciscoJabber(request)
+	if len(response) != 0 {
+		return
+	}
+	response = s.linksysBackdoor(request)
 	return
 }
