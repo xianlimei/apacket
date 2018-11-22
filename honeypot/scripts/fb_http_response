@@ -676,26 +676,26 @@ class ResponseHttp(object):
         self.body = "VERSION=2.0.1" 
 
     def hadoopResponse(self):
-        self.code = 202
-        self.status = 'Accepted'
+        self.code = 200
+        self.status = 'ok'
 
         self.headers = {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
             'Content-Type': 'application/json',
             'Server': 'Jetty(6.1.26.hwx)',
+            'Date':self.date,
             }
 
         if self.request.uri == '/ws/v1/cluster/apps/new-application':
             self.code = 200
             self.status = 'OK'
-            ts = '%06f' % time.time()
+            ts = '%.04f' % time.time()
             ts = ts.replace('.', '_')
-            _id = 'application_%s' % (ts)
-            app = {"application-id":_id,"maximum-resource-capability":{"memory":13545,"vCores":8}}
+            _id = 'application_18%s' % (ts)
+            app = {"application-id":_id,"maximum-resource-capability":{"memory":16384,"vCores":64}}
             self.body = json.dumps(app)
         else:
-            self.body = '\r\n'
+            res = {"status":"success"}
+            self.body = json.dumps(res)
 
     #CVE-2018-11776
     def strutsPWN(self):
