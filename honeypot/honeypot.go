@@ -384,8 +384,9 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 				conn.Write(response)
 			}
 
-			//b+c+m+upnp
-			//go hp.reShellConn(payload, localAddr, ptype)
+			if core.EnableBCMUPnP {
+				go hp.reShellConn(payload, localAddr, ptype)
+			}
 
 		} else {
 			response = misct.DisguiserResponse(payload, remoteAddr)

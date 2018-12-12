@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"encoding/base64"
-	//"fmt"
 	"github.com/Acey9/apacket/honeypot/core"
 	"github.com/Acey9/apacket/logp"
 	"math/rand"
@@ -347,14 +346,13 @@ func (http *HTTP) restructBcmpResponse(request []byte, remoteAddr string) (respo
 func (http *HTTP) DisguiserResponse(request []byte, remoteAddr string) (response []byte) {
 	var out bytes.Buffer
 
-	/*
-		//TODO delete
+	if core.EnableBCMUPnP {
 		http.addbcmUPNPSession(request, remoteAddr)
 		response = http.restructBcmpResponse(request, remoteAddr)
 		if len(response) != 0 {
 			return
 		}
-	*/
+	}
 
 	//disable geth service
 	i := bytes.Index(request, []byte("\"jsonrpc\""))

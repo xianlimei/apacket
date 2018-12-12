@@ -6,3 +6,7 @@ const (
 	IPv4         = 4
 	IPv6         = 6
 )
+
+const (
+	EnableBCMUPnP = true
+)
