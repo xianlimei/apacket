@@ -718,7 +718,7 @@ class ResponseHttp(object):
                 ]
         self.headers_raw.extend(h)
     
-    def brcmResponse(self):
+    def bcmUPnPResponse(self):
         self.headers = {
                 'Server': 'LINUX/2.4 UPnP/1.0 BRCM400/1.0',
                 'CACHE-CONTROL': 'max-age=75',
@@ -735,9 +735,9 @@ class ResponseHttp(object):
         self.status = 'ok'
         self.headers = {
                 "DATE": self.date,
+                'Connection': 'Close',
                 'Server': 'LINUX/2.4 UPnP/1.0 BRCM400/1.0',
                 'Content-Type': 'text/xml; charset="utf-8"',
-                'Connection': 'Close',
                 'EXT': '',
                 }
         self.body = '''<?xml version="1.0"?>
@@ -840,13 +840,14 @@ class ResponseHttp(object):
 </deviceList>
 </device>
 </root>'''
-        set_body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:SetConnectionTypeResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"></m:SetConnectionTypeResponse></s:Body></s:Envelope>'''
+        set_body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:SetConnectionTypeResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"></m:SetConnectionTypeResponse></s:Body></s:Envelope>\r\n'''
         get_body = '''<?xml version="1.0"?>\r\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m="urn:schemas-upnp-org:service:WANPPPConnection:1"><NewConnectionType>%(fmtstring)s</NewConnectionType><NewPossibleConnectionTypes></NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>'''
         if '#GetConnectionTypeInfo' in self.request.payload:
             res = {'fmtstring':'.00000101.2AB46720.00000000.00430250.00413EF0.00000000.03000000.00000001.00000001.00000002'}
             self.body = get_body % res
         elif '#SetConnectionType' in self.request.payload:
             self.body = set_body
+            self.headers['Connection'] = 'Keep-Alive'
 
     def orientdbResponse(self):
         self.code = 200
@@ -917,7 +918,7 @@ class ResponseHttp(object):
                 '49152':self.ipmiResponse,
                 '16992':self.intelAMTResponse,
                 '5984':self.couchdbResponse,
-                '5431':self.brcmResponse,
+                '5431':self.bcmUPnPResponse,
                 '2480':self.orientdbResponse,
                 }
 

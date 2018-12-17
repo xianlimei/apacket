@@ -314,7 +314,7 @@ func (http *HTTP) restructBcmpResponse(request []byte, remoteAddr string) (respo
 	body.WriteString("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" ")
 	body.WriteString("s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><m:GetConnectionTypeInfoResponse xmlns:m=\"urn:schemas-upnp-org:service:WANPPPConnection:1\"><NewConnectionType>")
 	body.WriteString(v)
-	body.WriteString("</NewConnectionType><NewPossibleConnectionTypes></NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>")
+	body.WriteString("</NewConnectionType><NewPossibleConnectionTypes></NewPossibleConnectionTypes></m:GetConnectionTypeInfoResponse></s:Body></s:Envelope>\r\n")
 
 	ts := time.Now()
 
