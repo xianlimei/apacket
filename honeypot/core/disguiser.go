@@ -41,18 +41,20 @@ type UDP struct {
 }
 
 type Applayer struct {
-	Ts    time.Time   `json:"ts"`
-	Ptype string      `json:"ptype"`
-	Host  string      `json:"sensor,omitempty"`
-	Psha1 string      `json:"psha1,omitempty"`
-	Plen  uint        `json:"plen,omitempty"`
-	TLS   bool        `json:"tls,omitempty"`
-	IPv   uint8       `json:"ipv"`
-	IP4   *IP4        `json:"ip4,omitempty"`
-	IP6   *IP6        `json:"ip6,omitempty"`
-	TCP   *TCP        `json:"tcp,omitempty"`
-	UDP   *UDP        `json:"udp,omitempty"`
-	Appl  interface{} `json:"appl,omitempty"`
+	Ts       time.Time   `json:"ts"`
+	Session  string      `json:"sid,omitempty"`
+	PktIndex int         `json:"pidx,omitempty"`
+	Ptype    string      `json:"ptype"`
+	Host     string      `json:"sensor,omitempty"`
+	Psha1    string      `json:"psha1,omitempty"`
+	Plen     uint        `json:"plen,omitempty"`
+	TLS      bool        `json:"tls,omitempty"`
+	IPv      uint8       `json:"ipv"`
+	IP4      *IP4        `json:"ip4,omitempty"`
+	IP6      *IP6        `json:"ip6,omitempty"`
+	TCP      *TCP        `json:"tcp,omitempty"`
+	UDP      *UDP        `json:"udp,omitempty"`
+	Appl     interface{} `json:"appl,omitempty"`
 }
 
 func (app *Applayer) Compress(source []byte) bytes.Buffer {

@@ -10,6 +10,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/misctcp"
 	"github.com/Acey9/apacket/logp"
 	"github.com/Acey9/apacket/outputs"
+	"github.com/google/uuid"
 	"net"
 	"os/exec"
 	"strings"
@@ -122,6 +123,8 @@ func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 	var response []byte
 	var identify bool
 	var ptype string
+	var sid string
+	var idx int
 
 	for {
 		payload := make([]byte, 4096)
@@ -138,7 +141,7 @@ func (hp *Honeypot) handlerUDP(conn *net.UDPConn) {
 			identify, ptype = hp.fingerprint(disguiser, payload, true)
 			logp.Debug("honeypot", "hp.fingerprint.udp identify:%v, ptype:%v", identify, ptype)
 			if identify {
-				response = hp.response(disguiser, payload, remoteAddr.String(), conn.LocalAddr().String(), ptype, true)
+				response = hp.response(disguiser, payload, idx, sid, remoteAddr.String(), conn.LocalAddr().String(), ptype, true)
 				logp.Debug("honeypot", "udp.response:% 2x", response)
 				break
 			}
@@ -289,7 +292,7 @@ func (hp *Honeypot) realLocalAddr(proto, remoteAddr string) (localAddr, rdport s
 }
 
 func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
-	var remoteAddr, localAddr string
+	var remoteAddr, localAddr, sid string
 
 	var stageTls, tlsTag, identify bool
 	var firstPalyloadLen int
@@ -320,6 +323,11 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 	misct := misctcp.NewMisc()
 
 	var pktCnt int
+
+	_sid, _err := uuid.NewUUID()
+	if _err == nil {
+		sid = _sid.String()
+	}
 
 	for {
 		conn.SetDeadline(time.Now().Add(SessionTimeout * time.Second))
@@ -379,7 +387,7 @@ func (hp *Honeypot) initHandler(conn net.Conn, isTLSConn bool) {
 		}
 
 		if identify {
-			response = hp.response(disguiser, payload, remoteAddr, localAddr, ptype, tlsTag)
+			response = hp.response(disguiser, payload, pktCnt, sid, remoteAddr, localAddr, ptype, tlsTag)
 			if len(response) != 0 {
 				conn.Write(response)
 			}
@@ -451,7 +459,7 @@ func (hp *Honeypot) fingerprint(disguiser core.Disguiser, payload []byte, tag bo
 	return
 }
 
-func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAddr, localAddr, ptype string, tlsTag bool) (response []byte) {
+func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, pktIndex int, sid, remoteAddr, localAddr, ptype string, tlsTag bool) (response []byte) {
 	defer func() {
 		if err := recover(); err != nil {
 			logp.Err("hp.response remote:%s local:%s info:%v", remoteAddr, localAddr, err)
@@ -459,6 +467,10 @@ func (hp *Honeypot) response(disguiser core.Disguiser, payload []byte, remoteAdd
 	}()
 
 	pkt := disguiser.Parser(remoteAddr, localAddr, payload, ptype, tlsTag)
+	if pkt != nil {
+		pkt.Session = sid
+		pkt.PktIndex = pktIndex
+	}
 	/*
 		if hp.sha1Filter.Hit(pkt.Psha1) {
 			break
