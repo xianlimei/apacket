@@ -737,7 +737,8 @@ class ResponseHttp(object):
                 "DATE": self.date,
                 'Connection': 'Close',
                 'Server': 'LINUX/2.4 UPnP/1.0 BRCM400/1.0',
-                'Content-Type': 'text/xml; charset="utf-8"',
+                #'Content-Type': 'text/xml; charset="utf-8"',
+                'Content-Type': 'application/octet-stream',
                 'EXT': '',
                 }
         self.body = '''<?xml version="1.0"?>
@@ -811,26 +812,6 @@ class ResponseHttp(object):
 <serviceId>urn:upnp-org:serviceId:WANPPPConnection.1</serviceId>
 <controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</controlURL>
 <eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100002/WANPPPConnection:1</eventSubURL>
-<SCPDURL>/dynsvc/WANPPPConnection:1.xml</SCPDURL>
-</service>
-</serviceList>
-</device>
-<device>
-<deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>
-<friendlyName>WanConnectionDevice.2</friendlyName>
-<manufacturer>ZTE</manufacturer>
-<manufacturerURL>http://www.com/</manufacturerURL>
-<modelDescription>(null)</modelDescription>
-<modelName>E8-C</modelName>
-<modelNumber>1.0</modelNumber>
-<modelURL>http://www.com/</modelURL>
-<UDN>uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003</UDN>
-<serviceList>
-<service>
-<serviceType>urn:schemas-upnp-org:service:WANPPPConnection:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:WANPPPConnection.1</serviceId>
-<controlURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003/WANPPPConnection:1</controlURL>
-<eventSubURL>/uuid:681ab2eb-8b10-108b-ebb2-1a681aeb100003/WANPPPConnection:1</eventSubURL>
 <SCPDURL>/dynsvc/WANPPPConnection:1.xml</SCPDURL>
 </service>
 </serviceList>
