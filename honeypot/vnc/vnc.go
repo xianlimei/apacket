@@ -118,6 +118,8 @@ func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 		return
 	}
 
+	isVNC = true
+
 	if _, err := conn.Write([]byte(challenge)); nil != err {
 		return
 	}
@@ -131,7 +133,6 @@ func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 		return
 	}
 
-	isVNC = true
 	payloadBuf.Write(res)
 
 	if payloadBuf.Len() > 524288 {
