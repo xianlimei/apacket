@@ -9,6 +9,7 @@ import (
 	"github.com/Acey9/apacket/honeypot/redis"
 	"github.com/Acey9/apacket/honeypot/smtp"
 	"github.com/Acey9/apacket/honeypot/telnet"
+	"github.com/Acey9/apacket/honeypot/vnc"
 )
 
 var DisguiserMap []core.Disguiser
@@ -41,4 +42,7 @@ func init() {
 
 	telnet := telnet.NewTelnet()
 	serviceMap[telnet.Name()] = telnet
+
+	vnc := vnc.NewVNC()
+	serviceMap[vnc.Name()] = vnc
 }
