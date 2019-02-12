@@ -68,15 +68,15 @@ func (v *VNC) initHandler(conn net.Conn) {
 		}
 	}()
 
-	payloadBuf := v.handler(conn)
+	isVnc, payloadBuf := v.handler(conn)
 	raddr := conn.RemoteAddr().String()
 	laddr := conn.LocalAddr().String()
 	if payloadBuf.Len() != 0 {
-		v.sendLog(raddr, laddr, payloadBuf.Bytes())
+		v.sendLog(isVnc, raddr, laddr, payloadBuf.Bytes())
 	}
 
 }
-func (v *VNC) handler(conn net.Conn) (payloadBuf bytes.Buffer) {
+func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 	if _, err := conn.Write([]byte(version)); nil != err {
 		logp.Err("%v disconnected before client version: %v", conn.RemoteAddr(), err)
 		return
@@ -130,6 +130,8 @@ func (v *VNC) handler(conn net.Conn) (payloadBuf bytes.Buffer) {
 		}
 		return
 	}
+
+	isVNC = true
 	payloadBuf.Write(res)
 
 	if payloadBuf.Len() > 524288 {
@@ -172,8 +174,13 @@ func (v *VNC) ReadNBytesFromPipe(conn net.Conn, n int) (_len int, res []byte, er
 	res = buf[:_len]
 	return
 }
-func (v *VNC) sendLog(raddr, laddr string, payload []byte) {
-	pkt, err := core.NewApplayer(raddr, laddr, PtypeVNC, core.TransportTCP, payload, false, nil)
+func (v *VNC) sendLog(isVNC bool, raddr, laddr string, payload []byte) {
+	var ptype string
+	ptype = "other"
+	if isVNC {
+		ptype = PtypeVNC
+	}
+	pkt, err := core.NewApplayer(raddr, laddr, ptype, core.TransportTCP, payload, false, nil)
 	if err != nil {
 		logp.Err("Smtp.sendLog:%v", err)
 		return
