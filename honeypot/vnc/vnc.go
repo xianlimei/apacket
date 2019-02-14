@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	PtypeVNC       = "vnc"
-	version        = "RFB 003.008\n"
-	versionAncient = "RFB 003.003\n"
-	challenge      = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+	PtypeVNC           = "vnc"
+	version            = "RFB 003.008\n"
+	versionAncient     = "RFB 003.003\n"
+	versionAncientV3_4 = "RFB 003.004\n"
+	challenge          = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 )
 
 type VNC struct {
@@ -110,12 +111,14 @@ func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 		if buf[0] != 0x02 {
 			return
 		}
-	case versionAncient:
+	case versionAncient, versionAncientV3_4:
 		if _, err := conn.Write([]byte{0, 0, 0, 2}); err != nil {
 			return
 		}
 	default:
-		return
+		if _, err := conn.Write([]byte{0, 0, 0, 2}); err != nil {
+			return
+		}
 	}
 
 	isVNC = true
@@ -135,6 +138,9 @@ func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 
 	payloadBuf.Write(res)
 
+	//s := fmt.Sprintf("$vnc$*%02X*%s", []byte(challenge), string(res))
+	//fmt.Println(s)
+
 	if payloadBuf.Len() > 524288 {
 		return
 	}
@@ -147,7 +153,7 @@ func (v *VNC) handler(conn net.Conn) (isVNC bool, payloadBuf bytes.Buffer) {
 		[]byte("succ")...,
 	))
 
-	SetReadTimeout(conn, 10)
+	SetReadTimeout(conn, 30)
 	n, res, err = v.ReadNBytesFromPipe(conn, 40960)
 	if n != 0 {
 		payloadBuf.Write(res)
