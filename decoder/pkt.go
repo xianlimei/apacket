@@ -40,6 +40,7 @@ type Packet struct {
 	Icmp6       *ICMPv6   `json:"icmp6,omitempty"`
 	Flow        *Flow     `json:"-"`
 	PayloadSha1 string    `json:"psha1,omitempty"`
+	FamilyName  string    `json:"fn,omitempty"`
 	Plen        uint      `json:"plen,omitempty"`
 }
 

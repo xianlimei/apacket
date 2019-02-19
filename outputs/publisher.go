@@ -2,12 +2,17 @@ package outputs
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"github.com/Acey9/apacket/config"
 	"github.com/Acey9/apacket/decoder"
 	"github.com/Acey9/apacket/logp"
 	"github.com/tsg/gopacket/layers"
 	"strconv"
+)
+
+const (
+	FNMiraiLike = "mirai_like"
 )
 
 type Publisher struct {
@@ -50,6 +55,13 @@ func (pub *Publisher) output(pkt *decoder.Packet) {
 	payloadSha1, plen := pkt.CompressPayload()
 	pkt.PayloadSha1 = payloadSha1
 	pkt.Plen = plen
+
+	if pkt.IPv == 4 && pkt.PktType == decoder.PktTypeTCPSYN {
+		intIP := binary.BigEndian.Uint32(pkt.Ip4.DstIP)
+		if pkt.Tcp.Seq == intIP {
+			pkt.FamilyName = FNMiraiLike
+		}
+	}
 	/*
 		if pub.sha1Filter.Hit(pkt.PayloadSha1) {
 			return
