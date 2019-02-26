@@ -216,6 +216,8 @@ class ResponseHttp(object):
         if self.request.body:
             if self.request.body.startswith("cmd="):
                 self.body = "610cker"
+            elif '/rest/type/node/INVALID_VALUE' in self.request.body:
+                self.body = http_body
             else:
                 self.body = self.request.body
         return
