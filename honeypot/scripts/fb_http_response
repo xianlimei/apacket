@@ -204,7 +204,7 @@ class ResponseHttp(object):
         self.headers['X-Powered-By'] = 'PHP/4.6.0'
         self.headers['X-Cache'] = 'MISS from Hello'
         self.headers['X-Cache-Lookup'] = 'MISS from Hello:8080'
-        self.headers['X-Drupal-Cache'] = 'HIT'
+        self.headers['X-Drupal-Cache'] = 'xHIT'
         self.headers['X-Drupal-Dynamic-Cache'] = 'MISS'
         self.headers['X-Generator'] = 'Drupal 8 (https://www.drupal.org)'
         self.headers['X-Content-Powered-By'] = 'K2 v2.8.0 (by JoomlaWor'
