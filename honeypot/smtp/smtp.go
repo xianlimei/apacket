@@ -17,7 +17,7 @@ const PtypeSmtp = "smtp"
 
 var ServerHello = []byte("220 www.github.com ESMTP postfix\r\n")
 
-var ClientHello = []byte("250-mail.github.com\r\n250-PIPELINING\r\n250-SIZE 5242880\r\n250-VRFY\r\n250-ETRN\r\n250-AUTH CRAM-MD5 LOGIN DIGEST-MD5 PLAIN\r\n250-AUTH=CRAM-MD5 LOGIN DIGEST-MD5 PLAIN\r\n250-ENHANCEDSTATUSCODES\r\n250-8BITMIME\r\n250 DSN\r\n")
+var ClientHello = []byte("250 mail.github.com\r\n250 PIPELINING\r\n250 SIZE 5242880\r\n250 VRFY\r\n250 ETRN\r\n250 AUTH CRAM-MD5 LOGIN DIGEST-MD5 PLAIN\r\n250 AUTH=CRAM-MD5 LOGIN DIGEST-MD5 PLAIN\r\n250 ENHANCEDSTATUSCODES\r\n250 8BITMIME\r\n250 DSN\r\n")
 
 var authSuccessful = []byte("235 2.7.0 Authentication successful\r\n")
 
@@ -27,6 +27,7 @@ var sendOK = []byte("250 2.0.0 Ok: queued as 8BCE210C\r\n")
 var cmdMap = map[string][]byte{
 	"hello": ClientHello,
 	"ehlo":  ClientHello,
+	"helo":  ClientHello,
 	"auth":  []byte("334 YWRtaW5AbWFpbC5naXRodWIuY29tCg==\r\n"),
 	"data":  []byte("354 End data with <CR><LF>.<CR><LF>\r\n"),
 }
