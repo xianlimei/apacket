@@ -14,9 +14,10 @@ import (
 	"github.com/tsg/gopacket/layers"
 	"os"
 	"runtime"
+	"time"
 )
 
-const version = "apacket 4.0.0"
+const version = "apacket 4.0.1"
 
 type MainWorker struct {
 	publisher *outputs.Publisher
@@ -156,7 +157,8 @@ func init() {
 }
 
 func sayHi() {
-	fmt.Println("apacket version: ", version)
+	ts := time.Now()
+	fmt.Println("start", version, "at", ts)
 }
 
 func main() {
