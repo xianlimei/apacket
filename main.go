@@ -158,7 +158,7 @@ func init() {
 
 func sayHi() {
 	ts := time.Now()
-	fmt.Println("start", version, "at", ts)
+	fmt.Println("started", version, "at", ts)
 }
 
 func main() {
